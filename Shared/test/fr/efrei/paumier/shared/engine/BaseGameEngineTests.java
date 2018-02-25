@@ -11,13 +11,16 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+import fr.efrei.paumier.shared.GradingTests;
 import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
 import fr.efrei.paumier.shared.events.FakeEvent;
 import fr.efrei.paumier.shared.time.FakeClock;
 import fr.efrei.paumier.shared.time.TimeManager;
 
+@Category(GradingTests.class)
 public abstract class BaseGameEngineTests {
 
 	private FakeClock clock;

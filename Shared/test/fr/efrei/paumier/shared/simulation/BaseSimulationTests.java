@@ -11,12 +11,15 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+import fr.efrei.paumier.shared.GradingTests;
 import fr.efrei.paumier.shared.events.Event;
 import fr.efrei.paumier.shared.selection.FakeSelector;
 import fr.efrei.paumier.shared.selection.Selector;
 import fr.efrei.paumier.shared.time.FakeClock;
 
+@Category(GradingTests.class)
 public abstract class BaseSimulationTests {
 
 	private FakeSelector selector;
