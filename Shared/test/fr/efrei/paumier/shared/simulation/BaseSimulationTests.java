@@ -50,7 +50,12 @@ public abstract class BaseSimulationTests {
 
 	@Test
 	public void sec003_onePersonIsInfected() {
-		selector.enqueueRanks(0);
+		selector.enqueueRanks(
+				1, 1, 1, 1, // sec 00 : 4 screenings
+				1, 1, 1, 1, 1, // sec 01 : 5 screenings
+				1, 1, 1, 1, 1,  // sec 02 : 5 screenings
+				0, 1  // sec 03 : 1 initial infection, 1 screening
+				);
 		clock.advance(Duration.ofSeconds(3));
 		simulation.update();
 		
@@ -63,6 +68,17 @@ public abstract class BaseSimulationTests {
 
 	@Test
 	public void sec008_twoPersonsAreInfected() {
+		selector.enqueueRanks(
+			1, 1, 1, 1, // sec 00 : 4 screenings
+			3, 3, 3, 3, 3, // sec 01 : 5 screenings
+			3, 3, 3, 3, 3, // sec 02 : 5 screenings
+			0, 3, 3, 3, 3, 3,  // sec 03 : 1 initial infection, 5 screenings
+			3, 3, 3, 3, 3, // sec 04 : 5 screenings
+			3, 3, 3, 3, 3, // sec 05 : 5 screenings
+			3, 3, 3, 3, 3, // sec 06 : 5 screenings
+			3, 3, 3, 3, 3, // sec 07 : 5 screenings
+			1, 3 // sec 08 : 1 spreading, 1 screenings
+			);
 		selector.enqueueRanks(0, 0);
 		clock.advance(Duration.ofSeconds(8));
 		simulation.update();
@@ -76,7 +92,22 @@ public abstract class BaseSimulationTests {
 
 	@Test
 	public void sec013_fourPersonsAreInfected() {
-		selector.enqueueRanks(0, 0, 0, 0);
+		selector.enqueueRanks(
+				1, 1, 1, 1, // sec 00 : 4 screenings
+				3, 3, 3, 3, 3, // sec 01 : 5 screenings
+				3, 3, 3, 3, 3, // sec 02 : 5 screenings
+				0, 3, 3, 3, 3, 3,  // sec 03 : 1 initial infection, 5 screenings
+				3, 3, 3, 3, 3, // sec 04 : 5 screenings
+				3, 3, 3, 3, 3, // sec 05 : 5 screenings
+				3, 3, 3, 3, 3, // sec 06 : 5 screenings
+				3, 3, 3, 3, 3, // sec 07 : 5 screenings
+				1, 3, 3, 3, 3, 3, // sec 08 : 1 spreading, 5 screenings
+				3, 3, 3, 3, 3, // sec 09 : 5 screenings
+				3, 3, 3, 3, 3, // sec 10 : 5 screenings
+				3, 3, 3, 3, 3, // sec 11 : 5 screenings
+				3, 3, 3, 3, 3, // sec 12 : 5 screenings
+				2, 4, 3 // sec 08 : 2 spreadings, 1 screening
+				);
 		clock.advance(Duration.ofSeconds(13));
 		simulation.update();
 		
