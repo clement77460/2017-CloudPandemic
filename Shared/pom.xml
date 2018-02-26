@@ -6,6 +6,13 @@
   <version>1.0.0</version>
   <name>Shared CloudPandemic</name>
   <description>Code shared by the teacher</description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+  </properties>
+  
   <build>
     <sourceDirectory>src</sourceDirectory>
     <testSourceDirectory>test</testSourceDirectory>
@@ -20,6 +27,7 @@
       </plugin>
     </plugins>
   </build>
+  
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
