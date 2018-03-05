@@ -6,6 +6,9 @@ public class Ville {
 	private List<Habitant> habitants;
 	protected static Statistique stats;
 	private Partie partie;
+	
+	
+	
 	public Ville(int nbHabitants,Partie partie) {
 		this.habitants=new ArrayList<Habitant>(nbHabitants);
 		this.initialisationOrAjoutStats(nbHabitants);
@@ -13,7 +16,7 @@ public class Ville {
 	}
 	private void initialisationOrAjoutStats(int nbHabitants) {
 		if(Ville.stats==null) {
-			Ville.stats=new Statistique(nbHabitants);
+			Ville.stats=new Statistique(nbHabitants,null);
 		}
 		else {
 			Ville.stats.addHabitantsAlive(nbHabitants);
@@ -25,14 +28,7 @@ public class Ville {
 			temp=new Habitant();
 			this.habitants.add(temp);
 		}
-	}
-	/*
-	public void infectation(int numHabitant) {
-		this.habitants.get(numHabitant).infectSomeone();
-	}
-	public void infectation(Habitant habitant1,Habitant habitant2) {
-		habitant1.infectSomeone(habitant2);
-	}*/
+	} 
 	public static Statistique getStats() {
 		return stats;
 	}

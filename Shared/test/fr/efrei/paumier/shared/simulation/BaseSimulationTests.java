@@ -35,7 +35,7 @@ public abstract class BaseSimulationTests {
 
 	protected abstract Simulation createSimulation(Clock clock, 
 			Selector selector, int population);
-
+	
 	@Test
 	public void starts_everybodyIsHealthy() {
 		assertEquals(100, simulation.getOriginalPopulation());
