@@ -1,15 +1,17 @@
 package fr.efrei.nouvellonJaworski.model.stats;
 import fr.efrei.nouvellonJaworski.model.entities.*;
 import fr.efrei.nouvellonJaworski.model.selection.MySelector;
-import fr.efrei.paumier.shared.selection.FakeSelector;
 import fr.efrei.paumier.shared.selection.Selector;
 import fr.efrei.paumier.shared.simulation.BaseSimulationTests;
 import fr.efrei.paumier.shared.simulation.Simulation;
+import fr.efrei.paumier.shared.time.FakeClock;
 
 import static org.junit.Assert.assertEquals;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,10 +20,13 @@ import org.junit.Test;
 public class FakeStatistique extends BaseSimulationTests{
 	private Simulation stats;
 	private Selector selector;
+	private FakeClock clock;
 	@Before
 	public void setUp() {
+		clock = new FakeClock(Clock.fixed(Instant.EPOCH,
+				ZoneId.systemDefault()));//classe shared
 		selector=new MySelector();//ma classe
-		stats = createSimulation(null,selector,100);//ma classe
+		stats = createSimulation(clock,selector,100);//ma classe
 		
 	}
 	@Override
@@ -41,7 +46,7 @@ public class FakeStatistique extends BaseSimulationTests{
 	@Test
 	public void sec003_onePersonIsInfected() {
 		((MySelector) selector).enqueueRanks(0);
-		//clock.advance(Duration.ofSeconds(13));
+		clock.advance(Duration.ofSeconds(13));
 		System.out.println(selector);
 		stats.update();
 		
@@ -53,7 +58,7 @@ public class FakeStatistique extends BaseSimulationTests{
 	@Test
 	public void sec008_twoPersonsAreInfected() {
 		((MySelector) selector).enqueueRanks(0, 0);
-		//clock.advance(Duration.ofSeconds(13));
+		clock.advance(Duration.ofSeconds(13));
 		stats.update();
 		
 		assertEquals(100, stats.getOriginalPopulation());
@@ -65,7 +70,7 @@ public class FakeStatistique extends BaseSimulationTests{
 	@Test
 	public void sec013_fourPersonsAreInfected() {
 		((MySelector) selector).enqueueRanks(0, 0, 0, 0);
-		//clock.advance(Duration.ofSeconds(13));
+		clock.advance(Duration.ofSeconds(13));
 		stats.update();
 		
 		assertEquals(100, stats.getOriginalPopulation());

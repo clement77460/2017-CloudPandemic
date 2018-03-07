@@ -11,7 +11,7 @@ public class Timer implements TimeManager{
 
 	@Override
 	public Instant getCurrentInstant() {
-		return null;
+		return Instant.now();
 	}
 
 }

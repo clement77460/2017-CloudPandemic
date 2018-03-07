@@ -57,37 +57,30 @@ public class Statistique implements Simulation{
 	}
 	@Override
 	public void update() {
-		//System.out.println(((MySelector) selecteurHabAlive).dqueRanks());
 		nbHabitantsInfected=((MySelector) selecteurHabAlive).dqueRanks();
 	}
 	@Override
 	public Instant getCurrentInstant() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	@Override
 	public int getOriginalPopulation() {
-		// TODO Auto-generated method stub
 		return nbOriginalHabitants;
 	}
 	@Override
 	public int getLivingPopulation() {
-		// TODO Auto-generated method stub
 		return nbHabitantsAlive;
 	}
 	@Override
 	public int getInfectedPopulation() {
-		// TODO Auto-generated method stub
 		return nbHabitantsInfected;
 	}
 	@Override
 	public int getQuarantinedPopulation() {
-		// TODO Auto-generated method stub
 		return nbHabitantsIsolated;
 	}
 	@Override
 	public int getDeadPopulation() {
-		// TODO Auto-generated method stub
 		return nbHabitantsDead;
 	}
 }
