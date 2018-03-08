@@ -59,7 +59,7 @@ public class StatistiqueTest extends BaseSimulationTests{
 	}
 	@Test
 	public void sec008_twoPersonsAreInfected() {
-		System.out.println("two person");
+		System.out.println("two persons");
 		selector.enqueueRanks(0, 0);
 		clock.advance(Duration.ofSeconds(8));
 		simulation.update();
@@ -73,7 +73,7 @@ public class StatistiqueTest extends BaseSimulationTests{
 
 	@Test
 	public void sec013_fourPersonsAreInfected() {
-		System.out.println("four person");
+		System.out.println("four persons");
 		selector.enqueueRanks(0, 0, 0, 0);
 		clock.advance(Duration.ofSeconds(13));
 		simulation.update();

@@ -18,7 +18,7 @@ public class GameEngineImplement implements GameEngine{
 	private Instant lastUpdate;
 	private ArrayList<Event> queue;
 	private EventQueueImplement eventQueue;
-	public GameEngineImplement(Clock clock) {
+	public GameEngineImplement(Clock clock) { 
 		this.clock=clock;
 		lastUpdate=Instant.now(clock);
 		eventQueue=new EventQueueImplement();
@@ -28,18 +28,25 @@ public class GameEngineImplement implements GameEngine{
 	@Override
 	public void update() {// declenche les evenements expires dans l'ordre croissant du temps
 							//stock la date du dernier update
-		
+		boolean alreadyUpdated=false;
 		queue=eventQueue.extractRegisteredList();
+		Instant lastUpdateTemp=lastUpdate;
 		for(Event event :queue) {
 			Instant clockInstant=clock.instant();
-			if(Duration.between(lastUpdate, clockInstant).getSeconds()>=event.getDuration().getSeconds()) {
-				lastUpdate=lastUpdate.plusSeconds(event.getDuration().getSeconds());
+			if(Duration.between(lastUpdateTemp, clockInstant).getSeconds()>=event.getDuration().getSeconds()) {
+				if(!alreadyUpdated) {
+					lastUpdate=lastUpdate.plusSeconds(event.getDuration().getSeconds());
+					alreadyUpdated=true;
+				}
 				event.trigger();
+				System.out.println("un event est triggered");
 			}
 			else {
 				eventQueue.register(event);
+				
 			}
 		}
+		//j'update la date si je suis allé dans if et jamais dans else
 	}
 
 	@Override

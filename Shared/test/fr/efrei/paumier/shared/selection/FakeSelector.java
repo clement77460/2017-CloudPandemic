@@ -20,10 +20,8 @@ public class FakeSelector implements Selector {
 	@Override
 	public <TItem> TItem selectAmong(List<TItem> choices) { 
 		if (choices.size() <= queue.peek()) {
-			System.out.println("ici");
 			return null;
 		}
-		System.out.println("la");
 		return choices.get(queue.poll());
 	}
 
