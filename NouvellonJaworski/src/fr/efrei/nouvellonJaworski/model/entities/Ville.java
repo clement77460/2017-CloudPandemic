@@ -4,7 +4,7 @@ import java.util.*;
 
 public class Ville {
 	private List<Habitant> habitants;
-	protected static Statistique stats;
+	protected static SimulationImplement stats;
 	private Partie partie;
 	
 	
@@ -16,7 +16,7 @@ public class Ville {
 	}
 	private void initialisationOrAjoutStats(int nbHabitants) {
 		if(Ville.stats==null) {
-			Ville.stats=new Statistique(nbHabitants,null);
+			Ville.stats=new SimulationImplement(nbHabitants,null);
 		}
 		else {
 			Ville.stats.addHabitantsAlive(nbHabitants);
@@ -29,7 +29,7 @@ public class Ville {
 			this.habitants.add(temp);
 		}
 	} 
-	public static Statistique getStats() {
+	public static SimulationImplement getStats() {
 		return stats;
 	}
 	public int getNbrHabitants() {

@@ -16,7 +16,7 @@ import fr.efrei.paumier.shared.engine.*;
 import fr.efrei.paumier.shared.events.Event;
 import fr.efrei.paumier.shared.events.FakeEvent;
 import fr.efrei.paumier.shared.time.FakeClock;
-public class FakeGameEngine extends BaseGameEngineTests{
+public class GameEngineTest extends BaseGameEngineTests{
 	private FakeClock clock;
 	private GameEngine manager;
 	
@@ -24,7 +24,7 @@ public class FakeGameEngine extends BaseGameEngineTests{
 	public void setUp() {
 		clock = new FakeClock(Clock.fixed(Instant.EPOCH,
 				ZoneId.systemDefault()));
-		manager = createGameEngine(clock);
+		manager = createGameEngine(clock); 
 	}
 	
 	@Override

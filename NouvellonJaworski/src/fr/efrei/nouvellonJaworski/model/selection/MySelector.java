@@ -20,8 +20,5 @@ public class MySelector implements Selector{
 			queue.offer(rank);	
 		}
 	}
-	public int dqueRanks() {
-		return queue.size();
-	}
 	
 }

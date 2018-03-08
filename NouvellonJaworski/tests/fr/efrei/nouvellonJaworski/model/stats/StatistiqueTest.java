@@ -1,24 +1,25 @@
-package fr.efrei.paumier.shared.simulation;
+package fr.efrei.nouvellonJaworski.model.stats;
 
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import fr.efrei.paumier.shared.events.Event;
+import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
 import fr.efrei.paumier.shared.selection.FakeSelector;
 import fr.efrei.paumier.shared.selection.Selector;
+import fr.efrei.paumier.shared.simulation.BaseSimulationTests;
+import fr.efrei.paumier.shared.simulation.Simulation;
 import fr.efrei.paumier.shared.time.FakeClock;
 
-public abstract class BaseSimulationTests {
 
+public class StatistiqueTest extends BaseSimulationTests{
 	private FakeSelector selector;
 	private FakeClock clock;
 	private Simulation simulation;
@@ -27,24 +28,22 @@ public abstract class BaseSimulationTests {
 	public void setUp() {
 		clock = new FakeClock(Clock.fixed(Instant.EPOCH,
 				ZoneId.systemDefault()));
-		selector = new FakeSelector(); 
+		selector = new FakeSelector();
 		simulation = createSimulation(clock, selector, 100);
 	}
-	
-	protected List<Event> eventTriggered = new ArrayList<Event>();
-
-	protected abstract Simulation createSimulation(Clock clock, 
-			Selector selector, int population);
-	
+	@Override
+	protected Simulation createSimulation(Clock clock, Selector selector, int population) {
+		return new SimulationImplement(clock,selector,population);
+	}
 	@Test
 	public void starts_everybodyIsHealthy() {
+		System.out.println("none");
 		assertEquals(100, simulation.getOriginalPopulation());
 		assertEquals(100, simulation.getLivingPopulation());
 		assertEquals(0, simulation.getInfectedPopulation());
 		assertEquals(0, simulation.getQuarantinedPopulation());
-		assertEquals(0, simulation.getDeadPopulation());
+		assertEquals(0, simulation.getDeadPopulation()); 
 	}
-
 	@Test
 	public void sec003_onePersonIsInfected() {
 		System.out.println("one person");
@@ -58,9 +57,9 @@ public abstract class BaseSimulationTests {
 		assertEquals(0, simulation.getQuarantinedPopulation());
 		assertEquals(0, simulation.getDeadPopulation());
 	}
-
 	@Test
 	public void sec008_twoPersonsAreInfected() {
+		System.out.println("two person");
 		selector.enqueueRanks(0, 0);
 		clock.advance(Duration.ofSeconds(8));
 		simulation.update();
@@ -74,6 +73,7 @@ public abstract class BaseSimulationTests {
 
 	@Test
 	public void sec013_fourPersonsAreInfected() {
+		System.out.println("four person");
 		selector.enqueueRanks(0, 0, 0, 0);
 		clock.advance(Duration.ofSeconds(13));
 		simulation.update();
@@ -84,5 +84,5 @@ public abstract class BaseSimulationTests {
 		assertEquals(0, simulation.getQuarantinedPopulation());
 		assertEquals(0, simulation.getDeadPopulation());
 	}
-	
+
 }

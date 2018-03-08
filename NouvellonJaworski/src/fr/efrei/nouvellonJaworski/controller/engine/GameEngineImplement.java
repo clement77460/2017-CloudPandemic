@@ -6,9 +6,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-
+import fr.efrei.nouvellonJaworski.controller.EventQueueImplement;
 import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
+import fr.efrei.paumier.shared.events.EventQueue;
 import fr.efrei.paumier.shared.events.FakeEventQueue;
 import fr.efrei.paumier.shared.time.FakeClock;
 
@@ -16,27 +17,17 @@ public class GameEngineImplement implements GameEngine{
 	private Clock clock;
 	private Instant lastUpdate;
 	private ArrayList<Event> queue;
-	private FakeEventQueue eventQueue;
+	private EventQueueImplement eventQueue;
 	public GameEngineImplement(Clock clock) {
 		this.clock=clock;
 		lastUpdate=Instant.now(clock);
-		eventQueue=new FakeEventQueue();
-		queue = new ArrayList<Event>();
+		eventQueue=new EventQueueImplement();
+		queue = new ArrayList<Event>(); 
 	}
 	
 	@Override
 	public void update() {// declenche les evenements expires dans l'ordre croissant du temps
 							//stock la date du dernier update
-		/*Event temp=queue.peek();
-		if(temp!=null) {
-			Instant clockInstant=clock.instant();
-			if(Duration.between(lastUpdate, clockInstant).getSeconds()>=temp.getDuration().getSeconds()) {
-				lastUpdate=lastUpdate.plusSeconds(temp.getDuration().getSeconds());
-				temp.trigger();
-				queue.removeFirst();
-				//vider la liste
-			}
-		}*/
 		
 		queue=eventQueue.extractRegisteredList();
 		for(Event event :queue) {

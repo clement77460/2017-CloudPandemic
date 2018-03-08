@@ -1,17 +1,26 @@
 package fr.efrei.nouvellonJaworski.controller;
 
+import java.util.ArrayList;
+
 import fr.efrei.paumier.shared.events.Event;
 import fr.efrei.paumier.shared.events.EventQueue;
 
 public class EventQueueImplement implements EventQueue{
 
-	@Override
-	public void register(Event... event) {//stocke les nouveaux evenement
-		// TODO Auto-generated method stub
-		
-	}
-	//toDo
-	//methode update pour déclencher les event expiré dans l'ordre du plus vieux au plus jeune
-	//stocke la date du dernie update
+	private ArrayList<Event> list = new ArrayList<Event>();
 
+	@Override
+	public void register(Event... events) {
+		for (Event event : events) {
+			list.add(event);
+		}
+	}
+	
+	public ArrayList<Event> extractRegisteredList() {
+		ArrayList<Event> list = this.list;
+		
+		this.list = new ArrayList<Event>();
+		
+		return list;
+	}
 }

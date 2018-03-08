@@ -1,5 +1,5 @@
 package fr.efrei.nouvellonJaworski.vue;
-import fr.efrei.nouvellonJaworski.model.entities.Statistique;
+import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
 import java.util.Scanner;
 
 import fr.efrei.nouvellonJaworski.controller.*;
@@ -20,7 +20,7 @@ public class Partie {
 			controllerPartie.choixAction(sc.nextInt());
 		}
 	}
-	public void printCarac(Statistique stats) {
+	public void printCarac(SimulationImplement stats) {
 		System.out.println(stats);
 	}
 }
