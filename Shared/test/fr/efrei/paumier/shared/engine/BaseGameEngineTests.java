@@ -28,7 +28,7 @@ public abstract class BaseGameEngineTests {
 		clock = new FakeClock(Clock.fixed(Instant.EPOCH,
 				ZoneId.systemDefault()));
 		manager = createGameEngine(clock);
-	}
+	} 
 	
 	protected List<Event> eventTriggered = new ArrayList<Event>();
  

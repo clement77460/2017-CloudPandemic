@@ -26,7 +26,7 @@ public abstract class BaseSimulationTests {
 	@Before
 	public void setUp() {
 		clock = new FakeClock(Clock.fixed(Instant.EPOCH,
-				ZoneId.systemDefault()));
+				ZoneId.systemDefault())); 
 		selector = new FakeSelector(); 
 		simulation = createSimulation(clock, selector, 100);
 	}

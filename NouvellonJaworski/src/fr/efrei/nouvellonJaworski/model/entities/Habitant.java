@@ -23,7 +23,7 @@ public class Habitant {
 	public void infectSomeone(Habitant habitant) {
 		if(!habitant.isInfected() && !habitant.isIsolated() && !habitant.isDead && this.isInfected && !this.isDead && !isIsolated) {//la cible pas isolé,pas infecté  et porteur infecté, pas mort,pas isolé
 			habitant.contaminerOuSoigner(true);//on le contamine
-			Ville.stats.incrNbHabitantsInfected();
+			//Ville.stats.incrNbHabitantsInfected();
 		}
 	}
 	/**

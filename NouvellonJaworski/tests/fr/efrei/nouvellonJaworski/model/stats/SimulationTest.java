@@ -38,7 +38,6 @@ public class SimulationTest extends BaseSimulationTests{
 	}
 	@Test
 	public void starts_everybodyIsHealthy() {
-		System.out.println("none");
 		assertEquals(100, simulation.getOriginalPopulation());
 		assertEquals(100, simulation.getLivingPopulation());
 		assertEquals(0, simulation.getInfectedPopulation());
@@ -47,7 +46,6 @@ public class SimulationTest extends BaseSimulationTests{
 	}
 	@Test
 	public void sec003_onePersonIsInfected() {
-		System.out.println("one person");
 		selector.enqueueRanks(0);
 		clock.advance(Duration.ofSeconds(3));
 		simulation.update();
@@ -60,7 +58,6 @@ public class SimulationTest extends BaseSimulationTests{
 	}
 	@Test
 	public void sec008_twoPersonsAreInfected() {
-		System.out.println("two persons");
 		selector.enqueueRanks(0, 0);
 		clock.advance(Duration.ofSeconds(8));
 		simulation.update();
@@ -74,7 +71,6 @@ public class SimulationTest extends BaseSimulationTests{
 
 	@Test
 	public void sec013_fourPersonsAreInfected() {
-		System.out.println("four persons");
 		selector.enqueueRanks(0, 0, 0, 0);
 		clock.advance(Duration.ofSeconds(13));
 		simulation.update();

@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import fr.efrei.nouvellonJaworski.controller.EventImplement;
+import fr.efrei.nouvellonJaworski.controller.EventInfect;
+import fr.efrei.nouvellonJaworski.controller.EventSpreading;
 import fr.efrei.nouvellonJaworski.controller.engine.GameEngineImplement;
 import fr.efrei.nouvellonJaworski.model.selection.*;
 import fr.efrei.paumier.shared.engine.GameEngine;
@@ -29,6 +30,7 @@ public class SimulationImplement implements Simulation{
 	protected List<Event> eventTriggered ;
 	private Instant lastUpdate;
 	private Ville ville;
+	private boolean contaminationInitial;
 	/**
 	 * OLD
 	 */
@@ -48,6 +50,7 @@ public class SimulationImplement implements Simulation{
 		this.eventTriggered = new ArrayList<Event>();
 		this.lastUpdate=Instant.now(clock);
 		this.ville=new Ville(population);
+		this.contaminationInitial=false;
 	}
 	/**
 	 * OLD
@@ -74,7 +77,6 @@ public class SimulationImplement implements Simulation{
 	 * OLD
 	 */
 	public void incrNbHabitantsInfected() {
-		System.out.println("un habitant est infecté");
 		this.nbHabitantsInfected++;
 	}
 	/**
@@ -120,28 +122,37 @@ public class SimulationImplement implements Simulation{
 	@Override 
 	public void update() {
 		Instant clockInstant=clock.instant();
-		while(Duration.between(lastUpdate, clockInstant).getSeconds()!=0) {
-			if(ville.getHabitantsInfected().size()==0) {// pas d event
-				Habitant source=selector.selectAmong(ville.getHabitants());
-				ville.getHabitants().remove(source);
-				Event event1 = new EventImplement(Instant.EPOCH, Duration.ofSeconds(3), null, this.eventTriggered,
-						ville.getHabitantsInfected(),source);
+		
+		while(Duration.between(lastUpdate, clockInstant).getSeconds()>0) {
+			if(!contaminationInitial) {// pas d habs infecte et debut de partie
+				Habitant target=selector.selectAmong(ville.getHabitants());
+				ville.getHabitants().remove(target);
+				Event event1 = new EventInfect(Instant.EPOCH, Duration.ofSeconds(3), null, this.eventTriggered,
+						ville,target,this);
 				gameEngine.register(event1);
+				this.contaminationInitial=true;
 			}else {
-				for(Event event:eventTriggered){//chaque event entraine une contamination
-					Habitant source=selector.selectAmong(ville.getHabitants());
-					ville.getHabitants().remove(source);
-					Event eventPropa=new EventImplement(Instant.EPOCH, Duration.ofSeconds(5), gameEngine, this.eventTriggered,
-							ville.getHabitantsInfected(),source);
-					gameEngine.register(eventPropa);
+				
+				while(ville.getHabitantsInfected().size()!=0 && ville.getHabitants().size()!=0) {
+					
+					//on fait attention a ne pas créer plus d'event que d'habitants a infecte 
+					Habitant contamine=ville.getHabitantsInfected().remove(0);
+					Habitant target=selector.selectAmong(ville.getHabitants());
+					ville.getHabitants().remove(target);
+					Event eventPropa=new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5), gameEngine, this.eventTriggered,
+							ville,target,contamine,this);
+					gameEngine.register(eventPropa); 
+						
 				}
 			}
 			gameEngine.update();
-			lastUpdate=gameEngine.getCurrentInstant();
+			if(lastUpdate==gameEngine.getCurrentInstant()) {//il n'y a pas eu de maj du coup on sort
+				lastUpdate=clockInstant; 
+			}else {
+				lastUpdate=gameEngine.getCurrentInstant();
+			}
 		}
-		System.out.println(ville.getHabitants().size());
-		System.out.println(ville.getHabitantsInfected().size());
-		this.nbHabitantsInfected=ville.getHabitantsInfected().size();
+		System.out.println("le nombre d'infecte est : "+this.nbHabitantsInfected);
 		
 	}
 	@Override

@@ -36,7 +36,7 @@ public class GameEngineImplement implements GameEngine{
 			if(Duration.between(lastUpdateTemp, clockInstant).getSeconds()>=event.getDuration().getSeconds()) {
 				if(!alreadyUpdated) {
 					lastUpdate=lastUpdate.plusSeconds(event.getDuration().getSeconds());
-					alreadyUpdated=true;
+					alreadyUpdated=true;  
 				}
 				event.trigger();
 			}
@@ -61,8 +61,8 @@ public class GameEngineImplement implements GameEngine{
 					if(events[i].getDuration().getSeconds()>events[n].getDuration().getSeconds()) {
 						temp=events[i];
 						events[i]=events[n];
-						events[n]=temp;
-					}
+						events[n]=temp; 
+					} 
 				}
 			}
 		}
