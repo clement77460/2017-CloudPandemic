@@ -4,15 +4,16 @@ import java.util.*;
 
 public class Ville {
 	private List<Habitant> habitants;
+	private List<Habitant> habitantsInfected;
 	protected static SimulationImplement stats;
-	private Partie partie;
 	
+	 
 	
-	
-	public Ville(int nbHabitants,Partie partie) {
+	public Ville(int nbHabitants) {
 		this.habitants=new ArrayList<Habitant>(nbHabitants);
-		this.initialisationOrAjoutStats(nbHabitants);
-		this.initialisationHabitants(nbHabitants);
+		//this.initialisationOrAjoutStats(nbHabitants);
+		habitantsInfected=new ArrayList<Habitant>();
+		this.initialisationHabitants(nbHabitants); 
 	}
 	private void initialisationOrAjoutStats(int nbHabitants) {
 		if(Ville.stats==null) {
@@ -29,6 +30,15 @@ public class Ville {
 			this.habitants.add(temp);
 		}
 	} 
+	public List<Habitant> getHabitantsInfected() {
+		return habitantsInfected;
+	}
+	public List<Habitant> getHabitants() {
+		return habitants;
+	}
+	public void setHabitants(List<Habitant> habitants) {
+		this.habitants = habitants;
+	}
 	public static SimulationImplement getStats() {
 		return stats;
 	}

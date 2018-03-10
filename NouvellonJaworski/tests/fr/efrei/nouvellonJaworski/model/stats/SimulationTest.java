@@ -19,7 +19,7 @@ import fr.efrei.paumier.shared.simulation.Simulation;
 import fr.efrei.paumier.shared.time.FakeClock;
 
 
-public class StatistiqueTest extends BaseSimulationTests{
+public class SimulationTest extends BaseSimulationTests{
 	private FakeSelector selector;
 	private FakeClock clock;
 	private Simulation simulation;
@@ -34,6 +34,7 @@ public class StatistiqueTest extends BaseSimulationTests{
 	@Override
 	protected Simulation createSimulation(Clock clock, Selector selector, int population) {
 		return new SimulationImplement(clock,selector,population);
+		//return new StatistiqueImplement2(clock,selector,population);
 	}
 	@Test
 	public void starts_everybodyIsHealthy() {

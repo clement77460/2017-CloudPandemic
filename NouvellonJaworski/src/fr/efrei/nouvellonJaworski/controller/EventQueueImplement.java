@@ -10,7 +10,7 @@ public class EventQueueImplement implements EventQueue{
 	private ArrayList<Event> list = new ArrayList<Event>();
 
 	@Override
-	public void register(Event... events) {
+	public void register(Event... events) { 
 		for (Event event : events) {
 			list.add(event);
 		}

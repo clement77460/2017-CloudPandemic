@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import fr.efrei.nouvellonJaworski.controller.EventImplement;
 import fr.efrei.nouvellonJaworski.controller.engine.GameEngineImplement;
 import fr.efrei.nouvellonJaworski.model.selection.*;
 import fr.efrei.paumier.shared.engine.GameEngine;
@@ -27,12 +28,13 @@ public class SimulationImplement implements Simulation{
 	private GameEngine gameEngine;
 	protected List<Event> eventTriggered ;
 	private Instant lastUpdate;
+	private Ville ville;
 	/**
 	 * OLD
 	 */
 	public SimulationImplement(int nbHabitants,Selector mySelector) {
 		this.nbHabitantsAlive=nbHabitants;
-		this.nbOriginalHabitants=nbHabitants;
+		this.nbOriginalHabitants=nbHabitants; 
 		this.nbHabitantsInfected=0;
 		this.nbHabitantsIsolated=0;
 		this.nbHabitantsDead=0;
@@ -45,6 +47,7 @@ public class SimulationImplement implements Simulation{
 		this.gameEngine=new GameEngineImplement(clock);
 		this.eventTriggered = new ArrayList<Event>();
 		this.lastUpdate=Instant.now(clock);
+		this.ville=new Ville(population);
 	}
 	/**
 	 * OLD
@@ -114,47 +117,36 @@ public class SimulationImplement implements Simulation{
 	public void addHabitantsAlive(int nbr) {
 		this.nbHabitantsAlive=this.nbHabitantsAlive+nbr;
 	}
-	@Override
+	@Override 
 	public void update() {
-		/*try {
-			while(true) {
-			if(selector.selectAmong(this.listHabitants).equals(null))
-				System.out.println("lel");
-			this.nbHabitantsInfected++;
-			}
-		} catch(java.lang.NullPointerException e) {
-			System.out.println("on stop");
-		}*/
-		/*Event event1 = new FakeEvent(Instant.EPOCH, Duration.ofSeconds(3), gameEngine, this.eventTriggered);
-		Event event1_1 = new FakeEvent(Instant.EPOCH, Duration.ofSeconds(5+3), gameEngine, this.eventTriggered);
-		Event event1_2 = new FakeEvent(Instant.EPOCH, Duration.ofSeconds(5+3+5), gameEngine, this.eventTriggered);
-		Event event1_1_1 = new FakeEvent(Instant.EPOCH, Duration.ofSeconds(5+5+3), gameEngine, this.eventTriggered);
-		gameEngine.register(event1,event1_1,event1_2,event1_1_1);
-		gameEngine.update();
-		this.nbHabitantsInfected= eventTriggered.size();*/
 		Instant clockInstant=clock.instant();
 		while(Duration.between(lastUpdate, clockInstant).getSeconds()!=0) {
-			if(selector.selectAmong(this.eventTriggered)==null) {// pas d event
-				System.out.println("on initialise l'event de contamination");
-				Event event1 = new FakeEvent(Instant.EPOCH, Duration.ofSeconds(3), null, this.eventTriggered);
+			if(ville.getHabitantsInfected().size()==0) {// pas d event
+				Habitant source=selector.selectAmong(ville.getHabitants());
+				ville.getHabitants().remove(source);
+				Event event1 = new EventImplement(Instant.EPOCH, Duration.ofSeconds(3), null, this.eventTriggered,
+						ville.getHabitantsInfected(),source);
 				gameEngine.register(event1);
 			}else {
-				System.out.println("la taille de la queu est "+eventTriggered.size()+" et le temps "+this.lastUpdate);
 				for(Event event:eventTriggered){//chaque event entraine une contamination
-					Event eventPropa=new FakeEvent(Instant.EPOCH, Duration.ofSeconds(5), gameEngine, this.eventTriggered);
+					Habitant source=selector.selectAmong(ville.getHabitants());
+					ville.getHabitants().remove(source);
+					Event eventPropa=new EventImplement(Instant.EPOCH, Duration.ofSeconds(5), gameEngine, this.eventTriggered,
+							ville.getHabitantsInfected(),source);
 					gameEngine.register(eventPropa);
 				}
 			}
 			gameEngine.update();
 			lastUpdate=gameEngine.getCurrentInstant();
 		}
+		System.out.println(ville.getHabitants().size());
+		System.out.println(ville.getHabitantsInfected().size());
+		this.nbHabitantsInfected=ville.getHabitantsInfected().size();
 		
-		this.nbHabitantsInfected=eventTriggered.size();
-		System.out.println(this.nbHabitantsInfected);
 	}
 	@Override
 	public Instant getCurrentInstant() {
-		return null;
+		return lastUpdate;
 	}
 	@Override
 	public int getOriginalPopulation() {

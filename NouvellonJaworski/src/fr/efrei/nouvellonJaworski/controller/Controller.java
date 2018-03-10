@@ -13,7 +13,7 @@ public class Controller {
 	public void initVille(int nbVilles,int nbHabitants) {
 		Ville temp;
 		for(int i=0;i<nbVilles;i++) {
-			temp=new Ville(nbHabitants,this.partie);
+			temp=new Ville(nbHabitants);
 			this.villes.add(temp);
 		}
 	}

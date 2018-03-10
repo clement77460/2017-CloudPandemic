@@ -23,7 +23,7 @@ public class GameEngineImplement implements GameEngine{
 		lastUpdate=Instant.now(clock);
 		eventQueue=new EventQueueImplement();
 		queue = new ArrayList<Event>(); 
-	}
+	} 
 	
 	@Override
 	public void update() {// declenche les evenements expires dans l'ordre croissant du temps
@@ -39,14 +39,12 @@ public class GameEngineImplement implements GameEngine{
 					alreadyUpdated=true;
 				}
 				event.trigger();
-				System.out.println("un event est triggered");
 			}
 			else {
 				eventQueue.register(event);
 				
 			}
 		}
-		//j'update la date si je suis allé dans if et jamais dans else
 	}
 
 	@Override

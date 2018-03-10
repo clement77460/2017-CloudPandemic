@@ -31,7 +31,7 @@ public abstract class BaseGameEngineTests {
 	}
 	
 	protected List<Event> eventTriggered = new ArrayList<Event>();
-
+ 
 	protected abstract GameEngine createGameEngine(Clock clock);
 
 	@Test
