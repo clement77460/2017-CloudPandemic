@@ -11,17 +11,8 @@ public class Ville {
 	
 	public Ville(int nbHabitants) {
 		this.habitants=new ArrayList<Habitant>(nbHabitants);
-		//this.initialisationOrAjoutStats(nbHabitants);
 		habitantsInfected=new ArrayList<Habitant>();
 		this.initialisationHabitants(nbHabitants); 
-	}
-	private void initialisationOrAjoutStats(int nbHabitants) {
-		if(Ville.stats==null) {
-			Ville.stats=new SimulationImplement(nbHabitants,null);
-		}
-		else {
-			Ville.stats.addHabitantsAlive(nbHabitants);
-		}
 	}
 	private void initialisationHabitants(int nbHabitants) {
 		Habitant temp;

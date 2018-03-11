@@ -31,16 +31,7 @@ public class SimulationImplement implements Simulation{
 	private Instant lastUpdate;
 	private Ville ville;
 	private boolean contaminationInitial;
-	/**
-	 * OLD
-	 */
-	public SimulationImplement(int nbHabitants,Selector mySelector) {
-		this.nbHabitantsAlive=nbHabitants;
-		this.nbOriginalHabitants=nbHabitants; 
-		this.nbHabitantsInfected=0;
-		this.nbHabitantsIsolated=0;
-		this.nbHabitantsDead=0;
-	}
+
 	public SimulationImplement(Clock clock, Selector selector, int population) {
 		this.clock=clock;
 		this.selector=selector;
