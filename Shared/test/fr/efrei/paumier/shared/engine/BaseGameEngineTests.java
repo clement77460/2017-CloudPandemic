@@ -140,6 +140,77 @@ public abstract class BaseGameEngineTests {
 		assertSame(event1, eventTriggered.get(1));
 	}
 
+	@Test
+	public void update_eventRegisteredLate_happensAfterDuration() {
+		Event event1 = createEvent(Duration.ofSeconds(10));
+
+		clock.advance(Duration.ofSeconds(5));
+		manager.update();
+		
+		manager.register(event1);
+
+		clock.advance(Duration.ofSeconds(5));
+		manager.update();
+
+		assertEquals(0, eventTriggered.size());
+
+		clock.advance(Duration.ofSeconds(5));
+		manager.update();
+
+		assertEquals(1, eventTriggered.size());
+		assertSame(event1, eventTriggered.get(0));
+	}
+
+	@Test
+	public void update_secondEventLongAndRegisteredLate_firstEventHappensFirst() {
+		Event event1 = createEvent(Duration.ofSeconds(20));
+		manager.register(event1);
+
+		clock.advance(Duration.ofSeconds(5));
+		manager.update();
+
+		Event event2 = createEvent(Duration.ofSeconds(20));
+		manager.register(event2);
+
+		clock.advance(Duration.ofSeconds(15));
+		manager.update();
+
+		assertEquals(1, eventTriggered.size());
+		assertSame(event1, eventTriggered.get(0));
+
+		clock.advance(Duration.ofSeconds(5));
+		manager.update();
+
+		assertEquals(2, eventTriggered.size());
+		assertSame(event1, eventTriggered.get(0));
+		assertSame(event2, eventTriggered.get(1));
+	}
+
+	@Test
+	public void update_secondEventShortAndRegisteredLate_secondEventHappensFirst() {
+		Event event1 = createEvent(Duration.ofSeconds(20));
+		manager.register(event1);
+
+		clock.advance(Duration.ofSeconds(5));
+		manager.update();
+		
+		Event event2 = createEvent(Duration.ofSeconds(10));
+		manager.register(event2);
+
+		clock.advance(Duration.ofSeconds(10));
+		manager.update();
+
+		assertEquals(1, eventTriggered.size());
+		assertSame(event2, eventTriggered.get(0));
+
+		clock.advance(Duration.ofSeconds(5));
+		manager.update();
+
+		assertEquals(2, eventTriggered.size());
+		assertSame(event2, eventTriggered.get(0));
+		assertSame(event1, eventTriggered.get(1));
+	}
+
 	private FakeEvent createEvent(Duration duration) {
 		return new FakeEvent(Instant.EPOCH, duration, null, this.eventTriggered);
 	}
