@@ -14,7 +14,7 @@ public class EventQueueImplement implements EventQueue{
 		for (Event event : events) {
 			list.add(event);
 		}
-	}
+	} 
 	
 	public ArrayList<Event> extractRegisteredList() {
 		ArrayList<Event> list = this.list;

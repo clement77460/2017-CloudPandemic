@@ -1,5 +1,5 @@
 package fr.efrei.nouvellonJaworski.model.entities;
-import fr.efrei.nouvellonJaworski.vue.*;
+
 import java.util.*;
 
 public class Ville {
@@ -11,9 +11,11 @@ public class Ville {
 	
 	public Ville(int nbHabitants) {
 		this.habitants=new ArrayList<Habitant>(nbHabitants);
-		habitantsInfected=new ArrayList<Habitant>();
+		this.habitantsInfected=new ArrayList<Habitant>();
 		this.initialisationHabitants(nbHabitants); 
 	}
+	
+	
 	private void initialisationHabitants(int nbHabitants) {
 		Habitant temp;
 		for(int i=0;i<nbHabitants;i++) {
@@ -21,22 +23,36 @@ public class Ville {
 			this.habitants.add(temp);
 		}
 	} 
+	
+	
 	public List<Habitant> getHabitantsInfected() {
 		return habitantsInfected;
 	}
+	
+	
 	public List<Habitant> getHabitants() {
 		return habitants;
 	}
+	
+	
 	public void setHabitants(List<Habitant> habitants) {
 		this.habitants = habitants;
 	}
+	
+	
 	public static SimulationImplement getStats() {
 		return stats;
 	}
+	
+	
 	public int getNbrHabitants() {
 		return this.habitants.size();
 	}
+	
+	
 	public Habitant getHabitant(int index) {
 		return this.habitants.get(index);
 	}
+	
+	
 }

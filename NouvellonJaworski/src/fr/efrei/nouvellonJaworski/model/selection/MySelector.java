@@ -1,6 +1,6 @@
 package fr.efrei.nouvellonJaworski.model.selection;
 
-import java.util.LinkedList;
+
 import java.util.List;
 
 import fr.efrei.paumier.shared.selection.Selector;

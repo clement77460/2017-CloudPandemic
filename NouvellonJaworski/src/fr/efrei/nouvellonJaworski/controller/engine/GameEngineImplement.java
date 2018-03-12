@@ -22,18 +22,21 @@ public class GameEngineImplement implements GameEngine{
 		this.clock=clock;
 		lastUpdate=Instant.now(clock);
 		eventQueue=new EventQueueImplement();
-		queue = new ArrayList<Event>(); 
+		queue = new ArrayList<Event>();  
 	} 
 	
 	@Override
-	public void update() {// declenche les evenements expires dans l'ordre croissant du temps
+	public void update() {// declenche les evenements expirés dans l'ordre croissant en fonction du temps
 							//stock la date du dernier update
 		boolean alreadyUpdated=false;
 		queue=eventQueue.extractRegisteredList();
-		Instant lastUpdateTemp=lastUpdate;
-		for(Event event :queue) {
+		Instant lastUpdateTemp=lastUpdate; 
+		
+		for(Event event :queue) {		
+			
 			Instant clockInstant=clock.instant();
 			if(Duration.between(lastUpdateTemp, clockInstant).getSeconds()>=event.getDuration().getSeconds()) {
+				
 				if(!alreadyUpdated) {
 					lastUpdate=lastUpdate.plusSeconds(event.getDuration().getSeconds());
 					alreadyUpdated=true;  
@@ -54,22 +57,27 @@ public class GameEngineImplement implements GameEngine{
 
 	@Override
 	public void register(Event... events) {
-		Event temp;
-		if(events.length!=1) {
-			for(int i=0;i<events.length-1;i++) {
-				for(int n=1;n<events.length;n++) {
-					if(events[i].getDuration().getSeconds()>events[n].getDuration().getSeconds()) {
-						temp=events[i];
-						events[i]=events[n];
-						events[n]=temp; 
-					} 
-				}
-			}
-		}
-		eventQueue.register(events);
 		
-		
+		eventQueue.register(this.triEvenements(events));
 	}
 
-
+	private Event[] triEvenements(Event... events0) {
+		Event[] events=events0;
+		Event temp;
+		
+		for(int i=0;i<events.length-1;i++) {
+			
+			for(int n=1;n<events.length;n++) {
+				
+				if(events[i].getDuration().getSeconds()>events[n].getDuration().getSeconds()) {
+					
+					temp=events[i];
+					events[i]=events[n];
+					events[n]=temp; 
+					
+				} 
+			}
+		}
+		return events;
+	}
 }
