@@ -3,7 +3,7 @@ package fr.efrei.paumier.shared.selection;
 import java.util.LinkedList;
 import java.util.List;
 
-public class FakeSelector<TItem> implements Selector<TItem> {
+public class FakeSelector implements Selector {
 
 	private LinkedList<Integer> queue = new LinkedList<Integer>();
 	
@@ -18,10 +18,10 @@ public class FakeSelector<TItem> implements Selector<TItem> {
 	}
 
 	@Override
-	public TItem selectAmong(List<TItem> choices) {
-		if (choices.size() <= queue.peek())
+	public <TItem> TItem selectAmong(List<TItem> choices) { 
+		if (choices.size() <= queue.peek()) {
 			return null;
-		
+		}
 		return choices.get(queue.poll());
 	}
 
