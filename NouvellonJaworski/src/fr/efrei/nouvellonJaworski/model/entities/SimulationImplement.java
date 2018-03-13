@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.controller.EventInfect;
+import fr.efrei.nouvellonJaworski.controller.EventQuarantine;
 import fr.efrei.nouvellonJaworski.controller.EventSpreading;
 import fr.efrei.nouvellonJaworski.controller.engine.GameEngineImplement;
 import fr.efrei.paumier.shared.engine.GameEngine;
@@ -96,6 +97,22 @@ public class SimulationImplement implements Simulation{
 		this.nbHabitantsAlive=this.nbHabitantsAlive+nbr;
 	}
 	
+	private void launchScreening() {
+		
+		Habitant target=selector.selectAmong(ville.getHabitants());
+		
+		if (target.isInfected == true) {
+			ville.getHabitants().remove(target);
+			Event eventScreening = new EventQuarantine(Instant.EPOCH, Duration.ofSeconds(5), null, this.eventTriggered, ville, target, this);
+			gameEngine.register(eventScreening);
+			
+			
+		}
+		
+
+		
+		
+	}
 	
 	private void launchInitialContamination() {
 		Habitant target=selector.selectAmong(ville.getHabitants());
@@ -140,7 +157,8 @@ public class SimulationImplement implements Simulation{
 			}else {
 				while(ville.getHabitantsInfected().size()!=0 && ville.getHabitants().size()!=0) {
 					
-					this.launchSpreadingContamination();	
+					this.launchSpreadingContamination();
+					this.launchScreening();
 					
 				}
 			}
@@ -150,6 +168,7 @@ public class SimulationImplement implements Simulation{
 			
 		}
 		System.out.println("le nombre d'infecte est : "+this.nbHabitantsInfected);
+		System.out.println("le nombre de quarantaine est : "+this.nbHabitantsIsolated);
 		
 	}
 	

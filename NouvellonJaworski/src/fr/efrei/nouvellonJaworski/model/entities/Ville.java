@@ -6,6 +6,7 @@ public class Ville {
 	private List<Habitant> habitants;
 	private List<Habitant> habitantsInfected;
 	protected static SimulationImplement stats;
+	private List<Habitant> habitantsIsolated;
 	
 	 
 	
@@ -24,6 +25,9 @@ public class Ville {
 		}
 	} 
 	
+	public List<Habitant> getHabitantsIsolated() {
+		return habitantsIsolated;
+	}
 	
 	public List<Habitant> getHabitantsInfected() {
 		return habitantsInfected;
@@ -54,5 +58,6 @@ public class Ville {
 		return this.habitants.get(index);
 	}
 	
+
 	
 }
