@@ -1,8 +1,7 @@
 package fr.efrei.nouvellonJaworski.vue;
 import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
+
 import fr.efrei.nouvellonJaworski.model.selection.MySelector;
-import fr.efrei.paumier.shared.selection.FakeSelector;
-import fr.efrei.paumier.shared.selection.Selector;
 import fr.efrei.paumier.shared.simulation.Simulation;
 import fr.efrei.paumier.shared.time.FakeClock;
 
@@ -11,21 +10,21 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Scanner;
 
-import fr.efrei.nouvellonJaworski.controller.*;
+
 public class Partie {
-	private FakeClock clock;
+	private final FakeClock clock;
 	private int population;
 	private MySelector selector;
 	private Simulation simulation;
+	
+	
 	public Partie(int population) {
 		this.population=population;
-		selector=new MySelector();
-		clock = new FakeClock(Clock.fixed(Instant.EPOCH,
+		this.selector=new MySelector();
+		this.clock = new FakeClock(Clock.fixed(Instant.EPOCH,
 				ZoneId.systemDefault()));
-		simulation = new SimulationImplement(clock, selector, 100);
+		this.simulation = new SimulationImplement(clock, selector, population);
 	}
 	public void printCarac(SimulationImplement stats) {
 		System.out.println(stats);
@@ -38,7 +37,6 @@ public class Partie {
 			try {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
