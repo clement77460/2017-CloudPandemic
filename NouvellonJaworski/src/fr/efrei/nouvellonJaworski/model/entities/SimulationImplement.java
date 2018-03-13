@@ -43,7 +43,7 @@ public class SimulationImplement implements Simulation{
 		this.ville=new Ville(population);
 		this.contaminationInitial=false;
 		this.launchInitialContamination();
-		this.launchScreening();
+
 	} 
 	
 	
@@ -101,7 +101,7 @@ public class SimulationImplement implements Simulation{
 	
 	private void launchScreening() {
 		
-		EventQuarantine eventScreening = new EventQuarantine(Instant.EPOCH, Duration.ofSeconds(2), null, this.eventTriggered, ville, gameEngine, selector);
+		Event eventScreening = new EventQuarantine(Instant.EPOCH, Duration.ofMillis(200), null, this.eventTriggered, ville, gameEngine, selector);
 		gameEngine.register(eventScreening);
 		gameEngine.update();
 			

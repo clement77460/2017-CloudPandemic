@@ -64,7 +64,8 @@ public class EventSpreading implements Event{
 	//Creation deux events spreading 
 		EventSpreading eventSpreading1 = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5), manager, triggeredEventsList, ville, source, gameEngine,selector);
 		EventSpreading eventSpreading2 = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5), manager, triggeredEventsList, ville, target, gameEngine,selector);
-		gameEngine.register(eventSpreading1,eventSpreading2);
+		EventDeath eventDeath = new EventDeath(Instant.EPOCH, Duration.ofSeconds(15), manager, triggeredEventsList, ville, selector, gameEngine, target);
+		gameEngine.register(eventSpreading1,eventSpreading2,eventDeath);
 		gameEngine.update();
 	}
 
