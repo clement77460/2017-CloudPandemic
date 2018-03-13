@@ -13,6 +13,7 @@ public class Ville {
 	public Ville(int nbHabitants) {
 		this.habitants=new ArrayList<Habitant>(nbHabitants);
 		this.habitantsInfected=new ArrayList<Habitant>();
+		this.habitantsIsolated = new ArrayList<Habitant>();
 		this.initialisationHabitants(nbHabitants); 
 	}
 	

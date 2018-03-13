@@ -55,8 +55,6 @@ public class EventInfect implements Event{
 		ville.getHabitants().remove(target);
 		ville.getHabitantsInfected().add(target);
 		//creation de spreading 
-		//TODO
-		
 		EventSpreading eventSpreading = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5), manager, triggeredEventsList, ville, target, gameEngine,selector);
 		gameEngine.register(eventSpreading);
 		gameEngine.update();
