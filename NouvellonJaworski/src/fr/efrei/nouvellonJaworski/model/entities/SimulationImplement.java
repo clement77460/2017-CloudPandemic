@@ -42,6 +42,7 @@ public class SimulationImplement implements Simulation{
 		this.lastUpdate=Instant.now(clock);
 		this.ville=new Ville(population);
 		this.contaminationInitial=false;
+		this.launchInitialContamination();
 	} 
 	
 	
@@ -109,68 +110,23 @@ public class SimulationImplement implements Simulation{
 			
 		}
 		
-
-		
-		
 	}
 	
 	private void launchInitialContamination() {
-		Habitant target=selector.selectAmong(ville.getHabitants());
-		ville.getHabitants().remove(target);
-		
-		Event event1 = new EventInfect(Instant.EPOCH, Duration.ofSeconds(3), null, 
-				this.eventTriggered,ville,target,this);
+		Event event1 = new EventInfect(Instant.EPOCH,  Duration.ofSeconds(3), null, this.eventTriggered,ville, selector, gameEngine);
 		gameEngine.register(event1);
+		gameEngine.update();
 		
-		this.contaminationInitial=true;
 	}
 	
 	
-	private void launchSpreadingContamination() {
-		//on fait attention à ne pas créer plus d'event que d'habitants à infecter 
-		Habitant contamine=ville.getHabitantsInfected().remove(0);
-		Habitant target=selector.selectAmong(ville.getHabitants());
-		ville.getHabitants().remove(target);
-		
-		Event eventPropa=new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5), gameEngine, this.eventTriggered,
-				ville,target,contamine,this);
-		gameEngine.register(eventPropa); 
-	} 
-	
-	private void updateLastUpdate(Instant clockInstant) {
-		if(lastUpdate==gameEngine.getCurrentInstant()) {//il n'y a pas eu de maj du coup on sort
-			lastUpdate=clockInstant; 
-		}else {
-			lastUpdate=gameEngine.getCurrentInstant();
-		}
-	}
+
 	
 	
 	@Override 
 	public void update() {
-		Instant clockInstant=clock.instant();
-		while(Duration.between(lastUpdate, clockInstant).getSeconds()>0) {
-			if(!contaminationInitial) {// on regarde si la contamination initial a été lancé
-				
-				this.launchInitialContamination();
-				
-			}else {
-				while(ville.getHabitantsInfected().size()!=0 && ville.getHabitants().size()!=0) {
-					
-					this.launchSpreadingContamination();
-					this.launchScreening();
-					
-				}
+		this.gameEngine.update();
 			}
-			
-			gameEngine.update();
-			this.updateLastUpdate(clockInstant);
-			
-		}
-		System.out.println("le nombre d'infecte est : "+this.nbHabitantsInfected);
-		System.out.println("le nombre de quarantaine est : "+this.nbHabitantsIsolated);
-		
-	}
 	
 	
 	@Override
@@ -193,7 +149,7 @@ public class SimulationImplement implements Simulation{
 	
 	@Override
 	public int getInfectedPopulation() {
-		return nbHabitantsInfected;
+		return ville.getHabitantsInfected().size();
 	}
 	
 	
