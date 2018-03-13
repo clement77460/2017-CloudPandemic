@@ -24,7 +24,7 @@ public class FakeSelector implements Selector {
 		
 		if (choices.size() <= queue.peek())
 			return null;
-		}
+		
 		return choices.get(queue.poll());
 	}
 }
