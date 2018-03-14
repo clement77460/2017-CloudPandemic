@@ -18,6 +18,7 @@ public class GameEngineImplement implements GameEngine{
 	private Instant lastUpdate;
 	private ArrayList<Event> queue;
 	private EventQueueImplement eventQueue;
+	
 	public GameEngineImplement(Clock clock) { 
 		this.clock=clock;
 		lastUpdate=Instant.now(clock);

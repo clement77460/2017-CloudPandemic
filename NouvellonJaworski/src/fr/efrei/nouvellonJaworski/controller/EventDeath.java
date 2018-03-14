@@ -12,12 +12,13 @@ import fr.efrei.paumier.shared.events.Event;
 import fr.efrei.paumier.shared.selection.Selector;
 import fr.efrei.paumier.shared.time.TimeManager;
 
-public class EventInfect implements Event{
+public class EventDeath implements Event{
 	private final Ville ville;
 	private final Duration duration;
 	private final TimeManager manager;
 	private final GameEngine gameEngine;
 	private final List<Event> triggeredEventsList;
+	private Habitant target;
 	private  Selector selector;
 	private Instant triggeredInstant;
 	
@@ -31,7 +32,7 @@ public class EventInfect implements Event{
 	 * @param target => habitant a infecter
 	 * @param simulation
 	 */
-	public EventInfect(Instant currentInstant, Duration duration, TimeManager manager, List<Event> triggeredEventsList, Ville ville, Selector selector, GameEngine gameEngine) { 
+	public EventDeath(Instant currentInstant, Duration duration, TimeManager manager, List<Event> triggeredEventsList, Ville ville, Selector selector, GameEngine gameEngine, Habitant target) { 
 		
 		this.duration = duration;
 		this.manager =  manager;
@@ -39,6 +40,7 @@ public class EventInfect implements Event{
 		this.ville=ville;
 		this.selector=selector;
 		this.gameEngine=gameEngine;
+		this.target=target;
 	}
 	
 	
@@ -49,16 +51,9 @@ public class EventInfect implements Event{
 		if (manager != null) {
 			this.triggeredInstant = manager.getCurrentInstant();
 		} 
-		Habitant target = selector.selectAmong(ville.getHabitants());
-		target.contaminerOuSoigner(true);
-		
-		ville.getHabitants().remove(target);
-		ville.getHabitantsInfected().add(target);
-		//creation de spreading 
-		EventSpreading eventSpreading = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5), manager, triggeredEventsList, ville, target, gameEngine,selector);
-		EventDeath eventDeath = new EventDeath(Instant.EPOCH, Duration.ofSeconds(15), manager, triggeredEventsList, ville, selector, gameEngine, target);
-		gameEngine.register(eventSpreading,eventDeath);
-		gameEngine.update();
+		target.setDead(true);
+		ville.getHabitantsInfected().remove(target);
+		ville.getHabitantsDead().add(target);
 	}
 
 	@Override

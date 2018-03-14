@@ -67,6 +67,7 @@ public class Habitant {
 	public void contaminerOuSoigner(boolean isInfected) {
 		this.isInfected = isInfected;
 	}
+	
 	public boolean isIsolated() {
 		return isIsolated;
 	}

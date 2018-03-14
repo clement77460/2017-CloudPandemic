@@ -7,7 +7,9 @@ import java.util.List;
 import fr.efrei.nouvellonJaworski.model.entities.Habitant;
 import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
 import fr.efrei.nouvellonJaworski.model.entities.Ville;
+import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
+import fr.efrei.paumier.shared.selection.Selector;
 import fr.efrei.paumier.shared.time.TimeManager;
 
 public class EventSpreading implements Event{
@@ -15,9 +17,9 @@ public class EventSpreading implements Event{
 	private final TimeManager manager;
 	private final List<Event> triggeredEventsList;
 	private final Ville ville;
-	private final Habitant target;
 	private final Habitant source;
-	private final SimulationImplement simulation;
+	private final GameEngine gameEngine;
+	private Selector selector;
 	 
 	private Instant triggeredInstant;
 	
@@ -32,17 +34,15 @@ public class EventSpreading implements Event{
 	 * @param source => habitant a infecter
 	 * @param simulation
 	 */
-	public EventSpreading(Instant currentInstant, Duration duration, TimeManager manager, List<Event> triggeredEventsList,
-			Ville ville,Habitant target,Habitant source,SimulationImplement simulation) {
+	public EventSpreading(Instant currentInstant, Duration duration, TimeManager manager, List<Event> triggeredEventsList,Ville ville,Habitant source, GameEngine gameEngine,Selector selector) {
 		
 		this.duration = duration; 
 		this.manager =  manager;
 		this.triggeredEventsList = triggeredEventsList;
 		this.ville=ville;
 		this.source=source;
-		this.target=target;
-		this.simulation=simulation;
-		
+		this.gameEngine=gameEngine;
+		this.selector=selector;
 	}
 	
 	
@@ -55,14 +55,18 @@ public class EventSpreading implements Event{
 			this.triggeredInstant = manager.getCurrentInstant();
 		} 
 		
-	
+		Habitant target = selector.selectAmong(ville.getHabitants());
 		source.infectSomeone(target);
-		
+		ville.getHabitants().remove(target);
 		ville.getHabitantsInfected().add(target);
-		ville.getHabitantsInfected().add(source);
 		
-		this.simulation.incrNbHabitantsInfected();
 		
+	//Creation deux events spreading 
+		EventSpreading eventSpreading1 = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5), manager, triggeredEventsList, ville, source, gameEngine,selector);
+		EventSpreading eventSpreading2 = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5), manager, triggeredEventsList, ville, target, gameEngine,selector);
+		EventDeath eventDeath = new EventDeath(Instant.EPOCH, Duration.ofSeconds(15), manager, triggeredEventsList, ville, selector, gameEngine, target);
+		gameEngine.register(eventSpreading1,eventSpreading2,eventDeath);
+		gameEngine.update();
 	}
 
 	@Override
