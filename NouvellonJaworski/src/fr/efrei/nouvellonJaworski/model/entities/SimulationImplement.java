@@ -29,7 +29,6 @@ public class SimulationImplement implements Simulation{
 	private int nbOriginalHabitants;
 	
 	private Instant lastUpdate;
-	private boolean contaminationInitial;
 
 	
 	public SimulationImplement(Clock clock, Selector selector, int population) {
@@ -39,9 +38,8 @@ public class SimulationImplement implements Simulation{
 		this.nbHabitantsAlive=population;
 		this.gameEngine=new GameEngineImplement(clock);
 		this.eventTriggered = new ArrayList<Event>();
-		this.lastUpdate=Instant.now(clock);
+		this.lastUpdate=clock.instant();
 		this.ville=new Ville(population);
-		this.contaminationInitial=false;
 		this.launchInitialContamination();
 
 	} 
@@ -103,12 +101,12 @@ public class SimulationImplement implements Simulation{
 		
 		Event eventScreening = new EventQuarantine(Instant.EPOCH, Duration.ofMillis(200), null, this.eventTriggered, ville, gameEngine, selector);
 		gameEngine.register(eventScreening);
-		gameEngine.update();
+		gameEngine.update(); 
 			
 	}
 	
 	private void launchInitialContamination() {
-		Event event1 = new EventInfect(Instant.EPOCH,  Duration.ofSeconds(3), null, this.eventTriggered,ville, selector, gameEngine);
+		Event event1 = new EventInfect(Instant.EPOCH,  Duration.ofSeconds(3), gameEngine, this.eventTriggered,ville, selector);
 		gameEngine.register(event1);
 		gameEngine.update();
 		

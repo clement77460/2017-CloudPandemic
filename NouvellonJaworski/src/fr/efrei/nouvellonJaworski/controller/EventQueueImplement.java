@@ -7,19 +7,19 @@ import fr.efrei.paumier.shared.events.EventQueue;
 
 public class EventQueueImplement implements EventQueue{
 
-	private ArrayList<Event> list = new ArrayList<Event>();
+	private ArrayList<EventStorage> list = new ArrayList<EventStorage>();
 
 	@Override
 	public void register(Event... events) { 
 		for (Event event : events) {
-			list.add(event);
+			list.add((EventStorage) event);
 		}
 	} 
 	
-	public ArrayList<Event> extractRegisteredList() {
-		ArrayList<Event> list = this.list;
+	public ArrayList<EventStorage> extractRegisteredList() {
+		ArrayList<EventStorage> list = this.list;
 		
-		this.list = new ArrayList<Event>();
+		this.list = new ArrayList<EventStorage>();
 		
 		return list;
 	}

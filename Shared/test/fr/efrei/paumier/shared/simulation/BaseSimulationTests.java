@@ -38,7 +38,7 @@ public abstract class BaseSimulationTests {
 
 	protected abstract Simulation createSimulation(Clock clock, 
 			Selector selector, int population);
-	
+	 
 	@Test
 	public void starts_everybodyIsHealthy() {
 		assertEquals(100, simulation.getOriginalPopulation());
@@ -108,7 +108,7 @@ public abstract class BaseSimulationTests {
 				3, 3, 3, 3, 3, // sec 12 : 5 screenings
 				2, 4, 3 // sec 13 : 2 spreadings, 1 screening
 				);
-		clock.advance(Duration.ofSeconds(13));
+		clock.advance(Duration.ofSeconds(13)); 
 		simulation.update();
 		
 		assertEquals(100, simulation.getOriginalPopulation());

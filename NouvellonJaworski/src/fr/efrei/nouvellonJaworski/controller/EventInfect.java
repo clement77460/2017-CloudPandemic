@@ -15,39 +15,29 @@ import fr.efrei.paumier.shared.time.TimeManager;
 public class EventInfect implements Event{
 	private final Ville ville;
 	private final Duration duration;
-	private final TimeManager manager;
 	private final GameEngine gameEngine;
 	private final List<Event> triggeredEventsList;
 	private  Selector selector;
 	private Instant triggeredInstant;
 	
-	/** 
-	 * EventInfect possède uniquement un target car c'est la contamination initial
-	 * @param currentInstant
-	 * @param duration
-	 * @param manager
-	 * @param triggeredEventsList
-	 * @param ville
-	 * @param target => habitant a infecter
-	 * @param simulation
-	 */
-	public EventInfect(Instant currentInstant, Duration duration, TimeManager manager, List<Event> triggeredEventsList, Ville ville, Selector selector, GameEngine gameEngine) { 
+	
+	public EventInfect(Instant currentInstant, Duration duration, GameEngine gameEngine, List<Event> triggeredEventsList, Ville ville, Selector selector) { 
 		
 		this.duration = duration;
-		this.manager =  manager;
 		this.triggeredEventsList = triggeredEventsList;
 		this.ville=ville;
 		this.selector=selector;
 		this.gameEngine=gameEngine;
-	}
+	} 
 	
 	
 	@Override
 	public void trigger() {
+		System.out.println("on lancement trigger ifnection initial");
 		triggeredEventsList.add(this);
 		
-		if (manager != null) {
-			this.triggeredInstant = manager.getCurrentInstant();
+		if (gameEngine != null) {
+			this.triggeredInstant = gameEngine.getCurrentInstant();
 		} 
 		Habitant target = selector.selectAmong(ville.getHabitants());
 		target.contaminerOuSoigner(true);
@@ -55,10 +45,11 @@ public class EventInfect implements Event{
 		ville.getHabitants().remove(target);
 		ville.getHabitantsInfected().add(target);
 		//creation de spreading 
-		EventSpreading eventSpreading = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5), manager, triggeredEventsList, ville, target, gameEngine,selector);
-		EventDeath eventDeath = new EventDeath(Instant.EPOCH, Duration.ofSeconds(15), manager, triggeredEventsList, ville, selector, gameEngine, target);
-		gameEngine.register(eventSpreading,eventDeath);
-		gameEngine.update();
+		EventSpreading eventSpreading = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target,selector);
+		EventDeath eventDeath = new EventDeath(Instant.EPOCH, Duration.ofSeconds(15), null, triggeredEventsList, ville, selector, gameEngine, target);
+		//gameEngine.register(eventSpreading,eventDeath);
+		gameEngine.register(eventSpreading);
+		gameEngine.update(); 
 	}
 
 	@Override
