@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.controller.EventInfect;
-import fr.efrei.nouvellonJaworski.controller.EventQuarantine;
-import fr.efrei.nouvellonJaworski.controller.EventSpreading;
+import fr.efrei.nouvellonJaworski.controller.EventScreening;
 import fr.efrei.nouvellonJaworski.controller.engine.GameEngineImplement;
 import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
@@ -97,17 +96,12 @@ public class SimulationImplement implements Simulation{
 		this.nbHabitantsAlive=this.nbHabitantsAlive+nbr;
 	}
 	
-	private void launchScreening() {
-		
-		Event eventScreening = new EventQuarantine(Instant.EPOCH, Duration.ofMillis(200), null, this.eventTriggered, ville, gameEngine, selector);
-		gameEngine.register(eventScreening);
-		gameEngine.update(); 
-			
-	}
 	
 	private void launchInitialContamination() {
 		Event event1 = new EventInfect(Instant.EPOCH,  Duration.ofSeconds(3), gameEngine, this.eventTriggered,ville, selector);
-		gameEngine.register(event1);
+		Event eventScreening = new EventScreening(Instant.EPOCH, Duration.ofMillis(200), gameEngine,this.eventTriggered, ville, selector);
+		//register eventScreening et finir de l'implémenter avant
+		gameEngine.register(event1,eventScreening);
 		gameEngine.update();
 		
 	}
@@ -136,7 +130,7 @@ public class SimulationImplement implements Simulation{
 	
 	@Override
 	public int getLivingPopulation() {
-		return nbHabitantsAlive;
+		return ville.getHabitantsAlive().size();
 	}
 	
 	
@@ -148,7 +142,7 @@ public class SimulationImplement implements Simulation{
 	
 	@Override
 	public int getQuarantinedPopulation() {
-		return nbHabitantsIsolated;
+		return ville.getHabitantsIsolated().size();
 	}
 	
 	

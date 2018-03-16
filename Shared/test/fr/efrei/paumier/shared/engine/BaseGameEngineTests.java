@@ -167,7 +167,6 @@ public abstract class BaseGameEngineTests {
 		manager.register(event1);
 
 		clock.advance(Duration.ofSeconds(5));
-		System.out.println("ici");
 		manager.update();
 		
 		Event event2 = createEvent(Duration.ofSeconds(20));

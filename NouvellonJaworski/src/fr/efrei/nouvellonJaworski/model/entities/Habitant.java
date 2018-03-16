@@ -41,11 +41,12 @@ public class Habitant {
 	/**
 	 * permet d'isoler un habitant
 	 */
-	public void isolateHabitant() {
+	public boolean isolateHabitant() {
 		if(!this.isDead && this.isInfected && !this.isIsolated) {//cible infecté, pas isolé, pas mort
 			this.setIsolated(true);//on l'isole
-			Ville.stats.incrNbHabitantsIsolated();
+			return true;
 		}
+		return false;
 	}
 	/**
 	 * faire succomber l'habitant

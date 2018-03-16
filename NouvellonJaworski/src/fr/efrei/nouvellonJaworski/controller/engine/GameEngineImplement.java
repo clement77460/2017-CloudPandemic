@@ -18,12 +18,12 @@ public class GameEngineImplement implements GameEngine{
 	private Clock clock;
 	private Instant lastUpdate;
 	private ArrayList<EventStorage> queue;
-	private EventQueueImplement eventQueue;
+	//private EventQueueImplement eventQueue;
 	
 	public GameEngineImplement(Clock clock) { 
 		this.clock=clock;
 		lastUpdate=Instant.now(clock);
-		eventQueue=new EventQueueImplement();
+		//eventQueue=new EventQueueImplement();
 		queue = new ArrayList<EventStorage>();  
 	} 
 	
@@ -31,30 +31,36 @@ public class GameEngineImplement implements GameEngine{
 	public void update() {// declenche les evenements expirés dans l'ordre croissant en fonction du temps
 							//stock la date du dernier update
 		boolean alreadyUpdated=false;
-		queue=eventQueue.extractRegisteredList();
-		//Instant lastUpdateTemp=lastUpdate; 
+		ArrayList<EventStorage> queueTemp;
+		queueTemp=this.extractRegisteredList();
+		EventStorage eventToTrigger = null;
 		
-		for(EventStorage event :queue) {		
-			
-			if(Duration.between(event.getCreationDate(),this.clock.instant()).getSeconds()
-					>= event.getDuration().getSeconds()) {
+		for(EventStorage event :queueTemp) {	
+			if(Duration.between(event.getCreationDate(),this.clock.instant()).toMillis()
+					>= event.getDuration().toMillis()) {
 				
 				if(!alreadyUpdated) {
-					lastUpdate=event.getCreationDate().plusSeconds((event.getDuration().getSeconds()));
+					lastUpdate=event.getCreationDate().plusMillis((event.getDuration().toMillis()));
 					alreadyUpdated=true;  
+					eventToTrigger=event;
 				}
-				
-				event.trigger(); 
+				else {
+					this.registerExistingEvent(event);
+				}
+				//event.trigger(); 
 				
 			}
 			else {
-				eventQueue.register(event);
+				this.registerExistingEvent(event);
 				
 			}
 		}
 		if(!alreadyUpdated)
 			lastUpdate=clock.instant();
-		System.out.println(lastUpdate);
+		else {
+			eventToTrigger.trigger();
+			this.update();
+		}
 	}
 	
 	
@@ -63,40 +69,77 @@ public class GameEngineImplement implements GameEngine{
 	public Instant getCurrentInstant() {
 		return lastUpdate;
 	}
-
+	
+	/**
+	 * méthode qui met un nouveau evenement dans un EventStorage
+	 */
 	@Override
 	public void register(Event... events) {
-		System.out.println(this.clock.instant());
 		EventStorage[] storage=new EventStorage[events.length];
 		for(int i=0;i<events.length;i++) {
-			//storage[i]=new EventStorage(events[i],this.clock.instant());
 			storage[i]=new EventStorage(events[i],this.lastUpdate);
 		}
-		storage=this.triEvenements(storage);
-		eventQueue.register(storage);
+		for(EventStorage store:storage) {
+			this.queue.add(store);
+		}
+		this.triEvenements();
 	}
-
-	private EventStorage[] triEvenements(EventStorage... events0) {
-		EventStorage[] events=events0;
+	/**
+	 * Méthode qui remet dans la file un evenement qui existait
+	 * 
+	 */
+	private void registerExistingEvent(EventStorage... eventStorage) {
+		for(EventStorage store:eventStorage) {
+			queue.add(store);
+		}
+		this.triEvenements();
+	}
+	
+	
+	private void triEvenements() {
 		EventStorage temp;
-		
-		for(int i=0;i<events.length-1;i++) {
-			
-			for(int n=1;n<events.length;n++) {
+		for(int i=0;i<this.queue.size()-1;i++) {
+			for(int n=1;n<this.queue.size();n++) {
 				
-				if(Duration.between(events[i].getCreationDate().plusSeconds(events[i].getDuration().getSeconds()),
-						events[n].getCreationDate().plusSeconds(events[n].getDuration().getSeconds())).getSeconds()<0){
+				if(this.creationDatePlusDuration(i).isAfter(
+						this.creationDatePlusDuration(n))) {
+					//n prend la place de i
+					temp=this.queue.remove(n);
+					this.queue.add(i, temp);
 					
-					temp=events[i];
-					events[i]=events[n];
-					events[n]=temp; 
-					
-				} 
+				}
+				else {
+					if(this.creationDatePlusDuration(i).equals(
+							this.creationDatePlusDuration(n))) {//on choisis celui qui a la plus ancienne date de creation
+						
+						if(this.queue.get(i).getCreationDate().isAfter(
+								this.queue.get(n).getCreationDate())) {
+							//n prend la place de i
+							temp=this.queue.remove(n);
+							this.queue.add(i, temp);
+						}
+					}
+				}
 			}
 		}
-		return events;
 	}
+	
+	
+	private Instant creationDatePlusDuration(int index) {
+		return this.queue.get(index).getCreationDate().plusMillis(
+				this.queue.get(index).getDuration().toMillis());
+	}
+	
+	
 	public void setLastUpdate(Instant updateTime) {
 		this.lastUpdate=updateTime;
+	}
+	
+	private ArrayList<EventStorage> extractRegisteredList() {
+		ArrayList<EventStorage> list = this.queue;
+		
+		this.queue = new ArrayList<EventStorage>();
+		
+		return list;
 	}
 }
