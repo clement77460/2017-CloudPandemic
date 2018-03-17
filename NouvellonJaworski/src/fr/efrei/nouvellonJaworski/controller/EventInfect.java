@@ -21,7 +21,8 @@ public class EventInfect implements Event{
 	private Instant triggeredInstant;
 	
 	
-	public EventInfect(Instant currentInstant, Duration duration, GameEngine gameEngine, List<Event> triggeredEventsList, Ville ville, Selector selector) { 
+	public EventInfect(Instant currentInstant, Duration duration, GameEngine gameEngine,
+			List<Event> triggeredEventsList, Ville ville, Selector selector) { 
 		
 		this.duration = duration;
 		this.triggeredEventsList = triggeredEventsList;

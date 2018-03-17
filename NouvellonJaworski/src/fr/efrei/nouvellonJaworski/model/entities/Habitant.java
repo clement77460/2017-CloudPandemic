@@ -14,7 +14,6 @@ public class Habitant {
 	 */
 	public void infectSomeone() {
 		this.contaminerOuSoigner(true);
-		Ville.stats.incrNbHabitantsInfected(); 
 	}
 	/**
 	 * fonction qui permet à un habitant d'en infecter un autre

@@ -6,26 +6,33 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.efrei.nouvellonJaworski.controller.EventScreeningCenter;
+import fr.efrei.nouvellonJaworski.controller.EventIncreaseTaxes;
 import fr.efrei.nouvellonJaworski.controller.EventInfect;
 import fr.efrei.nouvellonJaworski.controller.EventScreening;
+import fr.efrei.nouvellonJaworski.controller.EventTaxes;
 import fr.efrei.nouvellonJaworski.controller.engine.GameEngineImplement;
 import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
+import fr.efrei.paumier.shared.orders.OrderType;
 import fr.efrei.paumier.shared.selection.Selector;
 import fr.efrei.paumier.shared.simulation.Simulation;
 
 public class SimulationImplement implements Simulation{
+	
+	private final static int cost=100;
+	
 	private final Selector selector;
 	private final Clock clock;
 	private final GameEngine gameEngine;
 	protected final List<Event> eventTriggered ;
 	private final Ville ville;
 	
+	private int money;
 	private int nbHabitantsAlive;
-	private int nbHabitantsInfected;
-	private int nbHabitantsIsolated;
-	private int nbHabitantsDead;
 	private int nbOriginalHabitants;
+	private int nbUpgradeOfTaxes;
+	private int nbUpgradeOfScreeningCenter;
 	
 	private Instant lastUpdate;
 
@@ -38,58 +45,17 @@ public class SimulationImplement implements Simulation{
 		this.gameEngine=new GameEngineImplement(clock);
 		this.eventTriggered = new ArrayList<Event>();
 		this.lastUpdate=clock.instant();
+		this.money=0;
+		this.nbUpgradeOfTaxes=0;
+		this.nbUpgradeOfScreeningCenter=0;
 		this.ville=new Ville(population);
 		this.launchInitialContamination();
+		
 
 	} 
 	
 	
-	public int getNbHabitantsAlive() {
-		return nbHabitantsAlive;
-	}
 	
-	
-	public int getNbHabitantsInfected() {
-		return nbHabitantsInfected;
-	}
-	
-	
-	public int getNbHabitantsIsolated() {
-		return nbHabitantsIsolated;
-	}
-	
-	
-	public void incrNbHabitantsInfected() {
-		this.nbHabitantsInfected++;
-	}
-	
-	
-	public void incrNbHabitantsIsolated() {
-		this.nbHabitantsIsolated++;
-	}
-	
-	
-	public void decrNbHabitantsInfected() {
-		this.nbHabitantsInfected--;
-	}
-	
-	
-	public void decrNbHabitantsIsolated() {
-		this.nbHabitantsIsolated--;
-	}
-	
-	
-	public void decrNbHabitantsAlive() {
-		this.nbHabitantsAlive--;
-	}
-	
-	
-	@Override
-	public String toString() {
-		return "Il y a "+this.nbHabitantsAlive+" habitants en vie\n"
-				+"Il y a "+this.nbHabitantsInfected+" habitants infectées\n"
-				+"Il y a "+this.nbHabitantsIsolated+" habitants isolées\n";
-	}
 	
 	
 	public void addHabitantsAlive(int nbr) {
@@ -99,9 +65,9 @@ public class SimulationImplement implements Simulation{
 	
 	private void launchInitialContamination() {
 		Event event1 = new EventInfect(Instant.EPOCH,  Duration.ofSeconds(3), gameEngine, this.eventTriggered,ville, selector);
-		Event eventScreening = new EventScreening(Instant.EPOCH, Duration.ofMillis(200), gameEngine,this.eventTriggered, ville, selector);
-		//register eventScreening et finir de l'implémenter avant
-		gameEngine.register(event1,eventScreening);
+		Event eventScreening = new EventScreening(Instant.EPOCH, Duration.ofMillis(200), gameEngine,this.eventTriggered, ville, selector,this);
+		Event eventTaxes=new EventTaxes(Instant.EPOCH,  Duration.ofSeconds(5), gameEngine, this.eventTriggered,this);
+		gameEngine.register(event1,eventScreening,eventTaxes);
 		gameEngine.update();
 		
 	}
@@ -149,6 +115,42 @@ public class SimulationImplement implements Simulation{
 	@Override
 	public int getDeadPopulation() {
 		return ville.getHabitantsDead().size();
+	}
+
+	public void updateMoney() {
+		this.money=this.money+this.ville.getHabitantsAlive().size()*(this.nbUpgradeOfTaxes+1);
+	}
+	@Override
+	public long getMoney() {
+		return money;
+	}
+	
+	public void incrUpradeOfScreeningCenter() {
+		this.nbUpgradeOfScreeningCenter++;
+	}
+	
+	public void incrUpradeOfTaxes() {
+		this.nbUpgradeOfTaxes++;
+	}
+	
+	public int getNbUpgradeOfScreeningCenter() {
+		return this.nbUpgradeOfScreeningCenter;
+	}
+	@Override
+	public void executeOrder(OrderType order) {
+		if(order.equals(OrderType.INCREASE_TAXES)) {
+			EventIncreaseTaxes center=new EventIncreaseTaxes(this.lastUpdate, Duration.ofSeconds(5),
+					gameEngine, eventTriggered,this);
+			gameEngine.register(center);
+			
+		}else {
+			EventScreeningCenter center=new EventScreeningCenter(this.lastUpdate, Duration.ofSeconds(5),
+					gameEngine, eventTriggered,this);
+			gameEngine.register(center);
+		}
+		
+		
+		this.money=this.money-cost;
 	}
 	
 	
