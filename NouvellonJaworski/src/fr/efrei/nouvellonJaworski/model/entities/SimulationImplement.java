@@ -136,7 +136,7 @@ public class SimulationImplement implements Simulation{
 	
 	@Override
 	public int getInfectedPopulation() {
-		return ville.getHabitantsInfected().size();
+		return ville.getHabitantsInfected().size(); 
 	}
 	
 	
@@ -148,7 +148,7 @@ public class SimulationImplement implements Simulation{
 	
 	@Override
 	public int getDeadPopulation() {
-		return nbHabitantsDead;
+		return ville.getHabitantsDead().size();
 	}
 	
 	

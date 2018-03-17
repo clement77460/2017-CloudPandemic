@@ -9,7 +9,7 @@ public class EventStorage implements Event{
 	private Event event;
 	private Instant creationDate;
 	
-	public EventStorage(Event event,Instant cd) {
+	public EventStorage(Event event,Instant cd) { 
 		this.event=event;
 		this.creationDate=cd;
 	}

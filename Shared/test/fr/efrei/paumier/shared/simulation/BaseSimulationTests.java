@@ -228,7 +228,7 @@ public abstract class BaseSimulationTests {
 	public void screening_late_doesNotPreventsDeath() {
 		selector.enqueueRanks(
 				1, 1, 1, 1, // sec 00 : 4 screenings
-				3, 3, 3, 3, 3, // sec 01 : 5 screenings
+				3, 3, 3, 3, 3, // sec 01 : 5 screenings 
 				3, 3, 3, 3, 3, // sec 02 : 5 screenings
 				0, 3, 3, 3, 3, 3,  // sec 03 : 1 initial infection, 5 screenings
 				3, 3, 3, 3, 3, // sec 04 : 5 screenings

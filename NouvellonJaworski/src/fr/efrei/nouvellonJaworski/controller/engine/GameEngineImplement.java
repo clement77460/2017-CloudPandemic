@@ -58,7 +58,7 @@ public class GameEngineImplement implements GameEngine{
 		if(!alreadyUpdated)
 			lastUpdate=clock.instant();
 		else {
-			eventToTrigger.trigger();
+			eventToTrigger.trigger(); 
 			this.update();
 		}
 	}

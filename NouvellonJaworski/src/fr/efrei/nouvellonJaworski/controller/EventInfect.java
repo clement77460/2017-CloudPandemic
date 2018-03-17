@@ -36,21 +36,21 @@ public class EventInfect implements Event{
 		System.out.println("on lancement trigger ifnection initial");
 		triggeredEventsList.add(this);
 		
-		if (gameEngine != null) {
+		if (gameEngine != null) { 
 			this.triggeredInstant = gameEngine.getCurrentInstant();
 		} 
+		
 		Habitant target = selector.selectAmong(ville.getHabitantsAlive());
 		target.contaminerOuSoigner(true);
 		
 		ville.getHabitants().remove(target);
 		ville.getHabitantsInfected().add(target);
-		//creation de spreading 
-		EventSpreading eventSpreading = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target,selector);
-		EventDeath eventDeath = new EventDeath(Instant.EPOCH, Duration.ofSeconds(15), null, triggeredEventsList, ville, selector, gameEngine, target);
-		//gameEngine.register(eventSpreading,eventDeath);
 		
-		gameEngine.register(eventSpreading);
-		//gameEngine.update(); 
+		EventSpreading eventSpreading = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target,selector);
+		EventDeath eventDeath = new EventDeath(Instant.EPOCH, Duration.ofSeconds(15), gameEngine, triggeredEventsList, ville, selector, target);
+		
+		gameEngine.register(eventSpreading,eventDeath);
+		
 	}
 
 	@Override
