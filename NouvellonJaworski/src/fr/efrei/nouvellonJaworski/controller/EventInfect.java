@@ -33,12 +33,13 @@ public class EventInfect implements Event{
 	
 	@Override
 	public void trigger() {
-		System.out.println("on lancement trigger ifnection initial");
+		
 		triggeredEventsList.add(this);
 		
 		if (gameEngine != null) { 
 			this.triggeredInstant = gameEngine.getCurrentInstant();
 		} 
+		System.out.println("on lance un infect event a "+this.triggeredInstant.toString());
 		
 		Habitant target = selector.selectAmong(ville.getHabitantsAlive());
 		target.contaminerOuSoigner(true);

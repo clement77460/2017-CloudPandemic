@@ -19,7 +19,7 @@ public class EventSpreading implements Event{
 	private final Habitant source;
 	private final GameEngine gameEngine;
 	private Selector selector;
-	private boolean canTrigger;
+	
 	private Instant triggeredInstant;
 	
 	public EventSpreading(Instant currentInstant, Duration duration, GameEngine gameEngine, List<Event> triggeredEventsList,Ville ville,Habitant source,Selector selector) {
@@ -30,24 +30,20 @@ public class EventSpreading implements Event{
 		this.source=source;
 		this.gameEngine=gameEngine;
 		this.selector=selector; 
-		this.canTrigger=false;
-		this.checkSourceStatusWhenInfecting();
 		
-	}
-	private void checkSourceStatusWhenInfecting() {
-		if(!source.isDead() && !source.isIsolated()) {
-			this.canTrigger=true;
-		} 
 	}
 	
 	@Override
 	public void trigger() {
-		System.out.println("on trigger le spreading ? "+this.canTrigger);
+		
 		triggeredEventsList.add(this);
 		
 		if (gameEngine != null) {
 			this.triggeredInstant = gameEngine.getCurrentInstant();
 		} 
+		
+		System.out.println("on lance un spreading event a "+this.triggeredInstant.toString());
+		
 		if(!source.isDead() && !source.isIsolated()) {
 			Habitant target = selector.selectAmong(ville.getHabitants());
 			source.infectSomeone(target);
@@ -55,14 +51,14 @@ public class EventSpreading implements Event{
 			ville.getHabitantsInfected().add(target);
 		
 		
-			//Creation deux events spreading 
+			
 			EventSpreading eventSpreading1 = new EventSpreading(this.triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, source,selector);
 			EventSpreading eventSpreading2 = new EventSpreading(this.triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target,selector);
-			EventDeath eventDeath = new EventDeath(Instant.EPOCH, Duration.ofSeconds(15), gameEngine, triggeredEventsList, ville, selector,target);
-			//gameEngine.register(eventSpreading1,eventSpreading2,eventDeath);
-			gameEngine.register(eventSpreading1,eventSpreading2);
+			EventDeath eventDeath = new EventDeath(this.triggeredInstant, Duration.ofSeconds(15), gameEngine, triggeredEventsList, ville, selector,target);
+			
+			gameEngine.register(eventSpreading1,eventSpreading2,eventDeath);
+			
 		}
-		//gameEngine.update();
 	}
 
 	@Override

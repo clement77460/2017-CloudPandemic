@@ -35,12 +35,13 @@ public class EventDeath implements Event{
 	
 	@Override
 	public void trigger() {
-		System.out.println("on trigger la mort"); 
+		
 		triggeredEventsList.add(this);
 		
 		if (gameEngine != null) {
 			this.triggeredInstant = gameEngine.getCurrentInstant();
 		} 
+		System.out.println("on lance un death event a "+this.triggeredInstant.toString());
 		
 		if(target.killHabitant()) {//he died
 			System.out.println("he died");

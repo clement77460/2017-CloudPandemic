@@ -34,13 +34,12 @@ public class EventCure implements Event{
 
 	@Override
 	public void trigger() {
-		System.out.println("on lance trigger de guérison");
 		triggeredEventsList.add(this);
 		
 		if (gameEngine != null) { 
 			this.triggeredInstant = gameEngine.getCurrentInstant(); 
 		}
-		
+		System.out.println("on lance un cure event a "+this.triggeredInstant.toString());
 		if(target.healHabitant()) { //cure has succeed
 			System.out.println("cure succeed");
 			ville.getHabitantsInfected().remove(target);
