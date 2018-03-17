@@ -15,6 +15,7 @@ import org.junit.experimental.categories.Category;
 
 import fr.efrei.paumier.shared.GradingTests;
 import fr.efrei.paumier.shared.events.Event;
+import fr.efrei.paumier.shared.orders.OrderType;
 import fr.efrei.paumier.shared.selection.FakeSelector;
 import fr.efrei.paumier.shared.selection.Selector;
 import fr.efrei.paumier.shared.time.FakeClock;
@@ -256,5 +257,221 @@ public abstract class BaseSimulationTests {
 		assertEquals(0, simulation.getQuarantinedPopulation());
 		assertEquals(1, simulation.getDeadPopulation());
 	}
-	
+
+	@Test
+	public void money_startsAtZero() {
+		selector.setDefaultValue(50);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(4));
+		simulation.update();
+
+		assertEquals(0, simulation.getMoney());
+	}
+
+	@Test
+	public void money_increasedAtSec05_byInhabitants() {
+		selector.setDefaultValue(50);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+
+		assertEquals(100, simulation.getMoney());
+	}
+
+	@Test
+	public void money_increasedAtSec20_byLivingInhabitants() {
+		selector.setDefaultValue(50);		
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(4); // sec 08 - spreading
+		selector.enqueueRanks(4); // sec 08 - screening		
+		selector.skipNext(24); //  screenings...
+		selector.enqueueRanks(3); // sec 13 - spreading
+		selector.enqueueRanks(3); // sec 13 - screening		
+		selector.skipNext(24); //  screenings...
+		selector.enqueueRanks(2); // sec 18 - spreading
+		selector.enqueueRanks(2); // sec 18 - screening	
+		selector.skipNext(24); //  screenings...	
+		
+		clock.advance(Duration.ofSeconds(20));
+		simulation.update();
+
+		assertEquals(399, simulation.getMoney());
+	}	
+
+	@Test
+	public void taxeIncrease_firstTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_TAXES);
+
+		assertEquals(0, simulation.getMoney());
+	}
+
+	@Test
+	public void taxeIncrease_firstTime_doubleRevenue_butNotNextOne() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_TAXES);
+		
+		clock.advance(Duration.ofSeconds(10));
+		simulation.update();
+
+		assertEquals(300, simulation.getMoney());
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		assertEquals(500, simulation.getMoney());
+	}
+
+	@Test
+	public void taxeIncrease_secondTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_TAXES);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_TAXES);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+
+	@Test
+	public void taxeIncrease_secondTime_tripleRevenue() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_TAXES);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_TAXES);
+
+		clock.advance(Duration.ofSeconds(10));
+		simulation.update();
+		
+		assertEquals(500, simulation.getMoney());
+	}
+
+	@Test
+	public void screeningCenter_firstTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(20));
+		simulation.update();		
+		
+		simulation.executeOrder(OrderType.BUILD_SCREENING_CENTER);	
+		assertEquals(300, simulation.getMoney());
+	}
+
+	@Test
+	public void screeningCenter_secondTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(20));
+		simulation.update();		
+
+		simulation.executeOrder(OrderType.BUILD_SCREENING_CENTER);
+		simulation.executeOrder(OrderType.BUILD_SCREENING_CENTER);	
+		assertEquals(200, simulation.getMoney());
+	}
+
+	@Test
+	public void screeningCenter_firstTime_trippleScreeningCapacity() {
+		selector.setDefaultValue(-1);		
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(0); // sec 03 - infection (#0}
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0); // sec 08 - spreading (#1)
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0, 0); // sec 13 - spreading x 2 (#2 & #3)
+		selector.skipNext(25); //  screenings... (starts construction at sec 13.2)
+		selector.enqueueRanks(4, 5); // sec 18 - spreading x 3 (#4, #5 & #6)
+		selector.skipNext(1); // sec 13 - 1 screening
+		selector.enqueueRanks(3, 2, 1); // sec 18.2 (construction completed) - screening x 2 (#2 & #1)
+
+		clock.advance(Duration.ofSeconds(13));
+		clock.advance(Duration.ofMillis(200));
+		simulation.update();
+
+		simulation.executeOrder(OrderType.BUILD_SCREENING_CENTER);
+		simulation.executeOrder(OrderType.BUILD_SCREENING_CENTER);
+
+		clock.advance(Duration.ofMillis(4800));
+		simulation.update();		
+
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(6, simulation.getInfectedPopulation());
+		
+		clock.advance(Duration.ofMillis(200));
+		simulation.update();
+
+		assertEquals(3, simulation.getQuarantinedPopulation());
+	}
+
+	@Test
+	public void screeningCenter_secondTime_trippleScreeningCapacity() {
+		selector.setDefaultValue(-1);		
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(0); // sec 03 - infection (#0}
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0); // sec 08 - spreading (#1)
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0, 0); // sec 13 - spreading x 2 (#2 & #3)
+		selector.skipNext(25); //  screenings... (starts construction at sec 13.2)
+		selector.enqueueRanks(4, 5); // sec 18 - spreading x 3 (#4, #5 & #6)
+		selector.skipNext(1); // sec 13 - 1 screening
+		selector.enqueueRanks(3, 2, 1); // sec 18.2 (construction completed) - screening x 2 (#2 & #1)
+
+		clock.advance(Duration.ofSeconds(13));
+		clock.advance(Duration.ofMillis(200));
+		simulation.update();
+
+		simulation.executeOrder(OrderType.BUILD_SCREENING_CENTER);
+		simulation.executeOrder(OrderType.BUILD_SCREENING_CENTER);
+
+		clock.advance(Duration.ofMillis(4800));
+		simulation.update();		
+
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(6, simulation.getInfectedPopulation());
+		
+		clock.advance(Duration.ofMillis(200));
+		simulation.update();
+
+		assertEquals(3, simulation.getQuarantinedPopulation());
+	}
 }
