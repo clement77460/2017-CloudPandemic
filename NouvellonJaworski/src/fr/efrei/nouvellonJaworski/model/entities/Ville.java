@@ -2,7 +2,7 @@ package fr.efrei.nouvellonJaworski.model.entities;
 
 import java.util.*;
 
-import fr.efrei.paumier.shared.events.Event;
+
 
 public class Ville {
 	private List<Habitant> habitants;

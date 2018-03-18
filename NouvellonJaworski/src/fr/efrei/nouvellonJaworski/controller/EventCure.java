@@ -5,12 +5,9 @@ import java.time.Instant;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.model.entities.Habitant;
-import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
 import fr.efrei.nouvellonJaworski.model.entities.Ville;
 import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
-import fr.efrei.paumier.shared.selection.Selector;
-import fr.efrei.paumier.shared.time.TimeManager;
 
 public class EventCure implements Event{
 	
@@ -39,7 +36,8 @@ public class EventCure implements Event{
 		if (gameEngine != null) { 
 			this.triggeredInstant = gameEngine.getCurrentInstant(); 
 		}
-		System.out.println("on lance un cure event a "+this.triggeredInstant.toString());
+		System.out.println("on lance un cure event à "+this.triggeredInstant.toString());
+		
 		if(target.healHabitant()) { //cure has succeed
 			System.out.println("cure succeed");
 			ville.getHabitantsInfected().remove(target);

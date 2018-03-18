@@ -5,11 +5,8 @@ import java.time.Instant;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
-import fr.efrei.nouvellonJaworski.model.entities.Ville;
 import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
-import fr.efrei.paumier.shared.orders.OrderType;
-import fr.efrei.paumier.shared.selection.Selector;
 
 public class EventScreeningCenter implements Event{
 

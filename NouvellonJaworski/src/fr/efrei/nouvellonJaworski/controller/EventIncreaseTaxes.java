@@ -12,7 +12,7 @@ public class EventIncreaseTaxes implements Event{
 
 	private final Duration duration;
 	private final GameEngine gameEngine;
-	private final List<Event> triggeredEventsList;
+	private final List<Event> triggeredEventsList; //au cas ou pour les prochains tests
 	private final SimulationImplement simulation;
 	private Instant triggeredInstant;
 	
@@ -36,7 +36,6 @@ public class EventIncreaseTaxes implements Event{
 
 	@Override
 	public Duration getDuration() {
-		// TODO Auto-generated method stub
 		return duration;
 	}
 

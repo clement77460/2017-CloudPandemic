@@ -5,12 +5,9 @@ import java.time.Instant;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.model.entities.Habitant;
-import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
 import fr.efrei.nouvellonJaworski.model.entities.Ville;
 import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
-import fr.efrei.paumier.shared.selection.Selector;
-import fr.efrei.paumier.shared.time.TimeManager;
 
 public class EventDeath implements Event{
 	private final Ville ville;
@@ -18,16 +15,15 @@ public class EventDeath implements Event{
 	private final GameEngine gameEngine;
 	private final List<Event> triggeredEventsList;
 	private Habitant target;
-	private  Selector selector;
 	private Instant triggeredInstant;
 	
 	
-	public EventDeath(Instant currentInstant, Duration duration, GameEngine gameEngine, List<Event> triggeredEventsList, Ville ville, Selector selector, Habitant target) { 
+	public EventDeath(Instant currentInstant, Duration duration, GameEngine gameEngine, 
+			List<Event> triggeredEventsList, Ville ville, Habitant target) { 
 		
 		this.duration = duration;
 		this.triggeredEventsList = triggeredEventsList;
 		this.ville=ville;
-		this.selector=selector;
 		this.gameEngine=gameEngine;
 		this.target=target;
 	}
@@ -41,10 +37,11 @@ public class EventDeath implements Event{
 		if (gameEngine != null) {
 			this.triggeredInstant = gameEngine.getCurrentInstant();
 		} 
-		System.out.println("on lance un death event a "+this.triggeredInstant.toString());
+		
+		System.out.println("on lance un death event à "+this.triggeredInstant.toString());
 		
 		if(target.killHabitant()) {//he died
-			System.out.println("he died");
+			
 			ville.getHabitantsInfected().remove(target);
 			ville.getHabitantsAlive().remove(target);
 			ville.getHabitantsDead().add(target);

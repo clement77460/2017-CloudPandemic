@@ -41,21 +41,29 @@ public class EventScreening implements Event{
 			this.triggeredInstant = gameEngine.getCurrentInstant(); 
 		} 
 		System.out.println("on lance un screening event a "+this.triggeredInstant.toString());
-		for(int i=0;i<simulation.getNbUpgradeOfScreeningCenter()+1;i++) {
-			System.out.println(i);
-		Habitant target = selector.selectAmong(ville.getHabitantsAlive());
-		if(target.isolateHabitant()) {
-			ville.getHabitantsIsolated().add(target);
-			ville.getHabitants().remove(target);
-			System.out.println("on le décontamine");
-			EventCure eventCure=new EventCure(triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target);
-			gameEngine.register(eventCure);
-		}}
+		
+		this.launchCure();
+		
 		EventScreening event=new EventScreening(triggeredInstant, Duration.ofMillis(200), gameEngine, triggeredEventsList, ville, selector,simulation);
 		gameEngine.register(event);
-		//gameEngine.update();
+		
 	}
-
+	
+	private void launchCure() {
+		for(int i=0;i<simulation.getNbUpgradeOfScreeningCenter()+1;i++) {
+			Habitant target = selector.selectAmong(ville.getHabitantsAlive());
+			
+			if(target.isolateHabitant()) {
+				
+				ville.getHabitantsIsolated().add(target);
+				ville.getHabitants().remove(target);
+				EventCure eventCure=new EventCure(triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target);
+				gameEngine.register(eventCure);
+			}
+		
+		}
+	}
+	
 	@Override
 	public Duration getDuration() {
 		

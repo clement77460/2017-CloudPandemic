@@ -5,12 +5,10 @@ import java.time.Instant;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.model.entities.Habitant;
-import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
 import fr.efrei.nouvellonJaworski.model.entities.Ville;
 import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
 import fr.efrei.paumier.shared.selection.Selector;
-import fr.efrei.paumier.shared.time.TimeManager;
 
 public class EventInfect implements Event{
 	private final Ville ville;
@@ -40,6 +38,7 @@ public class EventInfect implements Event{
 		if (gameEngine != null) { 
 			this.triggeredInstant = gameEngine.getCurrentInstant();
 		} 
+		
 		System.out.println("on lance un infect event a "+this.triggeredInstant.toString());
 		
 		Habitant target = selector.selectAmong(ville.getHabitantsAlive());
@@ -48,8 +47,11 @@ public class EventInfect implements Event{
 		ville.getHabitants().remove(target);
 		ville.getHabitantsInfected().add(target);
 		
-		EventSpreading eventSpreading = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target,selector);
-		EventDeath eventDeath = new EventDeath(Instant.EPOCH, Duration.ofSeconds(15), gameEngine, triggeredEventsList, ville, selector, target);
+		EventSpreading eventSpreading = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5),
+				gameEngine, triggeredEventsList, ville, target,selector);
+		
+		EventDeath eventDeath = new EventDeath(Instant.EPOCH, Duration.ofSeconds(15),
+				gameEngine, triggeredEventsList, ville, target);
 		
 		gameEngine.register(eventSpreading,eventDeath);
 		
