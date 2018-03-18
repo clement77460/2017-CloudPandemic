@@ -30,8 +30,12 @@ public class Partie {
 		System.out.println(stats);
 	}
 	public void boucleJeu() {
-		while(simulation.getInfectedPopulation()!=100) {
-			System.out.println("seconde => "+clock.millis()/1000);
+		while(this.simulation.getDeadPopulation()!=100) {
+			System.out.println("seconde : "+clock.millis()/1000);
+			System.out.println("Money : "+this.simulation.getMoney());
+			System.out.println("Viviants : "+this.simulation.getLivingPopulation());
+			System.out.println("Infectés : "+this.simulation.getInfectedPopulation());
+			System.out.println("Morts : "+this.simulation.getDeadPopulation());
 			this.simulation.update();
 			clock.advance(Duration.ofSeconds(1));
 			try {
