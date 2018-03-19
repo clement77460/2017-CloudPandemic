@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +27,7 @@ public abstract class BaseGameEngineTests {
 	
 	@Before
 	public void setUp() {
-		clock = new FakeClock(Clock.fixed(Instant.EPOCH,
-				ZoneId.systemDefault()));
+		clock = new FakeClock();
 		manager = createGameEngine(clock);
 	}
 	

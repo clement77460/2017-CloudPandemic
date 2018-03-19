@@ -6,34 +6,42 @@ import java.time.Instant;
 import java.time.ZoneId;
 
 public class FakeClock extends Clock {
-	
-	private Clock currentClock; 
 
-	public FakeClock(Clock startingClock) {
-		setClock(startingClock);
+	private ZoneId zoneId; 
+	private Duration simulatedDuration = Duration.ZERO; 
+
+	public FakeClock() {
+		this(ZoneId.systemDefault());
 	}
-	
-	public void setClock(Clock newClock) {
-		this.currentClock = newClock;		
+
+	public FakeClock(ZoneId zoneId) {
+		this.zoneId = zoneId;
 	}
 	
 	public void advance(Duration duration) {
-		setClock(Clock.offset(currentClock, duration));
+		simulatedDuration = simulatedDuration.plus(duration);
+	}
+	
+	public void advanceTo(Duration duration) {
+		simulatedDuration = duration;
 	}
 
 	@Override
 	public ZoneId getZone() {
-		return this.currentClock.getZone();
+		return this.zoneId;
 	}
 
 	@Override
 	public Instant instant() {
-		return this.currentClock.instant();
+		return Instant.EPOCH.plus(simulatedDuration);
 	}
 
 	@Override
 	public Clock withZone(ZoneId zone) {
-		return new FakeClock(this.currentClock.withZone(zone));
+		FakeClock clock = new FakeClock(zone);
+		clock.advanceTo(simulatedDuration);
+		
+		return clock;
 	}
 	
 }

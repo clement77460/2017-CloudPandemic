@@ -4,8 +4,6 @@ import static org.junit.Assert.*;
 
 import java.time.Clock;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,8 +27,7 @@ public abstract class BaseSimulationTests {
 	
 	@Before
 	public void setUp() {
-		clock = new FakeClock(Clock.fixed(Instant.EPOCH,
-				ZoneId.systemDefault()));
+		clock = new FakeClock();
 		selector = new FakeSelector();
 		simulation = createSimulation(clock, selector, 100);
 	}
@@ -473,5 +470,166 @@ public abstract class BaseSimulationTests {
 		simulation.update();
 
 		assertEquals(3, simulation.getQuarantinedPopulation());
+	}
+
+	@Test
+	public void longScenario_noScreening_sec30() {
+		selector.setDefaultValue(50);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(0); // sec 00 - infection		
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(1); // sec 08 - spreading		
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(2, 3); // sec 13 - 2 spreadings	
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(4, 5, 6); // sec 18 - (1 death), 2 spreadings	
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(7, 8, 9, 10, 11); // sec 23 - (1 death), 5 spreadings	
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(12, 13, 14, 15, 16, 17, 18, 19); // sec 28 - (2 deaths), 8 spreadings	
+		
+		clock.advance(Duration.ofSeconds(30));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(96, simulation.getLivingPopulation());
+		assertEquals(16, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(4, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void longScenario_perfectScreening_sec30() {
+		selector.setDefaultValue(50);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(30));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(0, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void longScenario_patientZeroDies_noQuarantine() {
+		selector.setDefaultValue(50);		
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(4); // sec 08 - spreading
+		selector.enqueueRanks(4); // sec 08 - screening		
+		selector.skipNext(24); //  screenings...
+		selector.enqueueRanks(3); // sec 13 - spreading
+		selector.enqueueRanks(3); // sec 13 - screening		
+		selector.skipNext(25); //  screenings...	
+		selector.skipNext(25); //  screenings...	
+		selector.skipNext(25); //  screenings...	
+		
+		clock.advance(Duration.ofSeconds(30));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(0, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void extraLongScenario_patientZeroDies_someInQuarantine() {
+		selector.setDefaultValue(-1); // By default (for screening) screen the last one
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(0); // sec 00 - infection		
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0); // sec 08 - 1 spreading		
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0, 0); // sec 13 - 2 spreadings	
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0, 0, 0); // sec 18 - (1 death), 3 spreadings
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRankMultipleTimes(0, 5); // sec 23 - (1 death), 5 spreadings
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRankMultipleTimes(0, 8); // sec 28 - (2 deaths), 8 spreadings
+		selector.skipNext(25); //  screenings...
+		
+		selector.enqueueRankMultipleTimes(0, 13); // sec 33 - (3 deaths), 13 spreadings
+		selector.skipNext(25); //  screenings...	
+		selector.enqueueRankMultipleTimes(0, 21); // sec 38 - (5 deaths), 21 spreadings
+		selector.skipNext(25); //  screenings...	
+		selector.enqueueRankMultipleTimes(0, 34); // sec 43 - (8 deaths), 34 spreadings
+		selector.skipNext(25); //  screenings...	
+		selector.enqueueRankMultipleTimes(0, 12); // sec 48 - (13 deaths), 12 spreadings (max) 
+		selector.skipNext(25); //  screenings... 25 people quarantined
+		// sec 53 - (21 deaths, 1 cured)		 
+		selector.skipNext(25); //  screenings (and 25 cures)
+		// sec 58 - (21 deaths, no infected)	
+		
+		clock.advanceTo(Duration.ofSeconds(43));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(80, simulation.getLivingPopulation());
+		assertEquals(68, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(20, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofSeconds(48));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(67, simulation.getLivingPopulation());
+		assertEquals(67, simulation.getInfectedPopulation());
+		assertEquals(1, simulation.getQuarantinedPopulation());
+		assertEquals(33, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(52800));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(67, simulation.getLivingPopulation());
+		assertEquals(67, simulation.getInfectedPopulation());
+		assertEquals(25, simulation.getQuarantinedPopulation());
+		assertEquals(33, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(53000));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(46, simulation.getLivingPopulation());
+		assertEquals(45, simulation.getInfectedPopulation());
+		assertEquals(24, simulation.getQuarantinedPopulation());
+		assertEquals(54, simulation.getDeadPopulation());
+
+		clock.advanceTo(Duration.ofMillis(57800));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(46, simulation.getLivingPopulation());
+		assertEquals(21, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(54, simulation.getDeadPopulation());
+
+		clock.advanceTo(Duration.ofMillis(58000));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(25, simulation.getLivingPopulation());
+		assertEquals(0, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(75, simulation.getDeadPopulation());
+
+		clock.advanceTo(Duration.ofMillis(60000));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(25, simulation.getLivingPopulation());
+		assertEquals(0, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(75, simulation.getDeadPopulation());
 	}
 }
