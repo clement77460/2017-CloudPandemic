@@ -12,6 +12,8 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import fr.efrei.paumier.shared.GradingTests;
+import fr.efrei.paumier.shared.domain.CityBorder;
+import fr.efrei.paumier.shared.domain.FakeCityBorder;
 import fr.efrei.paumier.shared.events.Event;
 import fr.efrei.paumier.shared.orders.OrderType;
 import fr.efrei.paumier.shared.selection.FakeSelector;
@@ -20,22 +22,31 @@ import fr.efrei.paumier.shared.time.FakeClock;
 
 @Category(GradingTests.class)
 public abstract class BaseSimulationTests {
-
-	private FakeSelector selector;
+	
 	private FakeClock clock;
+	private FakeCityBorder border;
+	private FakeSelector selector;
 	private Simulation simulation;
 	
 	@Before
 	public void setUp() {
 		clock = new FakeClock();
+		border = null;
 		selector = new FakeSelector();
-		simulation = createSimulation(clock, selector, 100);
+		simulation = createSimulation(clock, null, selector, 100);
+	}
+	
+	public void setUpWithBorder() {
+		clock = new FakeClock();
+		border = new FakeCityBorder();
+		selector = new FakeSelector();
+		simulation = createSimulation(clock, border, selector, 100);
 	}
 	
 	protected List<Event> eventTriggered = new ArrayList<Event>();
 
 	protected abstract Simulation createSimulation(Clock clock, 
-			Selector selector, int population);
+			CityBorder border, Selector selector, int population);
 
 	@Test
 	public void starts_everybodyIsHealthy() {
@@ -727,5 +738,95 @@ public abstract class BaseSimulationTests {
 		assertEquals(88, simulation.getLivingPopulation());
 		assertEquals(12, simulation.getDeadPopulation());
 		assertEquals(60, simulation.getPanicLevel(), 0.01);
+	}
+
+	@Test
+	public void emigration_capPanicToLivingPopulation() {
+		setUpWithBorder();
+		setupScenarioForPanic();
+		
+		selector.enqueueRankMultipleTimes(-1, 4); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations
+		selector.enqueueRankMultipleTimes(0, 34); // sec 43 - (8 deaths), 34 spreadings - panic 100 (max) - 0 emmigrations
+
+		// same details as previous test
+		
+		clock.advanceTo(Duration.ofSeconds(43));
+		simulation.update();
+
+		assertEquals(80, simulation.getPanicLevel(), 0.01);
+		assertEquals(20, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void emigration_removesPopulation() {
+		setUpWithBorder();
+		setupScenarioForPanic();
+		
+		selector.enqueueRankMultipleTimes(-1, 4); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations
+		selector.enqueueRankMultipleTimes(0, 34); // sec 43 - (8 deaths), 34 spreadings - panic 100 (max) - 0 emmigrations
+
+		// same details as previous test
+		
+		clock.advanceTo(Duration.ofSeconds(43));
+		simulation.update();
+
+		assertEquals(80, simulation.getPanicLevel(), 0.01);
+		assertEquals(20, simulation.getDeadPopulation());
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(76, simulation.getLivingPopulation());		
+	}
+
+	@Test
+	public void emigration_sendMigrants() {
+		setUpWithBorder();
+		setupScenarioForPanic();
+		
+		selector.enqueueRankMultipleTimes(-1, 4); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations
+		selector.enqueueRankMultipleTimes(0, 34); // sec 43 - (8 deaths), 34 spreadings - panic 100 (max) - 0 emmigrations
+
+		// same details as previous test
+		
+		clock.advanceTo(Duration.ofSeconds(43));
+		simulation.update();
+
+		assertEquals(4, border.getEmigrants().size());
+		assertFalse(border.getEmigrants().get(0));
+		assertFalse(border.getEmigrants().get(1));
+		assertFalse(border.getEmigrants().get(2));
+		assertFalse(border.getEmigrants().get(3));
+	}
+
+	@Test
+	public void emigration_andSelectingInfectedMigrants_sendInfectedMigrants() {
+		setUpWithBorder();
+		setupScenarioForPanic();
+		
+		selector.enqueueRankMultipleTimes(0, 4); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations
+		selector.enqueueRankMultipleTimes(0, 34); // sec 43 - (8 deaths), 34 spreadings - panic 100 (max) - 0 emmigrations
+
+		// Important change : we instead emmigrate the first inhabitant in the list - a dying one
+		
+		// Details of sec 43:
+		// Initial population = 88
+		// First death - Population = 87, panic 65
+		// Second death - Population = 86, panic 70
+		// Third death - Population = 85, panic 75
+		// Fourth death - Population = 84, panic 80
+		// Fifth death - Population = 83, panic 85
+		//	-> Emigration - Population = 82, panic 80 - choosing first person in the list - one less death
+		// Sixth death - Population = 81, panic 85
+		//	-> Emigration - Population = 80, panic 80 - choosing first person in the list - one less death
+		
+		clock.advanceTo(Duration.ofSeconds(43));
+		simulation.update();
+		
+		assertTrue(border.getEmigrants().get(0));
+		assertTrue(border.getEmigrants().get(1));
+		assertEquals(80, simulation.getPanicLevel(), 0.01);
+		
+		assertEquals(18, simulation.getDeadPopulation());		
+		assertEquals(80, simulation.getLivingPopulation());		
+		assertEquals(2, border.getEmigrants().size());
 	}
 }
