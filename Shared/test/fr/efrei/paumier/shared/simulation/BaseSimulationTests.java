@@ -829,4 +829,146 @@ public abstract class BaseSimulationTests {
 		assertEquals(80, simulation.getLivingPopulation());		
 		assertEquals(2, border.getEmigrants().size());
 	}
+
+	@Test
+	public void immigration_doesNotAddInhabitantImmediatly() {
+		selector.enqueueRanks(
+				1, 1, 1, 1, // sec 00 : 4 screenings
+				1, 1, 1, 1, 1, // sec 01 : 5 screenings
+				1, 1, 1, 1, 1,  // sec 02 : 5 screenings
+				0, 1  // sec 03 : 1 initial infection, 1 screening
+				);
+		
+		simulation.startReceivingImmigrant(false);
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(0, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void immigration_addInhabitantAfter03sec() {
+		selector.enqueueRanks(
+				1, 1, 1, 1, // sec 00 : 4 screenings
+				1, 1, 1, 1, 1, // sec 01 : 5 screenings
+				1, 1, 1, 1, 1,  // sec 02 : 5 screenings
+				0, 1  // sec 03 : 1 initial infection, 1 screening
+				);
+		
+		simulation.startReceivingImmigrant(false);
+		
+		clock.advance(Duration.ofSeconds(3));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(101, simulation.getLivingPopulation());
+		assertEquals(1, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void immigration_withInfectedInhabitant_addInhabitantAfter03sec() {
+		selector.enqueueRanks(
+				1, 1, 1, 1, // sec 00 : 4 screenings
+				1, 1, 1, 1, 1, // sec 01 : 5 screenings
+				1, 1, 1, 1, 1,  // sec 02 : 5 screenings
+				0, 1  // sec 03 : 1 initial infection, 1 screening
+				);
+		
+		simulation.startReceivingImmigrant(true);
+		
+		clock.advance(Duration.ofSeconds(3));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(101, simulation.getLivingPopulation());
+		assertEquals(2, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void immigration_withInfectedInhabitant_triggersAdditionalSpreading() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection + 1 infected received
+		selector.skipNext(25);
+		selector.enqueueRanks(0, 0); // sec 08: 2 spreadings
+		
+		simulation.startReceivingImmigrant(true);
+		
+		clock.advance(Duration.ofSeconds(8));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(101, simulation.getLivingPopulation());
+		assertEquals(4, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void immigration_betweenTwoUpdates_addInhabitantAfter03sec() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection + 1 infected received
+		
+		clock.advanceTo(Duration.ofSeconds(1));
+				
+		simulation.startReceivingImmigrant(true);
+		
+		clock.advanceTo(Duration.ofSeconds(3));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(1, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofSeconds(4));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(101, simulation.getLivingPopulation());
+		assertEquals(2, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void immigration_betweenTwoUpdates_triggersAdditionalSpreadingAfter08sec() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection + 1 infected received
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading
+		selector.skipNext(5);
+		selector.enqueueRanks(0); // sec 09: 1 spreading
+		
+		clock.advanceTo(Duration.ofSeconds(1));
+				
+		simulation.startReceivingImmigrant(true);
+		
+		clock.advanceTo(Duration.ofSeconds(8));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(101, simulation.getLivingPopulation());
+		assertEquals(3, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofSeconds(9));
+		simulation.update();
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(101, simulation.getLivingPopulation());
+		assertEquals(4, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
 }

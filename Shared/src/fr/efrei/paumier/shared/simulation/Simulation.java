@@ -15,4 +15,5 @@ public interface Simulation extends TimeManager {
 	double getPanicLevel();
 	
 	void executeOrder(OrderType order);
+	void startReceivingImmigrant(boolean isInfected);
 }
