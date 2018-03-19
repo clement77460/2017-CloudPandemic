@@ -632,4 +632,100 @@ public abstract class BaseSimulationTests {
 		assertEquals(0, simulation.getQuarantinedPopulation());
 		assertEquals(75, simulation.getDeadPopulation());
 	}
+
+	@Test
+	public void death_increasesPanicLevel() {		
+		selector.setDefaultValue(-1); // By default (for screening) screen the last one
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(0); // sec 00 - infection		
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0); // sec 08 - spreading		
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0, 0); // sec 13 - 2 spreadings	
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0, 0); // sec 18 - (1 death), 2 spreadings	- panic 5
+		
+		clock.advanceTo(Duration.ofSeconds(18));
+		simulation.update();
+
+		assertEquals(5, simulation.getPanicLevel(), 0.01);
+	}
+	
+	private void setupScenarioForPanic() {		
+		selector.setDefaultValue(-1); // By default (for screening) screen the last one
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(0); // sec 00 - infection		
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0); // sec 08 - 1 spreading		
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0, 0); // sec 13 - 2 spreadings	
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0, 0, 0); // sec 18 - (1 death), 3 spreadings - panic 5
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRankMultipleTimes(0, 5); // sec 23 - (1 death), 5 spreadings - panic 10	
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRankMultipleTimes(0, 8); // sec 28 - (2 deaths), 8 spreadings - panic 20
+		selector.skipNext(25); //  screenings...
+		
+		selector.enqueueRankMultipleTimes(0, 13); // sec 33 - (3 deaths), 13 spreadings - panic 35
+		selector.skipNext(25); //  screenings...	
+		selector.enqueueRankMultipleTimes(0, 21); // sec 38 - (5 deaths), 21 spreadings - panic 60
+		selector.skipNext(25); //  screenings...	
+		
+	}
+
+	@Test
+	public void death_increasesPanicLevel_upToTotalPopulation() {
+		setupScenarioForPanic();
+		
+		selector.enqueueRankMultipleTimes(-1, 4); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations
+		selector.enqueueRankMultipleTimes(0, 34); // sec 43 - (8 deaths), 34 spreadings - panic 100 (max) - 0 emmigrations
+
+		// Details of sec 43:
+		// Initial population = 88
+		// First death - Population = 87, panic 65
+		// Second death - Population = 86, panic 70
+		// Third death - Population = 85, panic 75
+		// Fourth death - Population = 84, panic 80
+		// Fifth death - Population = 83, panic 85
+		//	-> Emigration - Population = 82, panic 80 - choosing last person in the list
+		// Sixth death - Population = 81, panic 85
+		//	-> Emigration - Population = 80, panic 80 - choosing last person in the list
+		// Seventh death - Population = 79, panic 85
+		//	-> Emigration - Population = 78, panic 80 - choosing last person in the list
+		// Eigth death - Population = 77, panic 85
+		//	-> Emigration - Population = 76, panic 80 - choosing last person in the list
+		// Because we chose the last person each time, he's not infected (and not dying)
+		
+		clock.advanceTo(Duration.ofSeconds(18));
+		simulation.update();
+
+		assertEquals(1, simulation.getDeadPopulation());
+		assertEquals(5, simulation.getPanicLevel(), 0.01);
+		
+		clock.advanceTo(Duration.ofSeconds(23));
+		simulation.update();
+
+		assertEquals(2, simulation.getDeadPopulation());
+		assertEquals(10, simulation.getPanicLevel(), 0.01);
+		
+		clock.advanceTo(Duration.ofSeconds(28));
+		simulation.update();
+
+		assertEquals(4, simulation.getDeadPopulation());
+		assertEquals(20, simulation.getPanicLevel(), 0.01);
+		
+		clock.advanceTo(Duration.ofSeconds(33));
+		simulation.update();
+
+		assertEquals(7, simulation.getDeadPopulation());
+		assertEquals(35, simulation.getPanicLevel(), 0.01);
+		
+		clock.advanceTo(Duration.ofSeconds(38));
+		simulation.update();
+
+		assertEquals(88, simulation.getLivingPopulation());
+		assertEquals(12, simulation.getDeadPopulation());
+		assertEquals(60, simulation.getPanicLevel(), 0.01);
+	}
 }
