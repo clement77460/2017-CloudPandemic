@@ -2,19 +2,21 @@ package fr.efrei.nouvellonJaworski.model.entities;
 
 import java.util.*;
 
-import fr.efrei.paumier.shared.events.Event;
+
 
 public class Ville {
 	private List<Habitant> habitants;
 	private List<Habitant> habitantsInfected;
 	private List<Habitant> habitantsIsolated;
 	private List<Habitant> habitantsDead;
+	private List<Habitant> habitantsAlive;
 	protected static SimulationImplement stats;
 	
 	 
 	
 	public Ville(int nbHabitants) {
 		this.habitants=new ArrayList<Habitant>(nbHabitants);
+		this.habitantsAlive=new ArrayList<Habitant>(nbHabitants);
 		this.habitantsInfected=new ArrayList<Habitant>();
 		this.habitantsIsolated = new ArrayList<Habitant>();
 		this.habitantsDead = new ArrayList<Habitant>();
@@ -27,11 +29,16 @@ public class Ville {
 		for(int i=0;i<nbHabitants;i++) {
 			temp=new Habitant();
 			this.habitants.add(temp);
+			this.habitantsAlive.add(temp);
 		}
 	} 
 	
 	public List<Habitant> getHabitantsIsolated() {
 		return habitantsIsolated;
+	}
+	
+	public List<Habitant> getHabitantsAlive() {
+		return habitantsAlive;
 	}
 	
 	public List<Habitant> getHabitantsInfected() {

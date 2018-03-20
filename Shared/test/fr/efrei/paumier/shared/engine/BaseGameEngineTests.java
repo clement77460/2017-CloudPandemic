@@ -168,7 +168,7 @@ public abstract class BaseGameEngineTests {
 
 		clock.advance(Duration.ofSeconds(5));
 		manager.update();
-
+		
 		Event event2 = createEvent(Duration.ofSeconds(20));
 		manager.register(event2);
 
@@ -203,7 +203,7 @@ public abstract class BaseGameEngineTests {
 		assertEquals(1, eventTriggered.size());
 		assertSame(event2, eventTriggered.get(0));
 
-		clock.advance(Duration.ofSeconds(5));
+		clock.advance(Duration.ofSeconds(5)); 
 		manager.update();
 
 		assertEquals(2, eventTriggered.size());

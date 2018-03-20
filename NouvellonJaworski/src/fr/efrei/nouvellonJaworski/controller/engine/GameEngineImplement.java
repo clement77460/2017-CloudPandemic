@@ -4,81 +4,169 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
-import fr.efrei.nouvellonJaworski.controller.EventQueueImplement;
+
+import fr.efrei.nouvellonJaworski.controller.EventStorage;
 import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
-import fr.efrei.paumier.shared.events.EventQueue;
-import fr.efrei.paumier.shared.events.FakeEventQueue;
-import fr.efrei.paumier.shared.time.FakeClock;
 
 public class GameEngineImplement implements GameEngine{
-	private Clock clock;
+	private final Clock clock;
+	
 	private Instant lastUpdate;
-	private ArrayList<Event> queue;
-	private EventQueueImplement eventQueue;
+	private ArrayList<EventStorage> queue;
 	
 	public GameEngineImplement(Clock clock) { 
 		this.clock=clock;
 		lastUpdate=Instant.now(clock);
-		eventQueue=new EventQueueImplement();
-		queue = new ArrayList<Event>();  
+		queue = new ArrayList<EventStorage>();  
 	} 
 	
 	@Override
 	public void update() {// declenche les evenements expirés dans l'ordre croissant en fonction du temps
 							//stock la date du dernier update
-		boolean alreadyUpdated=false;
-		queue=eventQueue.extractRegisteredList();
-		Instant lastUpdateTemp=lastUpdate; 
+		boolean hasOneEventAsTriggeredStatus=false;
+		ArrayList<EventStorage> queueTemp;
+		queueTemp=this.extractRegisteredList();
+		EventStorage eventToTrigger = null;
 		
-		for(Event event :queue) {		
-			
-			Instant clockInstant=clock.instant();
-			if(Duration.between(lastUpdateTemp, clockInstant).getSeconds()>=event.getDuration().getSeconds()) {
+		for(EventStorage event :queueTemp) {	
+			if(this.isClockTimeAfterTriggerTime(event)) {
 				
-				if(!alreadyUpdated) {
-					lastUpdate=lastUpdate.plusSeconds(event.getDuration().getSeconds());
-					alreadyUpdated=true;  
+				if(!hasOneEventAsTriggeredStatus) {
+					
+					this.lastUpdate=event.getCreationDate().plusMillis((event.getDuration().toMillis()));
+					hasOneEventAsTriggeredStatus=true;  
+					eventToTrigger=event;
 				}
-				event.trigger();
+				else {
+					this.registerExistingEvent(event);
+				}	
 			}
 			else {
-				eventQueue.register(event);
 				
+				this.registerExistingEvent(event);
 			}
 		}
+		this.updateLastUpdateTimeOrTriggerTheEvent(hasOneEventAsTriggeredStatus, eventToTrigger);
 	}
-
+	
+	private boolean isClockTimeAfterTriggerTime(EventStorage event) {
+		if(Duration.between(event.getCreationDate(),this.clock.instant()).toMillis()
+				>= event.getDuration().toMillis()) {
+			return true;
+		}
+		return false;
+	}
+	
+	private void updateLastUpdateTimeOrTriggerTheEvent(boolean hasOneEventToTrigger,EventStorage evToTrigger) {
+		if(!hasOneEventToTrigger)
+			lastUpdate=clock.instant();
+		else {
+			evToTrigger.trigger(); 
+			this.update();
+		}
+	}
+	
 	@Override
 	public Instant getCurrentInstant() {
 		return lastUpdate;
 	}
-
+	
+	/**
+	 * méthode qui met un nouveau evenement dans un EventStorage
+	 */
 	@Override
 	public void register(Event... events) {
-		
-		eventQueue.register(this.triEvenements(events));
+		EventStorage[] storage=new EventStorage[events.length];
+		for(int i=0;i<events.length;i++) {
+			storage[i]=new EventStorage(events[i],this.lastUpdate);
+		}
+		this.triEvenements(storage);
 	}
-
-	private Event[] triEvenements(Event... events0) {
-		Event[] events=events0;
-		Event temp;
+	
+	/**
+	 * Méthode qui remet dans la file un evenement qui existait
+	 * 
+	 */
+	private void registerExistingEvent(EventStorage... eventStorage) {
+		this.triEvenements(eventStorage);
+	}
+	
+	
+	
+	private void triEvenements(EventStorage... events) {
+		boolean isPlaced;
 		
-		for(int i=0;i<events.length-1;i++) {
+		for(int n=0;n<events.length;n++) {
+			isPlaced=false;
 			
-			for(int n=1;n<events.length;n++) {
-				
-				if(events[i].getDuration().getSeconds()>events[n].getDuration().getSeconds()) {
+			if(this.queue.size()==0) {
+				this.queue.add(events[n]);
+			}
+			
+			else {
+				for(int i=0;i<this.queue.size() && !isPlaced;i++) {
 					
-					temp=events[i];
-					events[i]=events[n];
-					events[n]=temp; 
+					isPlaced=this.addEventOnAnNonEmptyQueue(this.queue.get(i), events[n],i);
 					
-				} 
+				}
+				if(!isPlaced) {
+					this.queue.add(events[n]);
+				}
 			}
 		}
-		return events;
+	}
+	
+	
+	private boolean addEventOnAnNonEmptyQueue(EventStorage eventInQueue,
+			EventStorage eventToAdd,int indiceQueue) {
+		
+		if(this.creationDatePlusDuration(eventInQueue).isAfter(
+				this.creationDatePlusDuration(eventToAdd))) {
+			
+			this.queue.add(indiceQueue, eventToAdd);
+			return true;
+		}
+		else {
+			if(this.compareCreationDateIfTriggerTimeAreSimilar(eventInQueue, eventToAdd)){
+					
+				this.queue.add(indiceQueue, eventToAdd);
+				return true;
+				
+			}
+		}
+		return false;
+	}
+	
+	
+	private boolean compareCreationDateIfTriggerTimeAreSimilar(EventStorage eventInQueue,
+			EventStorage eventToAdd) {
+		
+		if(this.creationDatePlusDuration(eventInQueue).equals(
+				this.creationDatePlusDuration(eventToAdd))) {
+			//on choisis celui qui a la plus ancienne date de creation
+			
+			if(eventInQueue.getCreationDate().isAfter(
+					eventToAdd.getCreationDate())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	private Instant creationDatePlusDuration(EventStorage ev) {
+			return ev.getCreationDate().plusMillis(
+					ev.getDuration().toMillis());
+	}
+	
+	
+	private ArrayList<EventStorage> extractRegisteredList() {
+		ArrayList<EventStorage> list = this.queue;
+		
+		this.queue = new ArrayList<EventStorage>();
+		
+		return list;
 	}
 }

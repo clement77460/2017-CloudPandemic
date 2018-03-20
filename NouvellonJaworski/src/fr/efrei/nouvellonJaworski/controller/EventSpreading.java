@@ -5,70 +5,65 @@ import java.time.Instant;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.model.entities.Habitant;
-import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
 import fr.efrei.nouvellonJaworski.model.entities.Ville;
 import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
 import fr.efrei.paumier.shared.selection.Selector;
-import fr.efrei.paumier.shared.time.TimeManager;
 
 public class EventSpreading implements Event{
 	private final Duration duration;
-	private final TimeManager manager;
 	private final List<Event> triggeredEventsList;
 	private final Ville ville;
 	private final Habitant source;
 	private final GameEngine gameEngine;
 	private Selector selector;
-	 
+	
 	private Instant triggeredInstant;
 	
-	/**
-	 * EventSpreading possède un habitant source et un habitant target
-	 * @param currentInstant
-	 * @param duration
-	 * @param manager
-	 * @param triggeredEventsList
-	 * @param ville
-	 * @param target => habitant qui propage la contamination
-	 * @param source => habitant a infecter
-	 * @param simulation
-	 */
-	public EventSpreading(Instant currentInstant, Duration duration, TimeManager manager, List<Event> triggeredEventsList,Ville ville,Habitant source, GameEngine gameEngine,Selector selector) {
+	public EventSpreading(Instant currentInstant, Duration duration, GameEngine gameEngine, List<Event> triggeredEventsList,Ville ville,Habitant source,Selector selector) {
 		
 		this.duration = duration; 
-		this.manager =  manager;
 		this.triggeredEventsList = triggeredEventsList;
 		this.ville=ville;
 		this.source=source;
 		this.gameEngine=gameEngine;
-		this.selector=selector;
+		this.selector=selector; 
+		
 	}
-	
 	
 	@Override
 	public void trigger() {
 		
 		triggeredEventsList.add(this);
 		
-		if (manager != null) {
-			this.triggeredInstant = manager.getCurrentInstant();
+		if (gameEngine != null) {
+			this.triggeredInstant = gameEngine.getCurrentInstant();
 		} 
 		
+		System.out.println("on lance un spreading event a "+this.triggeredInstant.toString());
+		
+		if(!source.isDead() && !source.isIsolated()) {
+			
+			this.launchDeathAndSpreading();
+			
+		}
+	}
+
+	private void launchDeathAndSpreading() {
 		Habitant target = selector.selectAmong(ville.getHabitants());
 		source.infectSomeone(target);
 		ville.getHabitants().remove(target);
 		ville.getHabitantsInfected().add(target);
+	
+	
 		
+		EventSpreading eventSpreading1 = new EventSpreading(this.triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, source,selector);
+		EventSpreading eventSpreading2 = new EventSpreading(this.triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target,selector);
+		EventDeath eventDeath = new EventDeath(this.triggeredInstant, Duration.ofSeconds(15), gameEngine, triggeredEventsList, ville,target);
 		
-	//Creation deux events spreading 
-		EventSpreading eventSpreading1 = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5), manager, triggeredEventsList, ville, source, gameEngine,selector);
-		EventSpreading eventSpreading2 = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5), manager, triggeredEventsList, ville, target, gameEngine,selector);
-		EventDeath eventDeath = new EventDeath(Instant.EPOCH, Duration.ofSeconds(15), manager, triggeredEventsList, ville, selector, gameEngine, target);
 		gameEngine.register(eventSpreading1,eventSpreading2,eventDeath);
-		gameEngine.update();
 	}
-
+	
 	@Override
 	public Duration getDuration() {
 		return duration;

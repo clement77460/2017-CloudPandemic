@@ -14,48 +14,49 @@ public class Habitant {
 	 */
 	public void infectSomeone() {
 		this.contaminerOuSoigner(true);
-		Ville.stats.incrNbHabitantsInfected();
 	}
 	/**
 	 * fonction qui permet à un habitant d'en infecter un autre
 	 * 
 	 */
 	public void infectSomeone(Habitant habitant) {
-		if(!habitant.isInfected() && !habitant.isIsolated() && !habitant.isDead && this.isInfected && !this.isDead && !isIsolated) {//la cible pas isolé,pas infecté  et porteur infecté, pas mort,pas isolé
+		if(!habitant.isInfected() && !habitant.isIsolated() && !habitant.isDead && this.isInfected && !this.isDead && !isIsolated) {//la cible pas isolé,pas infecté  
 			habitant.contaminerOuSoigner(true);//on le contamine
-			//Ville.stats.incrNbHabitantsInfected();
+			
 		}
 	}
 	/**
 	 * permet de guérir un habitant
 	 * 
 	 */
-	public void healHabitant() {
+	public boolean healHabitant() {
 		if(!this.isDead && this.isInfected && this.isIsolated) {//cible infecté, isolé, pas mort 
 			this.contaminerOuSoigner(false);//on le soigne
 			this.setIsolated(false);//on le retire de la quarantaine
-			Ville.stats.decrNbHabitantsInfected();
-			Ville.stats.decrNbHabitantsIsolated();
+			
+			return true;
 		}
+		return false;
 	}
 	/**
 	 * permet d'isoler un habitant
 	 */
-	public void isolateHabitant() {
+	public boolean isolateHabitant() {
 		if(!this.isDead && this.isInfected && !this.isIsolated) {//cible infecté, pas isolé, pas mort
 			this.setIsolated(true);//on l'isole
-			Ville.stats.incrNbHabitantsIsolated();
+			return true;
 		}
+		return false;
 	}
 	/**
 	 * faire succomber l'habitant
 	 */
-	public void killHabitant() {
-		if(isInfected && !isIsolated && !isDead) {//infecte et pas en quarantaine
+	public boolean killHabitant() {
+		if(isInfected  && !isDead) {//infecte et pas mort
 			this.setDead(true);
-			Ville.stats.decrNbHabitantsInfected();
-			Ville.stats.decrNbHabitantsAlive();
+			return true;
 		}
+		return false;
 	}
 	public boolean isInfected() {
 		return isInfected;
