@@ -10,6 +10,10 @@ public interface Simulation extends TimeManager {
 	int getInfectedPopulation();
 	int getQuarantinedPopulation();
 	int getDeadPopulation();
+	
 	long getMoney();
+	double getPanicLevel();
+	
 	void executeOrder(OrderType order);
+	void startReceivingImmigrant(boolean isInfected);
 }

@@ -13,4 +13,4 @@ test:
   stage: test
   image: maven:3.3.9-jdk-8
   script:
-    - 'find -maxdepth 2 -type f -name pom.xml -exec mvn $MAVEN_CLI_OPTS -f {} test \;'
+    - 'find -maxdepth 2 -type f -name pom.xml -print0 | xargs -0 -n1 -I PROJECT mvn $MAVEN_CLI_OPTS -f PROJECT test'
