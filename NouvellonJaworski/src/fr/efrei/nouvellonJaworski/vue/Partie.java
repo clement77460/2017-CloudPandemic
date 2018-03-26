@@ -22,8 +22,7 @@ public class Partie {
 	public Partie(int population) {
 		this.population=population;
 		this.selector=new MySelector();
-		this.clock = new FakeClock(Clock.fixed(Instant.EPOCH,
-				ZoneId.systemDefault()));
+		this.clock = new FakeClock();
 		this.simulation = new SimulationImplement(clock, selector, population);
 	}
 	public void printCarac(SimulationImplement stats) {

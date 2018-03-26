@@ -36,7 +36,7 @@ public class EventTaxes implements Event{
 		if (gameEngine != null) { 
 			this.triggeredInstant = gameEngine.getCurrentInstant();
 		} 
-		System.out.println("on lance un Taxes event a "+this.triggeredInstant.toString());
+		
 		simulation.updateMoney();
 		Event eventTaxes=new EventTaxes(Instant.EPOCH,  Duration.ofSeconds(5), gameEngine, this.triggeredEventsList,simulation);
 		

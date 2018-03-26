@@ -28,7 +28,7 @@ public class EventIncreaseTaxes implements Event{
 	
 	@Override
 	public void trigger() {
-		System.out.println("on trigger un event de Increase Taxes");
+		
 		
 		simulation.incrUpradeOfTaxes();
 		

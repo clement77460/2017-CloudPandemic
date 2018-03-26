@@ -96,13 +96,15 @@ public class SimulationImplement implements Simulation{
 	
 	@Override
 	public int getLivingPopulation() {
-		return ville.getHabitantsAlive().size();
+		//return ville.getHabitantsAlive().size();
+		return ville.getHabitantsHealthy().size()+ville.getHabitantsInfected().size()
+				+ville.getHabitantsIsolated().size();
 	}
 	
 	
 	@Override
 	public int getInfectedPopulation() {
-		return ville.getHabitantsInfected().size(); 
+		return ville.getHabitantsInfected().size()+ville.getHabitantsIsolated().size(); 
 	}
 	
 	
@@ -114,11 +116,16 @@ public class SimulationImplement implements Simulation{
 	
 	@Override
 	public int getDeadPopulation() {
+		
 		return ville.getHabitantsDead().size();
 	}
 
 	public void updateMoney() {
-		this.money=this.money+this.ville.getHabitantsAlive().size()*(this.nbUpgradeOfTaxes+1);
+		
+		this.money=this.money+
+				(this.ville.getHabitantsHealthy().size()+ville.getHabitantsInfected().size()+ville.getHabitantsIsolated().size())
+				*(this.nbUpgradeOfTaxes+1);
+	
 	}
 	@Override
 	public long getMoney() {
@@ -151,6 +158,27 @@ public class SimulationImplement implements Simulation{
 		
 		
 		this.money=this.money-cost;
+		
+	}
+
+
+
+
+
+	@Override
+	public double getPanicLevel() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+
+
+
+	@Override
+	public void startReceivingImmigrant(boolean isInfected) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

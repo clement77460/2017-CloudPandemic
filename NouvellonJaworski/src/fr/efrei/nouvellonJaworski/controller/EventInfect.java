@@ -39,12 +39,12 @@ public class EventInfect implements Event{
 			this.triggeredInstant = gameEngine.getCurrentInstant();
 		} 
 		
-		System.out.println("on lance un infect event a "+this.triggeredInstant.toString());
+		//System.out.println("on lance un infect event a "+this.triggeredInstant.toString());
 		
-		Habitant target = selector.selectAmong(ville.getHabitantsAlive());
+		Habitant target = selector.selectAmong(ville.getHabitantsHealthy());
 		target.contaminerOuSoigner(true);
 		
-		ville.getHabitants().remove(target);
+		ville.getHabitantsHealthy().remove(target);
 		ville.getHabitantsInfected().add(target);
 		
 		EventSpreading eventSpreading = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5),

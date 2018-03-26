@@ -1,13 +1,15 @@
 package fr.efrei.nouvellonJaworski.model.entities;
 
 public class Habitant {
-	boolean isInfected;
-	boolean isIsolated;
-	boolean isDead;
-	public Habitant() {
+	private boolean isInfected;
+	private boolean isIsolated;
+	private boolean isDead;
+	private Integer id;
+	public Habitant(int id) {
 		this.isInfected=false;
 		this.isIsolated=false;//false => pas en quarantaine
 		this.isDead=false;
+		this.id=id;
 	}
 	/**
 	 * infecte un habitant donné en début de partie
@@ -88,6 +90,9 @@ public class Habitant {
 	 */
 	public void setDead(boolean isDead) {
 		this.isDead = isDead;
+	}
+	public Integer getId() {
+		return this.id;
 	}
 	
 }

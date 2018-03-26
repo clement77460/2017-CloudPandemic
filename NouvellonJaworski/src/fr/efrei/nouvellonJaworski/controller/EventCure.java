@@ -36,14 +36,12 @@ public class EventCure implements Event{
 		if (gameEngine != null) { 
 			this.triggeredInstant = gameEngine.getCurrentInstant(); 
 		}
-		System.out.println("on lance un cure event à "+this.triggeredInstant.toString());
+		//System.out.println("on lance un cure event à "+this.triggeredInstant.toString());
 		
 		if(target.healHabitant()) { //cure has succeed
-			System.out.println("cure succeed");
-			ville.getHabitantsInfected().remove(target);
 			
-			
-			ville.getHabitants().add(target);
+			//ville.getHabitantsInfected().remove(target);
+			ville.getHabitantsHealthy().add(target);
 			
 		}
 		ville.getHabitantsIsolated().remove(target);//if dead we still remove the target from isolated ppl
