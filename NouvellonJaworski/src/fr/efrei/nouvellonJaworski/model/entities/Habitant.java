@@ -4,12 +4,19 @@ public class Habitant {
 	private boolean isInfected;
 	private boolean isIsolated;
 	private boolean isDead;
-	private Integer id;
-	public Habitant(int id) {
+	private boolean isEmigrated;
+	private final int id;
+	
+	private static int compteur=0;
+	
+	public Habitant() {
 		this.isInfected=false;
 		this.isIsolated=false;//false => pas en quarantaine
 		this.isDead=false;
-		this.id=id;
+		this.isEmigrated=false;
+		this.id=Habitant.compteur;
+		Habitant.compteur++;
+		System.out.println(this.id);
 	}
 	/**
 	 * infecte un habitant donné en début de partie
@@ -84,12 +91,18 @@ public class Habitant {
 	public boolean isDead() {
 		return isDead;
 	}
+	public boolean isEmigrated() {
+		return isEmigrated;
+	}
 	/**
 	 * permet de changer le status de mort d'un habitant
 	 * @param isDead
 	 */
 	public void setDead(boolean isDead) {
 		this.isDead = isDead;
+	}
+	public void setEmigrated(boolean isEmigrated) {
+		this.isEmigrated=isEmigrated;
 	}
 	public Integer getId() {
 		return this.id;

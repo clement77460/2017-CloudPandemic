@@ -7,11 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.controller.EventScreeningCenter;
+import fr.efrei.nouvellonJaworski.controller.EventImmigration;
 import fr.efrei.nouvellonJaworski.controller.EventIncreaseTaxes;
 import fr.efrei.nouvellonJaworski.controller.EventInfect;
 import fr.efrei.nouvellonJaworski.controller.EventScreening;
 import fr.efrei.nouvellonJaworski.controller.EventTaxes;
 import fr.efrei.nouvellonJaworski.controller.engine.GameEngineImplement;
+import fr.efrei.paumier.shared.domain.CityBorder;
 import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
 import fr.efrei.paumier.shared.orders.OrderType;
@@ -25,6 +27,7 @@ public class SimulationImplement implements Simulation{
 	private final Selector selector;
 	private final Clock clock;
 	private final GameEngine gameEngine;
+	private final CityBorder border;
 	protected final List<Event> eventTriggered ;
 	private final Ville ville;
 	
@@ -37,8 +40,9 @@ public class SimulationImplement implements Simulation{
 	private Instant lastUpdate;
 
 	
-	public SimulationImplement(Clock clock, Selector selector, int population) {
+	public SimulationImplement(Clock clock, CityBorder border,Selector selector, int population) {
 		this.clock=clock;
+		this.border=border;
 		this.selector=selector;
 		this.nbOriginalHabitants=population;
 		this.nbHabitantsAlive=population;
@@ -48,7 +52,7 @@ public class SimulationImplement implements Simulation{
 		this.money=0;
 		this.nbUpgradeOfTaxes=0;
 		this.nbUpgradeOfScreeningCenter=0;
-		this.ville=new Ville(population);
+		this.ville=new Ville(population,border,selector);
 		this.launchInitialContamination();
 		
 
@@ -96,7 +100,7 @@ public class SimulationImplement implements Simulation{
 	
 	@Override
 	public int getLivingPopulation() {
-		//return ville.getHabitantsAlive().size();
+		
 		return ville.getHabitantsHealthy().size()+ville.getHabitantsInfected().size()
 				+ville.getHabitantsIsolated().size();
 	}
@@ -167,18 +171,19 @@ public class SimulationImplement implements Simulation{
 
 	@Override
 	public double getPanicLevel() {
-		// TODO Auto-generated method stub
-		return 0;
+		return ville.getPanic();
 	}
 
-
-
-
+	
+	
 
 	@Override
 	public void startReceivingImmigrant(boolean isInfected) {
-		// TODO Auto-generated method stub
-		
+		gameEngine.update();
+		Event event = new EventImmigration(clock.instant(), Duration.ofSeconds(3), gameEngine,
+				eventTriggered, ville, isInfected,selector);
+		gameEngine.register(event);
+		System.out.println(clock.instant());
 	}
 	
 	

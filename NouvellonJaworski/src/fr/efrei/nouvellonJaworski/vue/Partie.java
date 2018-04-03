@@ -23,7 +23,7 @@ public class Partie {
 		this.population=population;
 		this.selector=new MySelector();
 		this.clock = new FakeClock();
-		this.simulation = new SimulationImplement(clock, selector, population);
+		this.simulation = new SimulationImplement(clock, null,selector, population);
 	}
 	public void printCarac(SimulationImplement stats) {
 		System.out.println(stats);

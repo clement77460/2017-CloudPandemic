@@ -14,7 +14,7 @@ public class SimulationTest extends BaseSimulationTests{
 	@Override
 	protected Simulation createSimulation(Clock clock, CityBorder border, Selector selector, int population) {
 		
-		return new SimulationImplement(clock, selector, population);
+		return new SimulationImplement(clock,border, selector, population);
 	}
 	
 

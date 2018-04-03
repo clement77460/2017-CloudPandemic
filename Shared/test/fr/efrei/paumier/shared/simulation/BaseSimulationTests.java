@@ -826,7 +826,7 @@ public abstract class BaseSimulationTests {
 		assertTrue(border.getEmigrants().get(1));
 		assertEquals(80, simulation.getPanicLevel(), 0.01);
 		
-		assertEquals(18, simulation.getDeadPopulation());		
+		assertEquals(18, simulation.getDeadPopulation());
 		assertEquals(80, simulation.getLivingPopulation());		
 		assertEquals(2, border.getEmigrants().size());
 	}
@@ -922,6 +922,7 @@ public abstract class BaseSimulationTests {
 		simulation.startReceivingImmigrant(true);
 		
 		clock.advanceTo(Duration.ofSeconds(3));
+		System.out.println(clock.instant());
 		simulation.update();
 		
 		assertEquals(100, simulation.getOriginalPopulation());

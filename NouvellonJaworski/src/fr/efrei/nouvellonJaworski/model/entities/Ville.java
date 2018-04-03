@@ -2,31 +2,39 @@ package fr.efrei.nouvellonJaworski.model.entities;
 
 import java.util.*;
 
+import fr.efrei.paumier.shared.domain.CityBorder;
+import fr.efrei.paumier.shared.domain.MigrationMessage;
+import fr.efrei.paumier.shared.selection.Selector;
+
 
 
 public class Ville {
+	private final CityBorder border;
+	private final Selector selector;
+	
 	private List<Habitant> habitantsHealthy;
 	private List<Habitant> habitantsInfected;
 	private List<Habitant> habitantsIsolated;
 	private List<Habitant> habitantsDead;
 	protected static SimulationImplement stats;
-	
+	private Double panicLVL;
 	 
 	
-	public Ville(int nbHabitants) {
+	public Ville(int nbHabitants,CityBorder border,Selector selector) {
 		this.habitantsHealthy=new ArrayList<Habitant>(nbHabitants);
+		this.border=border;
+		this.selector=selector;
 		this.habitantsInfected=new ArrayList<Habitant>();
 		this.habitantsIsolated = new ArrayList<Habitant>();
 		this.habitantsDead = new ArrayList<Habitant>();
 		this.initialisationHabitants(nbHabitants); 
+		this.panicLVL=0.0;
 	}
 	
 	
-	private void initialisationHabitants(int nbHabitants) {
-		Habitant temp;
+	private void initialisationHabitants(int nbHabitants) {	
 		for(int i=0;i<nbHabitants;i++) {
-			temp=new Habitant(i);
-			this.habitantsHealthy.add(temp);
+			this.habitantsHealthy.add(new Habitant());
 		}
 	} 
 	
@@ -44,25 +52,14 @@ public class Ville {
 		return habitantsHealthy;
 	}
 	
+
 	
-	public void setHabitantsHealthy(List<Habitant> habitants) {
-		this.habitantsHealthy = habitants;
-	}
-	
-	
-	public static SimulationImplement getStats() {
-		return stats;
-	}
 	
 	
 	public int getNbrHabitantsHealthy() {
 		return this.habitantsHealthy.size();
 	}
 	
-	
-	public Habitant getHabitantHealthy(int index) {
-		return this.habitantsHealthy.get(index);
-	}
 
 
 	public List<Habitant> getHabitantsDead() {
@@ -70,6 +67,46 @@ public class Ville {
 		return habitantsDead;
 	}
 	
-
+	public void decrPanic() {
+		//verify not under 2.5, put static var
+		this.panicLVL=this.panicLVL-2.5;
+	}
+	
+	public void incrPanic() {
+		int livingPopulation=this.getHabitantsHealthy().size()+this.getHabitantsInfected().size()
+				+this.getHabitantsIsolated().size();
+		
+		this.panicLVL=this.panicLVL+5.0;
+		
+		if(this.panicLVL>=livingPopulation && border!=null) {
+			
+			this.emigration();
+			this.panicLVL=this.panicLVL-5.0;
+		}
+	}
+	
+	private void emigration() {
+		List<Habitant> habitantsHealthyAndInfected=new ArrayList<Habitant>();
+		
+		habitantsHealthyAndInfected.addAll(habitantsInfected);
+		habitantsHealthyAndInfected.addAll(habitantsHealthy);
+		habitantsHealthyAndInfected.sort((o1, o2) -> o1.getId().compareTo(o2.getId()));
+		
+		Habitant target=selector.selectAmong(habitantsHealthyAndInfected);
+		
+		//creation du message de migration pour sa ville d'acceuil
+		MigrationMessage mm=new MigrationMessage(target.isInfected());
+		
+		habitantsHealthy.remove(target);
+		habitantsInfected.remove(target);
+		System.out.println("emigration " +target.getId());
+		target.setEmigrated(true);
+		border.sendEmigrant(target.isInfected());
+	}
+	
+	
+	public double getPanic() {
+		return this.panicLVL;
+	}
 	
 }
