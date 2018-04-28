@@ -26,14 +26,17 @@ public class Partie {
 		
 		this.sc=new Scanner(System.in);
 		
-		this.cityBorder=new Client("localhost",11111);
-		//this.cityBorder=new Client("178.62.119.191",4242);
+		//this.cityBorder=new Client("localhost",11111);
+		this.cityBorder=new Client("178.62.119.191",4242);
 		 
+		//passer en agurment city border si le serveur est opérationnel
 		//this.simulation = new SimulationImplement(clock2, cityBorder,selector, population);
-		this.simulation = new SimulationImplement(clock2, cityBorder,selector, population);
+		this.simulation = new SimulationImplement(clock2, null,selector, population);
+		
 		((Client) cityBorder).setSimulation(simulation);
 		
-		new Thread( (Runnable) this.cityBorder).start();
+		//lancer le thread seulement si le serveur est opérationnel
+		//new Thread( (Runnable) this.cityBorder).start();
 	}
 	
 	
