@@ -599,7 +599,6 @@ public abstract class BaseSimulationTests {
 		assertEquals(33, simulation.getDeadPopulation());
 		
 		clock.advanceTo(Duration.ofMillis(52800));
-		System.out.println("update ici");
 		simulation.update();
 		
 		assertEquals(100, simulation.getOriginalPopulation());
@@ -922,7 +921,6 @@ public abstract class BaseSimulationTests {
 		simulation.startReceivingImmigrant(true);
 		
 		clock.advanceTo(Duration.ofSeconds(3));
-		System.out.println(clock.instant());
 		simulation.update();
 		
 		assertEquals(100, simulation.getOriginalPopulation());

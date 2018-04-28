@@ -38,7 +38,7 @@ public class EventImmigration implements Event{
 	
 	@Override
 	public void trigger() {
-		System.out.println("on lance un immig event");
+		
 		Habitant temp=new Habitant();
 		
 		triggeredEventsList.add(this);

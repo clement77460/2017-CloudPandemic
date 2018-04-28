@@ -68,8 +68,9 @@ public class Ville {
 	}
 	
 	public void decrPanic() {
-		//verify not under 2.5, put static var
-		this.panicLVL=this.panicLVL-2.5;
+		
+		if(panicLVL>=2.5)
+			this.panicLVL=this.panicLVL-2.5;
 	}
 	
 	public void incrPanic() {
@@ -81,7 +82,8 @@ public class Ville {
 		if(this.panicLVL>=livingPopulation && border!=null) {
 			
 			this.emigration();
-			this.panicLVL=this.panicLVL-5.0;
+			if(panicLVL>=5) 
+				this.panicLVL=this.panicLVL-5.0;
 		}
 	}
 	
@@ -94,12 +96,10 @@ public class Ville {
 		
 		Habitant target=selector.selectAmong(habitantsHealthyAndInfected);
 		
-		//creation du message de migration pour sa ville d'acceuil
-		MigrationMessage mm=new MigrationMessage(target.isInfected());
 		
 		habitantsHealthy.remove(target);
 		habitantsInfected.remove(target);
-		System.out.println("emigration " +target.getId());
+		
 		target.setEmigrated(true);
 		border.sendEmigrant(target.isInfected());
 	}

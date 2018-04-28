@@ -16,7 +16,6 @@ public class Habitant {
 		this.isEmigrated=false;
 		this.id=Habitant.compteur;
 		Habitant.compteur++;
-		System.out.println(this.id);
 	}
 	/**
 	 * infecte un habitant donné en début de partie

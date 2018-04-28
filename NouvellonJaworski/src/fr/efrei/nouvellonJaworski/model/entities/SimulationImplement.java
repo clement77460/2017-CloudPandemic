@@ -39,8 +39,10 @@ public class SimulationImplement implements Simulation{
 	
 	private Instant lastUpdate;
 
+	private Boolean firstHabitantIsInfected;
 	
 	public SimulationImplement(Clock clock, CityBorder border,Selector selector, int population) {
+		this.firstHabitantIsInfected=false;
 		this.clock=clock;
 		this.border=border;
 		this.selector=selector;
@@ -60,15 +62,13 @@ public class SimulationImplement implements Simulation{
 	
 	
 	
-	
-	
 	public void addHabitantsAlive(int nbr) {
 		this.nbHabitantsAlive=this.nbHabitantsAlive+nbr;
 	}
 	
 	
 	private void launchInitialContamination() {
-		Event event1 = new EventInfect(Instant.EPOCH,  Duration.ofSeconds(3), gameEngine, this.eventTriggered,ville, selector);
+		Event event1 = new EventInfect(Instant.EPOCH,  Duration.ofSeconds(3), gameEngine, this.eventTriggered,ville, selector,this);
 		Event eventScreening = new EventScreening(Instant.EPOCH, Duration.ofMillis(200), gameEngine,this.eventTriggered, ville, selector,this);
 		Event eventTaxes=new EventTaxes(Instant.EPOCH,  Duration.ofSeconds(5), gameEngine, this.eventTriggered,this);
 		gameEngine.register(event1,eventScreening,eventTaxes);
@@ -149,23 +149,32 @@ public class SimulationImplement implements Simulation{
 	}
 	@Override
 	public void executeOrder(OrderType order) {
-		if(order.equals(OrderType.INCREASE_TAXES)) {
-			EventIncreaseTaxes center=new EventIncreaseTaxes(this.lastUpdate, Duration.ofSeconds(5),
-					gameEngine, eventTriggered,this);
-			gameEngine.register(center);
-			
-		}else {
-			EventScreeningCenter center=new EventScreeningCenter(this.lastUpdate, Duration.ofSeconds(5),
-					gameEngine, eventTriggered,this);
-			gameEngine.register(center);
+		if(enoughMoney()) {
+			if(order.equals(OrderType.INCREASE_TAXES)) {
+				EventIncreaseTaxes center=new EventIncreaseTaxes(this.lastUpdate, Duration.ofSeconds(5),
+						gameEngine, eventTriggered,this);
+				gameEngine.register(center);
+	
+			}else {
+				EventScreeningCenter center=new EventScreeningCenter(this.lastUpdate, Duration.ofSeconds(5),
+						gameEngine, eventTriggered,this);
+				gameEngine.register(center);
+			}
+		
+		
+			this.money=this.money-cost;
 		}
-		
-		
-		this.money=this.money-cost;
-		
 	}
 
-
+	private boolean enoughMoney() {
+		
+		if(money-cost<0) {
+			System.out.println("manque d'argent pour effectuer cette tâche");
+			return false;
+		}
+		
+		return true;
+	}
 
 
 
@@ -174,16 +183,21 @@ public class SimulationImplement implements Simulation{
 		return ville.getPanic();
 	}
 
+	public void setFirstHabitantIsInfected(Boolean status) {
+		this.firstHabitantIsInfected=status;
+	}
 	
+	public Boolean getFirstHabitantIsInfected() {
+		return this.firstHabitantIsInfected;
+	}
 	
-
 	@Override
 	public void startReceivingImmigrant(boolean isInfected) {
 		gameEngine.update();
 		Event event = new EventImmigration(clock.instant(), Duration.ofSeconds(3), gameEngine,
 				eventTriggered, ville, isInfected,selector);
 		gameEngine.register(event);
-		System.out.println(clock.instant());
+		
 	}
 	
 	
