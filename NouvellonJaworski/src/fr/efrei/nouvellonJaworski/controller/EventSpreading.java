@@ -50,20 +50,22 @@ public class EventSpreading implements Event{
 	}
 
 	private void launchDeathAndSpreading() {
+		//s'il y a la présence de non infectés
+		if(ville.getHabitantsHealthy().size()>0) {
+			Habitant target = selector.selectAmong(ville.getHabitantsHealthy());
+			
+			source.infectSomeone(target);
+			ville.getHabitantsHealthy().remove(target);
+			ville.getHabitantsInfected().add(target);
 		
-		Habitant target = selector.selectAmong(ville.getHabitantsHealthy());
 		
-		source.infectSomeone(target);
-		ville.getHabitantsHealthy().remove(target);
-		ville.getHabitantsInfected().add(target);
-	
-	
-		
-		EventSpreading eventSpreading1 = new EventSpreading(this.triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, source,selector);
-		EventSpreading eventSpreading2 = new EventSpreading(this.triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target,selector);
-		EventDeath eventDeath = new EventDeath(this.triggeredInstant, Duration.ofSeconds(15), gameEngine, triggeredEventsList, ville,target);
-		
-		gameEngine.register(eventSpreading1,eventSpreading2,eventDeath);
+			
+			EventSpreading eventSpreading1 = new EventSpreading(this.triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, source,selector);
+			EventSpreading eventSpreading2 = new EventSpreading(this.triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target,selector);
+			EventDeath eventDeath = new EventDeath(this.triggeredInstant, Duration.ofSeconds(15), gameEngine, triggeredEventsList, ville,target);
+			
+			gameEngine.register(eventSpreading1,eventSpreading2,eventDeath);
+		}
 	}
 	
 	@Override

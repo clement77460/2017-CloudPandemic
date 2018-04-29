@@ -61,7 +61,7 @@ public class Partie {
 		System.out.println("----------------------------------------------------------------");
 		System.out.println("seconde : "+clock2.millis()/1000);
 		System.out.println("Money : "+this.simulation.getMoney());
-		System.out.println("Non-Infectés : "+this.simulation.getLivingPopulation());
+		System.out.println("Vivants : "+this.simulation.getLivingPopulation());
 		System.out.println("Infectés : "+this.simulation.getInfectedPopulation());
 		System.out.println("Morts : "+this.simulation.getDeadPopulation());
 		System.out.println("Panic : "+this.simulation.getPanicLevel());
