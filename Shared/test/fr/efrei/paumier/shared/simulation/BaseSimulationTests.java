@@ -971,4 +971,184 @@ public abstract class BaseSimulationTests {
 		assertEquals(0, simulation.getQuarantinedPopulation());
 		assertEquals(0, simulation.getDeadPopulation());
 	}
+
+	@Test
+	public void v6_improvingMedicine_firstTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+
+	@Test
+	public void v6_improvingMedicine_secondTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+
+	@Test
+	public void v6_improvingMedicine_doubleRateOfCure() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.enqueueRanks(0, 0); // sec 13: 2 spreadings (#2, #3)
+		selector.enqueueRanks(3); // sec 13: 1 screening - #3 quarantined
+		
+		clock.advanceTo(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE); // Will be available at sec 10
+		
+		clock.advanceTo(Duration.ofMillis(15500));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(3, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void v6_improvingMedicine_twice_trippleRateOfCure() {
+		selector.setDefaultValue(50);		
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(0); // sec 03 - infection (#0}
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0); // sec 08 - spreading (#1)
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0, 0); // sec 13 - spreading x 2 (#2 & #3)
+		selector.skipNext(5); // sec 13
+		selector.skipNext(5); // sec 14
+		selector.skipNext(5); // sec 15
+		selector.skipNext(1); // sec 16.0
+		selector.enqueueRanks(0); // sec 16.2: 1 screening - #0 quarantined
+		selector.skipNext(3); // sec 16.4, 16.6 & 16.8
+		selector.skipNext(5); // sec 17
+		
+		clock.advanceTo(Duration.ofSeconds(10));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE); // Will be available at sec 15
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE); // Will be available at sec 15
+		
+		clock.advanceTo(Duration.ofMillis(17867));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(3, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void v6_improvingMedicine_canSaveSomebodyMuchCloserToHisEnd() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.enqueueRanks(0, 0); // sec 13: 2 spreadings (#2, #3)
+		selector.skipNext(5); // sec 13
+		selector.skipNext(5); // sec 14
+		selector.enqueueRanks(0); // sec 15: 1 screening - #0 quarantined
+		selector.skipNext(4); // sec 15
+		selector.skipNext(5); // sec 16
+		selector.skipNext(5); // sec 17
+		selector.skipNext(24);
+		selector.enqueueRanks(1, 1, 1); // sec 18: 3 spreadings
+		
+		clock.advanceTo(Duration.ofMillis(5000));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE); // Will be available at sec 10
+		
+		clock.advanceTo(Duration.ofMillis(18000)); // Curing event of # will trigger at 17.5, before the dying event of sec 18
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(6, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void v6_improvingMedicine_cannotSaveSomebodyAtTheVeryEnd() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.enqueueRanks(0, 0); // sec 13: 2 spreadings (#2, #3)
+		selector.skipNext(5); // sec 13
+		selector.skipNext(5); // sec 14
+		selector.skipNext(5); // sec 15
+		selector.enqueueRanks(0); // sec 16: 1 screening - #0 quarantined
+		selector.skipNext(4); // sec 16
+		selector.skipNext(5); // sec 17
+		selector.skipNext(24);
+		selector.enqueueRanks(1, 1, 1); // sec 18: 3 spreadings
+		
+		clock.advanceTo(Duration.ofMillis(5000));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE); // Will be available at sec 10
+		
+		clock.advanceTo(Duration.ofMillis(18000)); // Curing event of # will trigger at 18.5, after the dying event of sec 18
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(6, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void v6_improvingMedicine_rightNearEnd_mightBeEnoughToSaveHim() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.enqueueRanks(0, 0); // sec 13: 2 spreadings (#2, #3)
+		selector.enqueueRanks(0); // sec 13: 1 screening - #0 quarantined
+		selector.skipNext(24);
+		selector.enqueueRanks(1, 1, 1); // sec 18: 3 spreadings
+		
+		clock.advanceTo(Duration.ofMillis(12900));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE); // Will be available at sec 17.9
+		
+		clock.advanceTo(Duration.ofMillis(18000)); // #0 will be cured at sec 17.950, before the dying event of sec 18
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(6, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
 }
