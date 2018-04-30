@@ -209,6 +209,93 @@ public abstract class BaseGameEngineTests {
 		assertSame(event1, eventTriggered.get(1));
 	}
 
+	@Test
+	public void update_eventRateChanges_updateTimeWithProrateRespect() {
+		FakeEvent event = createEvent(Duration.ofSeconds(10));
+
+		manager.register(event);
+		assertEquals(0, eventTriggered.size());
+
+		manager.update();
+		assertEquals(0, eventTriggered.size());
+
+		clock.advance(Duration.ofSeconds(3));
+		manager.update();
+		assertEquals(0, eventTriggered.size());
+
+		clock.advance(Duration.ofSeconds(3));
+		manager.update();
+		event.setRate(2);
+		assertEquals(0, eventTriggered.size());
+
+		clock.advance(Duration.ofSeconds(1));
+		manager.update();
+		assertEquals(0, eventTriggered.size());
+
+		clock.advance(Duration.ofSeconds(1));
+		manager.update();
+
+		assertEquals(1, eventTriggered.size());
+		assertSame(event, eventTriggered.get(0));
+	}
+
+	@Test
+	public void update_rateChanges_andNewEvents_andMultipleSteps_reorderEvents() {
+		FakeEvent event1 = createEvent(Duration.ofSeconds(8), manager);
+		FakeEvent event2 = createEvent(Duration.ofSeconds(30), manager);
+		FakeEvent event3 = createEvent(Duration.ofSeconds(2), manager);
+
+		manager.register(event1, event2);
+		manager.update();
+
+		clock.advance(Duration.ofSeconds(3));
+		manager.update();
+		event2.setRate(9);
+		manager.register(event3);
+
+		for (int i = 3; i < 8; i++) {
+			clock.advance(Duration.ofSeconds(1));
+			manager.update();
+		}
+
+		assertEquals(3, eventTriggered.size());
+		assertSame(event3, eventTriggered.get(0));
+		assertSame(event2, eventTriggered.get(1));
+		assertSame(event1, eventTriggered.get(2));
+
+		assertEquals(Instant.EPOCH.plusSeconds(5), event3.getTriggeredInstant());
+		assertEquals(Instant.EPOCH.plusSeconds(6), event2.getTriggeredInstant());
+		assertEquals(Instant.EPOCH.plusSeconds(8), event1.getTriggeredInstant());
+	}
+
+	@Test
+	public void update_rateChanges_andNewEvents_andBigStep_reorderEvents() {
+		FakeEvent event1 = createEvent(Duration.ofSeconds(8), manager);
+		FakeEvent event2 = createEvent(Duration.ofSeconds(30), manager);
+		FakeEvent event3 = createEvent(Duration.ofSeconds(2), manager);
+
+		manager.register(event1, event2);
+		manager.update();
+
+		clock.advance(Duration.ofSeconds(3));
+		manager.update();
+		event2.setRate(9);
+		manager.register(event3);
+
+		clock.advance(Duration.ofSeconds(10));
+		manager.update();
+
+		assertEquals(3, eventTriggered.size());
+		assertSame(event3, eventTriggered.get(0));
+		assertSame(event2, eventTriggered.get(1));
+		assertSame(event1, eventTriggered.get(2));
+
+		assertEquals(Instant.EPOCH.plusSeconds(5), event3.getTriggeredInstant());
+		assertEquals(Instant.EPOCH.plusSeconds(6), event2.getTriggeredInstant());
+		assertEquals(Instant.EPOCH.plusSeconds(8), event1.getTriggeredInstant());
+		assertEquals(Instant.EPOCH.plusSeconds(13), manager.getCurrentInstant());
+	}
+
 	private FakeEvent createEvent(Duration duration) {
 		return new FakeEvent(Instant.EPOCH, duration, null, this.eventTriggered);
 	}
