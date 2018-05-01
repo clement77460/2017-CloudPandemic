@@ -1151,4 +1151,142 @@ public abstract class BaseSimulationTests {
 		assertEquals(0, simulation.getQuarantinedPopulation());
 		assertEquals(0, simulation.getDeadPopulation());
 	}
+	
+	@Test
+	public void v6_improvingVaccine_firstTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_VACCINE);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+
+	@Test
+	public void v6_improvingVaccine_secondTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_VACCINE);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_VACCINE);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+	
+	@Test
+	public void v6_improvingMedicine_reduceRateOfDyingBy20Percent() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.enqueueRanks(0, 0); // sec 13: 2 spreadings (#2, #3)
+		selector.skipNext(25);
+		selector.enqueueRanks(1, 1, 1, 1); // sec 18: 4 spreadings (+1 because #0 is still alive)
+		selector.skipNext(24);
+		
+		clock.advanceTo(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_VACCINE); // Will be available at sec 10
+		
+		// #0 will be infected at 3
+		// at 10, 8 seconds of life remains. Vaccine is then discovered. 
+		// 8 / 0.8 = 10 seconds of life now remains.
+		// He will die at sec 20 precisely
+		
+		clock.advanceTo(Duration.ofMillis(18000));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(8, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(19999));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(8, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(20000));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(7, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+	}
+	
+	@Test
+	public void v6_improvingMedicine_twice_reduceRateOfDyingBy36Percents() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.enqueueRanks(0, 0); // sec 13: 2 spreadings (#2, #3)
+		selector.skipNext(25);
+		selector.enqueueRanks(1, 1, 1, 1); // sec 18: 4 spreadings (+1 because #0 is still alive)
+		selector.skipNext(24);
+		
+		clock.advanceTo(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_VACCINE); // Will be available at sec 10
+		
+		clock.advanceTo(Duration.ofSeconds(10));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_VACCINE); // Will be available at sec 15
+		
+		// #0 will be infected at 3
+		// at 10, 8 seconds of life remains. Vaccine is then improved. 
+		// 8 / 0.8 = 10 seconds of life now remains.
+		// at 15, 5 seconds of life remains. Vaccine is then improved again. 
+		// 5 / 0.8 = 6.25 seconds of life now remains.
+		// He will die at sec 21.25 precisely
+		
+		clock.advanceTo(Duration.ofMillis(18000));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(8, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(21249));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(8, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(21250));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(7, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+	}	 
 }
