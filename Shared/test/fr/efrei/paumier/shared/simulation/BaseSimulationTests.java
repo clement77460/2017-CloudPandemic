@@ -741,7 +741,7 @@ public abstract class BaseSimulationTests {
 	}
 
 	@Test
-	public void emigration_capPanicToLivingPopulation() {
+	public void v6_emigration_capPanicToLivingPopulation() {
 		setUpWithBorder();
 		setupScenarioForPanic();
 		
@@ -753,12 +753,12 @@ public abstract class BaseSimulationTests {
 		clock.advanceTo(Duration.ofSeconds(43));
 		simulation.update();
 
-		assertEquals(80, simulation.getPanicLevel(), 0.01);
+		assertEquals(75, simulation.getPanicLevel(), 0.01);
 		assertEquals(20, simulation.getDeadPopulation());
 	}
 
 	@Test
-	public void emigration_removesPopulation() {
+	public void v6_emigration_removesPopulation() {
 		setUpWithBorder();
 		setupScenarioForPanic();
 		
@@ -770,15 +770,15 @@ public abstract class BaseSimulationTests {
 		clock.advanceTo(Duration.ofSeconds(43));
 		simulation.update();
 
-		assertEquals(80, simulation.getPanicLevel(), 0.01);
+		assertEquals(75, simulation.getPanicLevel(), 0.01);
 		assertEquals(20, simulation.getDeadPopulation());
 		
 		assertEquals(100, simulation.getOriginalPopulation());
-		assertEquals(76, simulation.getLivingPopulation());		
+		assertEquals(75, simulation.getLivingPopulation());		
 	}
 
 	@Test
-	public void emigration_sendMigrants() {
+	public void v6_emigration_sendMigrants() {
 		setUpWithBorder();
 		setupScenarioForPanic();
 		
@@ -790,7 +790,7 @@ public abstract class BaseSimulationTests {
 		clock.advanceTo(Duration.ofSeconds(43));
 		simulation.update();
 
-		assertEquals(4, border.getEmigrants().size());
+		assertEquals(5, border.getEmigrants().size());
 		assertFalse(border.getEmigrants().get(0));
 		assertFalse(border.getEmigrants().get(1));
 		assertFalse(border.getEmigrants().get(2));
@@ -1289,4 +1289,187 @@ public abstract class BaseSimulationTests {
 		assertEquals(0, simulation.getQuarantinedPopulation());
 		assertEquals(1, simulation.getDeadPopulation());
 	}	 
+	
+	@Test
+	public void v6_increaseCurfew_firstTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+
+	@Test
+	public void v6_increaseCurfew_secondTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+	
+	@Test
+	public void v6_increaseCurfew_reduceRateOfSpreadingBy20Percent() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.skipNext(4); // sec 13.0, 13.2, 13.4, 13.6
+		selector.enqueueRanks(0, 0); // sec 13.750: 2 spreadings (#2, #3)
+		
+		clock.advanceTo(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 10
+				
+		// #0 and #1 are supposed to spread at sec 13
+		// Those 3 remaining seconds will become 3.75
+		
+		clock.advanceTo(Duration.ofMillis(13749));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(2, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(13750));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(4, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
+	
+	@Test
+	public void v6_increaseCurfew__forFullSpreads_reduceRateOfSpreadingBy20Percent() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.skipNext(4); // sec 13.0, 13.2, 13.4, 13.6
+		selector.enqueueRanks(0, 0); // sec 13.750: 2 spreadings (#2, #3)
+		selector.skipNext(1); // sec 13.8
+		selector.skipNext(30); // sec 14 -> 19.8
+		selector.enqueueRanks(1, 1, 1); // sec 20: 3 spreadings
+		
+		clock.advanceTo(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 10
+				
+		// #0 and #1 are supposed to spread at sec 13
+		// Those 3 remaining seconds will become 3.75
+		// Then the next wave of spreading will happen 6.25 second later, so at 20
+		
+		clock.advanceTo(Duration.ofMillis(19999));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(3, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(20000));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(6, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+	}
+	
+	@Test
+	public void v6_increaseCurfew_twice_reduceRateOfSpreadingBy36Percents() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.skipNext(4); // sec 13.0, 13.2, 13.4, 13.6
+		selector.enqueueRanks(0, 0); // sec 13.750: 2 spreadings (#2, #3)
+		selector.skipNext(1); // sec 13.8
+		selector.skipNext(35); // sec 14 -> 20.8
+		selector.skipNext(1); // sec 21.0
+		selector.skipNext(1); // sec 21.2
+		selector.enqueueRanks(1, 1, 1); // sec 21.250: 3 spreadings
+		
+		clock.advanceTo(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 10
+		
+		clock.advanceTo(Duration.ofSeconds(10));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 15
+				
+		// #0 and #1 are supposed to spread at sec 13
+		// At sec 10, the 3 remaining seconds will become 3.75
+		// At 13.75, a new wave of spreading will be scheduled to 20
+		// At 15, the 5 remaing seconds will become 6.25		
+		
+		clock.advanceTo(Duration.ofMillis(21249));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(3, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(21250));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(6, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void v6_increaseCurfew_canTriggerEmigration() {
+		setUpWithBorder();
+		setupScenarioForPanic(); // at 38, panic will be at 60... or more if we increase the curfew
+		
+		clock.advanceTo(Duration.ofMillis(33100));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 38.1
+
+		// same details as previous test
+		
+		clock.advanceTo(Duration.ofMillis(38000));
+		simulation.update();
+
+		assertEquals(0, border.getEmigrants().size());
+		
+		clock.advanceTo(Duration.ofMillis(38100));
+		simulation.update();
+
+		assertEquals(3, border.getEmigrants().size());
+	}
 }
