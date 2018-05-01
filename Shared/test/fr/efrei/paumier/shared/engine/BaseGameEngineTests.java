@@ -296,6 +296,32 @@ public abstract class BaseGameEngineTests {
 		assertEquals(Instant.EPOCH.plusSeconds(13), manager.getCurrentInstant());
 	}
 
+	@Test
+	public void update_rateChanges_andBigStep_doNotApplyChangeDuringUpdate() {
+		FakeEvent relatedEvent = createEvent(Duration.ofSeconds(30), manager);
+		Event acceleratorEvent = new Event() {
+			@Override
+			public Duration getDuration() {
+				return Duration.ofSeconds(3);
+			}
+
+			@Override
+			public void trigger() {
+				relatedEvent.setRate(9);				
+			}			
+		};
+
+		manager.register(acceleratorEvent, relatedEvent);
+		
+		clock.advance(Duration.ofSeconds(30));
+		manager.update();
+
+		assertEquals(1, eventTriggered.size());
+		assertSame(relatedEvent, eventTriggered.get(0));
+
+		assertEquals(Instant.EPOCH.plusSeconds(6), relatedEvent.getTriggeredInstant());
+	}
+
 	private FakeEvent createEvent(Duration duration) {
 		return new FakeEvent(Instant.EPOCH, duration, null, this.eventTriggered);
 	}
