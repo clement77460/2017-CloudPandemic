@@ -741,7 +741,7 @@ public abstract class BaseSimulationTests {
 	}
 
 	@Test
-	public void v6_emigration_capPanicToLivingPopulation() {
+	public void emigration_capPanicToLivingPopulation() {
 		setUpWithBorder();
 		setupScenarioForPanic();
 		
@@ -758,7 +758,7 @@ public abstract class BaseSimulationTests {
 	}
 
 	@Test
-	public void v6_emigration_removesPopulation() {
+	public void emigration_removesPopulation() {
 		setUpWithBorder();
 		setupScenarioForPanic();
 		
@@ -778,7 +778,7 @@ public abstract class BaseSimulationTests {
 	}
 
 	@Test
-	public void v6_emigration_sendMigrants() {
+	public void emigration_sendMigrants() {
 		setUpWithBorder();
 		setupScenarioForPanic();
 		
@@ -1471,5 +1471,148 @@ public abstract class BaseSimulationTests {
 		simulation.update();
 
 		assertEquals(3, border.getEmigrants().size());
+	}
+	
+	@Test
+	public void v6_reduceCurfew_firstTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW);
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.REDUCE_CURFEW);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+
+	@Test
+	public void v6_reduceCurfew_secondTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW);
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.REDUCE_CURFEW);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.REDUCE_CURFEW);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+	
+	@Test
+	public void v6_reduceCurfew_cannotDecreaseMoreThanIncrease() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW);
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.REDUCE_CURFEW);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.REDUCE_CURFEW);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.REDUCE_CURFEW);
+		
+		assertEquals(100, simulation.getMoney());
+	}
+	
+	@Test
+	public void v6_reduceCurfew_cancelRateOfSpreadingIncrease() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.skipNext(4); // sec 13.0, 13.2, 13.4, 13.6
+		selector.enqueueRanks(0, 0); // sec 13.750: 2 spreadings (#2, #3)
+		selector.skipNext(1); // sec 13.8
+		selector.skipNext(35); // sec 14 -> 20.8
+		selector.skipNext(1); // sec 21.0
+		selector.skipNext(1); // sec 21.2
+		selector.enqueueRanks(1, 1, 1); // sec 21.250: 3 spreadings
+		
+		clock.advanceTo(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 10
+		
+		clock.advanceTo(Duration.ofSeconds(10));
+		simulation.update();
+		simulation.executeOrder(OrderType.REDUCE_CURFEW); // Will be available at sec 15
+				
+		// #0 and #1 are supposed to spread at sec 13
+		// At sec 10, the 3 remaining seconds will become 3.75
+		// At 13.75, a new wave of spreading will be scheduled to 20
+		// At 15, the 5 remaing seconds will become 4		
+		
+		clock.advanceTo(Duration.ofMillis(18999));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(3, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(19000));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(6, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void v6_reduceCurfew_cancelPanicIncrease() {
+		setUpWithBorder();
+		setupScenarioForPanic(); // at 38, panic will be at 60... or more if we increase the curfew
+		
+		clock.advanceTo(Duration.ofMillis(33100));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.REDUCE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.REDUCE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.REDUCE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 38.1
+
+		clock.advanceTo(Duration.ofMillis(38100));
+		simulation.update();
+
+		assertEquals(0, border.getEmigrants().size());
 	}
 }
