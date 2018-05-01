@@ -2,8 +2,11 @@ package fr.efrei.paumier.shared.simulation;
 
 import java.time.Duration;
 
-public class Statistics {
+import fr.efrei.paumier.shared.networking.messaging.Message;
 
+public class Statistics implements Message {
+	private static final long serialVersionUID = -754972027220032817L;
+	
 	private final int originalPopulation;
 	private final int livingPopulation;
 	private final int infectedPopulation;

@@ -1615,4 +1615,47 @@ public abstract class BaseSimulationTests {
 
 		assertEquals(0, border.getEmigrants().size());
 	}
+
+	@Test
+	public void v6_sendStatistics_forwardAllData() {
+		setUpWithBorder();
+		
+		selector.setDefaultValue(50);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();		
+		simulation.sendStatistics();
+
+		assertEquals(1, border.getStatisticsList().size());
+		Statistics firstCapture = border.getStatisticsList().get(0);
+		
+		assertEquals(100, firstCapture.getOriginalPopulation());
+		assertEquals(100, firstCapture.getLivingPopulation());
+		assertEquals(1, firstCapture.getInfectedPopulation());
+		assertEquals(1, firstCapture.getQuarantinedPopulation());
+		assertEquals(0, firstCapture.getDeadPopulation());
+		assertEquals(100, firstCapture.getMoney());
+		assertEquals(0, firstCapture.getPanicLevel(), 0.01);
+		assertEquals(Duration.ofSeconds(5), firstCapture.getEllapsedDuration());
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();		
+		simulation.sendStatistics();
+
+		assertEquals(2, border.getStatisticsList().size());
+		assertEquals(firstCapture, border.getStatisticsList().get(0));
+		Statistics secondCapture = border.getStatisticsList().get(1);
+		
+		assertEquals(100, secondCapture.getOriginalPopulation());
+		assertEquals(100, secondCapture.getLivingPopulation());
+		assertEquals(0, secondCapture.getInfectedPopulation());
+		assertEquals(0, secondCapture.getQuarantinedPopulation());
+		assertEquals(0, secondCapture.getDeadPopulation());
+		assertEquals(200, secondCapture.getMoney());
+		assertEquals(0, secondCapture.getPanicLevel(), 0.01);
+		assertEquals(Duration.ofSeconds(10), secondCapture.getEllapsedDuration());
+	}
 }

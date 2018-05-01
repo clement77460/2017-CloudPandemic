@@ -16,4 +16,5 @@ public interface Simulation extends TimeManager {
 	
 	void executeOrder(OrderType order);
 	void startReceivingImmigrant(boolean isInfected);
+	void sendStatistics();
 }
