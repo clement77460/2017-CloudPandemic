@@ -28,7 +28,7 @@ public class EventScreeningCenter implements Event{
 
 	@Override
 	public void trigger() {
-		System.out.println("on trigger un event de Screening centers");
+		//System.out.println("on trigger un event de Screening centers");
 		
 		simulation.incrUpradeOfScreeningCenter();
 		

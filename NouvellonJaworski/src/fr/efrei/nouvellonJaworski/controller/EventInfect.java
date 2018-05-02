@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.model.entities.Habitant;
+import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
 import fr.efrei.nouvellonJaworski.model.entities.Ville;
 import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
@@ -15,18 +16,20 @@ public class EventInfect implements Event{
 	private final Duration duration;
 	private final GameEngine gameEngine;
 	private final List<Event> triggeredEventsList;
+	private final SimulationImplement simulation;
 	private  Selector selector;
 	private Instant triggeredInstant;
 	
-	
+	//Faire getter dans simulation et retirer les args inutiles dans le constructeur !
 	public EventInfect(Instant currentInstant, Duration duration, GameEngine gameEngine,
-			List<Event> triggeredEventsList, Ville ville, Selector selector) { 
+			List<Event> triggeredEventsList, Ville ville, Selector selector,SimulationImplement simulation) { 
 		
 		this.duration = duration;
 		this.triggeredEventsList = triggeredEventsList;
 		this.ville=ville;
 		this.selector=selector;
 		this.gameEngine=gameEngine;
+		this.simulation=simulation;
 	} 
 	
 	
@@ -39,14 +42,18 @@ public class EventInfect implements Event{
 			this.triggeredInstant = gameEngine.getCurrentInstant();
 		} 
 		
-		System.out.println("on lance un infect event a "+this.triggeredInstant.toString());
-		
-		Habitant target = selector.selectAmong(ville.getHabitantsAlive());
+		Habitant target = selector.selectAmong(ville.getHabitantsHealthy());
 		target.contaminerOuSoigner(true);
 		
-		ville.getHabitants().remove(target);
+		ville.getHabitantsHealthy().remove(target);
 		ville.getHabitantsInfected().add(target);
 		
+		this.createNewEventsOnTarget(target);
+		
+		simulation.setFirstHabitantIsInfected(true);
+	}
+
+	private void createNewEventsOnTarget(Habitant target) {
 		EventSpreading eventSpreading = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5),
 				gameEngine, triggeredEventsList, ville, target,selector);
 		
@@ -54,9 +61,8 @@ public class EventInfect implements Event{
 				gameEngine, triggeredEventsList, ville, target);
 		
 		gameEngine.register(eventSpreading,eventDeath);
-		
 	}
-
+	
 	@Override
 	public Duration getDuration() {
 		return duration;

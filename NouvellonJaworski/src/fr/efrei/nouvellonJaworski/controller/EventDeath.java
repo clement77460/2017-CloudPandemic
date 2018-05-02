@@ -38,13 +38,19 @@ public class EventDeath implements Event{
 			this.triggeredInstant = gameEngine.getCurrentInstant();
 		} 
 		
-		System.out.println("on lance un death event à "+this.triggeredInstant.toString());
+		//System.out.println("on lance un death event à "+this.triggeredInstant.toString());
 		
-		if(target.killHabitant()) {//he died
-			
-			ville.getHabitantsInfected().remove(target);
-			ville.getHabitantsAlive().remove(target);
-			ville.getHabitantsDead().add(target);
+		
+		if(!target.isEmigrated()) {
+			if(target.killHabitant() ) {//he died
+				if(!target.isIsolated()) {//is not isolate
+					ville.getHabitantsInfected().remove(target);
+					ville.incrPanic();
+				}
+				
+				
+				ville.getHabitantsDead().add(target);
+			}
 		}
 	}
 

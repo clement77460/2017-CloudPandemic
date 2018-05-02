@@ -2,6 +2,7 @@ package fr.efrei.nouvellonJaworski.controller;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.model.entities.Habitant;
@@ -40,7 +41,6 @@ public class EventScreening implements Event{
 		if (gameEngine != null) { 
 			this.triggeredInstant = gameEngine.getCurrentInstant(); 
 		} 
-		System.out.println("on lance un screening event a "+this.triggeredInstant.toString());
 		
 		this.launchCure();
 		
@@ -50,13 +50,21 @@ public class EventScreening implements Event{
 	}
 	
 	private void launchCure() {
+		List<Habitant> habitantsHealthyAndNot=new ArrayList<Habitant>();
+		habitantsHealthyAndNot.addAll(ville.getHabitantsHealthy());
+		habitantsHealthyAndNot.addAll(ville.getHabitantsInfected());
+		// trier la liste par ordre croissant d'id
+		habitantsHealthyAndNot.sort((o1, o2) -> o1.getId().compareTo(o2.getId()));
+
 		for(int i=0;i<simulation.getNbUpgradeOfScreeningCenter()+1;i++) {
-			Habitant target = selector.selectAmong(ville.getHabitantsAlive());
+			Habitant target = selector.selectAmong(habitantsHealthyAndNot);
+			habitantsHealthyAndNot.remove(target);
+			
 			
 			if(target.isolateHabitant()) {
 				
 				ville.getHabitantsIsolated().add(target);
-				ville.getHabitants().remove(target);
+				ville.getHabitantsInfected().remove(target);
 				EventCure eventCure=new EventCure(triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target);
 				gameEngine.register(eventCure);
 			}
