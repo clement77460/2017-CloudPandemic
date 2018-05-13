@@ -688,8 +688,8 @@ public abstract class BaseSimulationTests {
 	@Test
 	public void death_increasesPanicLevel_upToTotalPopulation() {
 		setupScenarioForPanic();
-		
-		selector.enqueueRankMultipleTimes(-1, 4); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations
+
+		selector.enqueueRankMultipleTimes(-1, 5); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 5 emmigrations (including 1 double emigration) 
 		selector.enqueueRankMultipleTimes(0, 34); // sec 43 - (8 deaths), 34 spreadings - panic 100 (max) - 0 emmigrations
 
 		// Details of sec 43:
@@ -704,8 +704,9 @@ public abstract class BaseSimulationTests {
 		//	-> Emigration - Population = 80, panic 80 - choosing last person in the list
 		// Seventh death - Population = 79, panic 85
 		//	-> Emigration - Population = 78, panic 80 - choosing last person in the list
-		// Eigth death - Population = 77, panic 85
-		//	-> Emigration - Population = 76, panic 80 - choosing last person in the list
+		//  -> Emigration - Population = 77, panic 80 - choosing last person in the list (also due to the fact that emigration lower the population)
+		// Eigth death - Population = 76, panic 85
+		//	-> Emigration - Population = 75, panic 80 - choosing last person in the list
 		// Because we chose the last person each time, he's not infected (and not dying)
 		
 		clock.advanceTo(Duration.ofSeconds(18));
@@ -744,8 +745,8 @@ public abstract class BaseSimulationTests {
 	public void emigration_capPanicToLivingPopulation() {
 		setUpWithBorder();
 		setupScenarioForPanic();
-		
-		selector.enqueueRankMultipleTimes(-1, 4); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations
+
+		selector.enqueueRankMultipleTimes(-1, 5); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 5 emmigrations (including 1 double emigration) 
 		selector.enqueueRankMultipleTimes(0, 34); // sec 43 - (8 deaths), 34 spreadings - panic 100 (max) - 0 emmigrations
 
 		// same details as previous test
@@ -762,7 +763,7 @@ public abstract class BaseSimulationTests {
 		setUpWithBorder();
 		setupScenarioForPanic();
 		
-		selector.enqueueRankMultipleTimes(-1, 4); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations
+		selector.enqueueRankMultipleTimes(-1, 5); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 5 emmigrations (including 1 double emigration) 
 		selector.enqueueRankMultipleTimes(0, 34); // sec 43 - (8 deaths), 34 spreadings - panic 100 (max) - 0 emmigrations
 
 		// same details as previous test
@@ -770,9 +771,6 @@ public abstract class BaseSimulationTests {
 		clock.advanceTo(Duration.ofSeconds(43));
 		simulation.update();
 
-		assertEquals(75, simulation.getPanicLevel(), 0.01);
-		assertEquals(20, simulation.getDeadPopulation());
-		
 		assertEquals(100, simulation.getOriginalPopulation());
 		assertEquals(75, simulation.getLivingPopulation());		
 	}
@@ -782,7 +780,7 @@ public abstract class BaseSimulationTests {
 		setUpWithBorder();
 		setupScenarioForPanic();
 		
-		selector.enqueueRankMultipleTimes(-1, 4); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations
+		selector.enqueueRankMultipleTimes(-1, 5); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations (including 1 double emigration - see above)
 		selector.enqueueRankMultipleTimes(0, 34); // sec 43 - (8 deaths), 34 spreadings - panic 100 (max) - 0 emmigrations
 
 		// same details as previous test
@@ -802,7 +800,7 @@ public abstract class BaseSimulationTests {
 		setUpWithBorder();
 		setupScenarioForPanic();
 		
-		selector.enqueueRankMultipleTimes(0, 4); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations
+		selector.enqueueRankMultipleTimes(0, 5); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 5 emmigrations
 		selector.enqueueRankMultipleTimes(0, 34); // sec 43 - (8 deaths), 34 spreadings - panic 100 (max) - 0 emmigrations
 
 		// Important change : we instead emmigrate the first inhabitant in the list - a dying one
