@@ -17,19 +17,21 @@ public class EventSpreading implements Event{
 	private final Ville ville;
 	private final Habitant source;
 	private final GameEngine gameEngine;
+	private final SimulationImplement simulation;
 	private Selector selector;
 	
 	private Instant triggeredInstant;
 	
 	public EventSpreading(Instant currentInstant, Duration duration, 
 			GameEngine gameEngine, List<Event> triggeredEventsList,
-			Ville ville,Habitant source,Selector selector) {
+			Ville ville,Habitant source,Selector selector,SimulationImplement simulation) {
 		
 		this.duration = duration; 
 		this.triggeredEventsList = triggeredEventsList;
 		this.ville=ville;
 		this.source=source;
 		this.gameEngine=gameEngine;
+		this.simulation=simulation;
 		this.selector=selector; 
 		
 	}
@@ -64,9 +66,9 @@ public class EventSpreading implements Event{
 		
 		
 			
-			EventSpreading eventSpreading1 = new EventSpreading(this.triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, source,selector);
-			EventSpreading eventSpreading2 = new EventSpreading(this.triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target,selector);
-			EventDeath eventDeath = new EventDeath(this.triggeredInstant, Duration.ofSeconds(15), gameEngine, triggeredEventsList, ville,target);
+			EventSpreading eventSpreading1 = new EventSpreading(this.triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, source,selector,simulation);
+			EventSpreading eventSpreading2 = new EventSpreading(this.triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target,selector,simulation);
+			EventDeath eventDeath = new EventDeath(this.triggeredInstant, Duration.ofSeconds(15), gameEngine, triggeredEventsList, ville,target,simulation);
 			
 			gameEngine.register(eventSpreading1,eventSpreading2,eventDeath);
 		}

@@ -19,7 +19,6 @@ public class EventImmigration implements Event{
 	private final GameEngine gameEngine;
 	private final Selector selector;
 	private final SimulationImplement simulation;
-	
 	private final boolean isInfected;
 	
 	
@@ -55,10 +54,10 @@ public class EventImmigration implements Event{
 			temp.infectSomeone();
 			ville.getHabitantsInfected().add(temp);
 			EventSpreading eventSpreading = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5),
-					gameEngine, triggeredEventsList, ville, temp,selector);
+					gameEngine, triggeredEventsList, ville, temp,selector,simulation);
 			
 			EventDeath eventDeath = new EventDeath(Instant.EPOCH, Duration.ofSeconds(15),
-					gameEngine, triggeredEventsList, ville, temp);
+					gameEngine, triggeredEventsList, ville, temp,simulation);
 			
 			this.gameEngine.register(eventSpreading,eventDeath);
 			

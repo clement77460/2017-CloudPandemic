@@ -1,5 +1,7 @@
 package fr.efrei.nouvellonJaworski.model.eventRate;
 
+import java.math.BigDecimal;
+
 public class RateStorage {
 	
 	private double spreadingRate=1.0;
@@ -23,7 +25,9 @@ public class RateStorage {
 	}
 	
 	public void incrDeathRate() {
-		this.deathRate=this.deathRate*0.20;
+		BigDecimal rate=new BigDecimal(deathRate);
+		BigDecimal multiplicateur=new BigDecimal("0.80");
+		this.deathRate=rate.multiply(multiplicateur).doubleValue();
 		System.out.println(this.deathRate);
 	}
 }

@@ -15,13 +15,15 @@ public class EventDeath implements Event{
 	private final Duration duration;
 	private final GameEngine gameEngine;
 	private final List<Event> triggeredEventsList;
+	private final SimulationImplement simulation;
 	private Habitant target;
 	private Instant triggeredInstant;
 	
 	
 	public EventDeath(Instant currentInstant, Duration duration, GameEngine gameEngine, 
-			List<Event> triggeredEventsList, Ville ville, Habitant target) { 
-		
+			List<Event> triggeredEventsList, 
+			Ville ville, Habitant target,SimulationImplement simulation) { 
+		this.simulation=simulation;
 		this.duration = duration;
 		this.triggeredEventsList = triggeredEventsList;
 		this.ville=ville;
@@ -39,17 +41,16 @@ public class EventDeath implements Event{
 			this.triggeredInstant = gameEngine.getCurrentInstant();
 		} 
 		
-		//System.out.println("on lance un death event à "+this.triggeredInstant.toString());
+		System.out.println("on lance un death event à "+this.triggeredInstant.toString() + "sur "+target.getId());
 		
 		
 		if(!target.isEmigrated()) {
 			if(target.killHabitant() ) {//he died
-				if(!target.isIsolated()) {//is not isolate
-					ville.getHabitantsInfected().remove(target);
-					ville.incrPanic();
-				}
 				
+				ville.getHabitantsInfected().remove(target);
+				ville.incrPanic();
 				
+				ville.getHabitantsIsolated().remove(target);			
 				ville.getHabitantsDead().add(target);
 			}
 		}
@@ -60,10 +61,10 @@ public class EventDeath implements Event{
 		return duration;
 	}
 	
-	/*public double getRate() {
+	public double getRate() {
 		
 		return simulation.getRateStorage().getDeathRate();
 		
-	}*/
+	}
 
 }

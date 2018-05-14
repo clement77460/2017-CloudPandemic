@@ -56,10 +56,10 @@ public class EventInfect implements Event{
 
 	private void createNewEventsOnTarget(Habitant target) {
 		EventSpreading eventSpreading = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5),
-				gameEngine, triggeredEventsList, ville, target,selector);
+				gameEngine, triggeredEventsList, ville, target,selector,simulation);
 		
 		EventDeath eventDeath = new EventDeath(Instant.EPOCH, Duration.ofSeconds(15),
-				gameEngine, triggeredEventsList, ville, target);
+				gameEngine, triggeredEventsList, ville, target,simulation);
 		
 		gameEngine.register(eventSpreading,eventDeath);
 	}
