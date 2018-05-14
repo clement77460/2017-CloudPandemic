@@ -3,7 +3,6 @@ package fr.efrei.nouvellonJaworski.model.entities;
 import java.util.*;
 
 import fr.efrei.paumier.shared.domain.CityBorder;
-import fr.efrei.paumier.shared.domain.MigrationMessage;
 import fr.efrei.paumier.shared.selection.Selector;
 
 
@@ -16,7 +15,7 @@ public class Ville {
 	private List<Habitant> habitantsInfected;
 	private List<Habitant> habitantsIsolated;
 	private List<Habitant> habitantsDead;
-	protected static SimulationImplement stats;
+	
 	private Double panicLVL;
 	 
 	
@@ -67,23 +66,26 @@ public class Ville {
 		return habitantsDead;
 	}
 	
-	public void decrPanic() {
+	public void decrPanic(double decreaseValue) {
 		
-		if(panicLVL>=2.5)
-			this.panicLVL=this.panicLVL-2.5;
+		if(panicLVL>=decreaseValue)
+			this.panicLVL=this.panicLVL-decreaseValue;
 	}
 	
-	public void incrPanic() {
+	public void incrPanic(double increaseValue) {
 		int livingPopulation=this.getHabitantsHealthy().size()+this.getHabitantsInfected().size()
 				+this.getHabitantsIsolated().size();
 		
-		this.panicLVL=this.panicLVL+5.0;
+		this.panicLVL=this.panicLVL+increaseValue;
+		
 		
 		if(this.panicLVL>livingPopulation && border!=null) {
 			
-			this.emigration();
-			if(panicLVL>=5) 
+			
+			if(panicLVL>=5) {
 				this.panicLVL=this.panicLVL-5.0;
+			}
+			this.emigration();
 		}
 	}
 	
@@ -92,10 +94,10 @@ public class Ville {
 				+this.getHabitantsIsolated().size();
 		
 		if(this.panicLVL>livingPopulation && border!=null) {
-			//this.emigration();
 			if(panicLVL>=5) 
 				this.panicLVL=this.panicLVL-5.0;
 			this.emigration();
+			this.checkPanic();
 		}
 	}
 	

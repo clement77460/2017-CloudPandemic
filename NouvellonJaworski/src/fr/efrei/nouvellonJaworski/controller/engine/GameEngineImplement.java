@@ -4,7 +4,6 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 
 import fr.efrei.nouvellonJaworski.controller.EventStorage;
@@ -57,17 +56,6 @@ public class GameEngineImplement implements GameEngine{
 			lastUpdate=clock.instant();
 		}
 		this.updateRateEvents();
-	}
-	private void triii() {
-		//re-trier la liste a cause des rate temporaire pour les tests 
-		//utilisation de compareTo après
-		ArrayList<EventStorage> queueTemp;
-		queueTemp=this.extractRegisteredList();
-		
-		
-		for(EventStorage ev:queueTemp) {
-			this.registerExistingEvent(ev);
-		}
 	}
 	
 	private void updateRateEvents() {
@@ -193,11 +181,4 @@ public class GameEngineImplement implements GameEngine{
 					ev.getDuration().toMillis());
 	}
 	
-	private ArrayList<EventStorage> extractRegisteredList() {
-		ArrayList<EventStorage> list = this.queue;
-		
-		this.queue = new ArrayList<EventStorage>();
-		
-		return list;
-	}
 }

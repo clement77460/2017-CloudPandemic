@@ -1,7 +1,6 @@
 package fr.efrei.nouvellonJaworski.controller;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.model.entities.Habitant;
@@ -19,10 +18,9 @@ public class EventSpreading implements Event{
 	private final GameEngine gameEngine;
 	private final SimulationImplement simulation;
 	private Selector selector;
+
 	
-	private Instant triggeredInstant;
-	
-	public EventSpreading(Instant currentInstant, Duration duration, 
+	public EventSpreading(Duration duration, 
 			GameEngine gameEngine, List<Event> triggeredEventsList,
 			Ville ville,Habitant source,Selector selector,SimulationImplement simulation) {
 		
@@ -41,12 +39,6 @@ public class EventSpreading implements Event{
 		
 		triggeredEventsList.add(this);
 		
-		if (gameEngine != null) {
-			this.triggeredInstant = gameEngine.getCurrentInstant();
-		} 
-		
-		
-		
 		
 		if(!source.isDead() && !source.isIsolated() && source.isInfected() && ville.getHabitantsHealthy().size()!=0) {
 			
@@ -59,16 +51,16 @@ public class EventSpreading implements Event{
 		//s'il y a la présence de non infectés
 		if(ville.getHabitantsHealthy().size()>0) {
 			Habitant target = selector.selectAmong(ville.getHabitantsHealthy());
-			System.out.println(source.getId()+" on lance un spreading event a "+this.triggeredInstant.toString() +"sur "+target.getId());
+			//System.out.println(source.getId()+" on lance un spreading event a "+this.triggeredInstant.toString() +"sur "+target.getId());
 			source.infectSomeone(target);
 			ville.getHabitantsHealthy().remove(target);
 			ville.getHabitantsInfected().add(target);
 		
 		
 			
-			EventSpreading eventSpreading1 = new EventSpreading(this.triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, source,selector,simulation);
-			EventSpreading eventSpreading2 = new EventSpreading(this.triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target,selector,simulation);
-			EventDeath eventDeath = new EventDeath(this.triggeredInstant, Duration.ofSeconds(15), gameEngine, triggeredEventsList, ville,target,simulation);
+			EventSpreading eventSpreading1 = new EventSpreading(Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, source,selector,simulation);
+			EventSpreading eventSpreading2 = new EventSpreading(Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target,selector,simulation);
+			EventDeath eventDeath = new EventDeath(Duration.ofSeconds(15), triggeredEventsList, ville,target,simulation);
 			
 			gameEngine.register(eventSpreading1,eventSpreading2,eventDeath);
 		}
@@ -79,4 +71,8 @@ public class EventSpreading implements Event{
 		return duration;
 	}
 
+	public double getRate() {
+		
+		return simulation.getRateStorage().getSpreadingRate();
+	}
 }

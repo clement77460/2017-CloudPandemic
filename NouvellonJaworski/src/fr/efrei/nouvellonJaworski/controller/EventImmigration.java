@@ -1,7 +1,6 @@
 package fr.efrei.nouvellonJaworski.controller;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.model.entities.Habitant;
@@ -22,10 +21,8 @@ public class EventImmigration implements Event{
 	private final boolean isInfected;
 	
 	
-	private Instant triggeredInstant;
 	
-	
-	public EventImmigration(Instant currentInstant, Duration duration, GameEngine gameEngine, 
+	public EventImmigration(Duration duration, GameEngine gameEngine, 
 			List<Event> triggeredEventsList, Ville ville,
 			boolean isInfected,Selector selector,SimulationImplement simulation) {
 		this.isInfected=isInfected;
@@ -33,7 +30,6 @@ public class EventImmigration implements Event{
 		this.triggeredEventsList = triggeredEventsList;
 		this.ville=ville;
 		this.gameEngine=gameEngine;
-		this.triggeredInstant=currentInstant;
 		this.selector=selector;
 		this.simulation=simulation;
 		
@@ -46,18 +42,15 @@ public class EventImmigration implements Event{
 		
 		triggeredEventsList.add(this);
 		
-		if (gameEngine != null) { 
-			this.triggeredInstant = gameEngine.getCurrentInstant(); 
-		}
 		
 		if(isInfected) {
 			temp.infectSomeone();
 			ville.getHabitantsInfected().add(temp);
-			EventSpreading eventSpreading = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5),
+			EventSpreading eventSpreading = new EventSpreading(Duration.ofSeconds(5),
 					gameEngine, triggeredEventsList, ville, temp,selector,simulation);
 			
-			EventDeath eventDeath = new EventDeath(Instant.EPOCH, Duration.ofSeconds(15),
-					gameEngine, triggeredEventsList, ville, temp,simulation);
+			EventDeath eventDeath = new EventDeath(Duration.ofSeconds(15),
+					triggeredEventsList, ville, temp,simulation);
 			
 			this.gameEngine.register(eventSpreading,eventDeath);
 			

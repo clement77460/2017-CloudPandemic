@@ -1,7 +1,6 @@
 package fr.efrei.nouvellonJaworski.controller;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.model.entities.Habitant;
@@ -18,10 +17,8 @@ public class EventInfect implements Event{
 	private final List<Event> triggeredEventsList;
 	private final SimulationImplement simulation;
 	private  Selector selector;
-	private Instant triggeredInstant;
 	
-	//Faire getter dans simulation et retirer les args inutiles dans le constructeur !
-	public EventInfect(Instant currentInstant, Duration duration, GameEngine gameEngine,
+	public EventInfect(Duration duration, GameEngine gameEngine,
 			List<Event> triggeredEventsList, Ville ville, Selector selector,SimulationImplement simulation) { 
 		
 		this.duration = duration;
@@ -38,12 +35,8 @@ public class EventInfect implements Event{
 		
 		triggeredEventsList.add(this);
 		
-		if (gameEngine != null) { 
-			this.triggeredInstant = gameEngine.getCurrentInstant();
-		} 
 		
 		Habitant target = selector.selectAmong(ville.getHabitantsHealthy());
-		System.out.println("event infect "+this.triggeredInstant+ " sur "+target.getId());
 		target.contaminerOuSoigner(true);
 		
 		ville.getHabitantsHealthy().remove(target);
@@ -55,11 +48,11 @@ public class EventInfect implements Event{
 	}
 
 	private void createNewEventsOnTarget(Habitant target) {
-		EventSpreading eventSpreading = new EventSpreading(Instant.EPOCH, Duration.ofSeconds(5),
+		EventSpreading eventSpreading = new EventSpreading(Duration.ofSeconds(5),
 				gameEngine, triggeredEventsList, ville, target,selector,simulation);
 		
-		EventDeath eventDeath = new EventDeath(Instant.EPOCH, Duration.ofSeconds(15),
-				gameEngine, triggeredEventsList, ville, target,simulation);
+		EventDeath eventDeath = new EventDeath(Duration.ofSeconds(15),
+				triggeredEventsList, ville, target,simulation);
 		
 		gameEngine.register(eventSpreading,eventDeath);
 	}

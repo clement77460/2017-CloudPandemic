@@ -7,9 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.controller.EventScreeningCenter;
+import fr.efrei.nouvellonJaworski.controller.EventDecreaseCurfew;
 import fr.efrei.nouvellonJaworski.controller.EventImmigration;
 import fr.efrei.nouvellonJaworski.controller.EventImproveMedicine;
 import fr.efrei.nouvellonJaworski.controller.EventImproveVaccine;
+import fr.efrei.nouvellonJaworski.controller.EventIncreaseCurfew;
 import fr.efrei.nouvellonJaworski.controller.EventIncreaseTaxes;
 import fr.efrei.nouvellonJaworski.controller.EventInfect;
 import fr.efrei.nouvellonJaworski.controller.EventScreening;
@@ -39,30 +41,29 @@ public class SimulationImplement implements Simulation{
 	
 	
 	
-	private int money;
-	private int nbHabitantsAlive;
+	private int money=0;
 	private int nbOriginalHabitants;
-	private int nbUpgradeOfTaxes;
-	private int nbUpgradeOfScreeningCenter;
+	
+	private int nbUpgradeOfTaxes=0;
+	private int nbUpgradeOfScreeningCenter=0;
+	private int nbIncreaseOfCurfew=0;
+	private int nbDecreaseOfCurfew=0;
 	
 	private Instant lastUpdate;
 
-	private Boolean firstHabitantIsInfected;
+	private Boolean firstHabitantIsInfected=false;
 	
 	public SimulationImplement(Clock clock, CityBorder border,Selector selector, int population) {
-		this.firstHabitantIsInfected=false;
+		
 		this.clock=clock;
 		this.beginTime=clock.instant();
 		this.border=border;
 		this.selector=selector;
 		this.nbOriginalHabitants=population;
-		this.nbHabitantsAlive=population;
+		
 		this.gameEngine=new GameEngineImplement(clock);
 		this.eventTriggered = new ArrayList<Event>();
 		this.lastUpdate=clock.instant();
-		this.money=0;
-		this.nbUpgradeOfTaxes=0;
-		this.nbUpgradeOfScreeningCenter=0;
 		this.ville=new Ville(population,border,selector);
 		this.rateStorage=new RateStorage();
 		this.launchInitialContamination();
@@ -72,15 +73,10 @@ public class SimulationImplement implements Simulation{
 	
 	
 	
-	public void addHabitantsAlive(int nbr) {
-		this.nbHabitantsAlive=this.nbHabitantsAlive+nbr;
-	}
-	
-	
 	private void launchInitialContamination() {
-		Event event1 = new EventInfect(Instant.EPOCH,  Duration.ofSeconds(3), gameEngine, this.eventTriggered,ville, selector,this);
-		Event eventScreening = new EventScreening(Instant.EPOCH, Duration.ofMillis(200), gameEngine,this.eventTriggered, ville, selector,this);
-		Event eventTaxes=new EventTaxes(Instant.EPOCH,  Duration.ofSeconds(5), gameEngine, this.eventTriggered,this);
+		Event event1 = new EventInfect(Duration.ofSeconds(3), gameEngine, this.eventTriggered,ville, selector,this);
+		Event eventScreening = new EventScreening(Duration.ofMillis(200), gameEngine,this.eventTriggered, ville, selector,this);
+		Event eventTaxes=new EventTaxes(Duration.ofSeconds(5), gameEngine, this.eventTriggered,this);
 		gameEngine.register(event1,eventScreening,eventTaxes);
 		gameEngine.update();
 		
@@ -159,44 +155,58 @@ public class SimulationImplement implements Simulation{
 	}
 	@Override
 	public void executeOrder(OrderType order) {
+		boolean toPay=true;
 		if(enoughMoney()) {
 			switch(order) {
 				case INCREASE_TAXES:
-					EventIncreaseTaxes increaseTaxes=new EventIncreaseTaxes(this.lastUpdate, Duration.ofSeconds(5),
-							gameEngine, eventTriggered,this);
+					EventIncreaseTaxes increaseTaxes=new EventIncreaseTaxes(Duration.ofSeconds(5),
+							this);
 					gameEngine.register(increaseTaxes);
 					break;
 				
 				case BUILD_SCREENING_CENTER:
-					EventScreeningCenter screeningCenter=new EventScreeningCenter(this.lastUpdate, Duration.ofSeconds(5),
-							gameEngine, eventTriggered,this);
+					EventScreeningCenter screeningCenter=new EventScreeningCenter(Duration.ofSeconds(5),this);
 					gameEngine.register(screeningCenter);
 					break;	
 				case RESEARCH_IMPROVED_MEDICINE:
-					EventImproveMedicine improveMedicine=new EventImproveMedicine(this.lastUpdate, Duration.ofSeconds(5),
-							gameEngine, eventTriggered,this);
+					EventImproveMedicine improveMedicine=new EventImproveMedicine(Duration.ofSeconds(5),this);
 					gameEngine.register(improveMedicine);
+					break;
 				case INCREASE_CURFEW:
+					EventIncreaseCurfew increaseCurfew=new EventIncreaseCurfew(Duration.ofSeconds(5),
+							this);
+					gameEngine.register(increaseCurfew);
+					this.increaseNbIncreaseOfCurfew();
 					break;
 				case REDUCE_CURFEW:
+					toPay=this.checkConditionsAndLaunchReduceCurfew();
 					break;
 				case RESEARCH_IMPROVED_VACCINE:
-					EventImproveVaccine improveVaccine=new EventImproveVaccine(this.lastUpdate, Duration.ofSeconds(5),
-							gameEngine, eventTriggered,this);
+					EventImproveVaccine improveVaccine=new EventImproveVaccine(Duration.ofSeconds(5),this);
 					gameEngine.register(improveVaccine);
 					break;
 				default:
 					break;
 			}
-				
-			this.money=this.money-cost;
+			if(toPay) {
+				this.money=this.money-cost;
+			}
 		}
+	}
+	private boolean checkConditionsAndLaunchReduceCurfew() {
+		if(this.nbIncreaseOfCurfew>this.nbDecreaseOfCurfew) {
+			EventDecreaseCurfew decreaseCurfew=new EventDecreaseCurfew(Duration.ofSeconds(5),this);
+			gameEngine.register(decreaseCurfew);
+			this.increaseNbDecreaseOfCurfew();
+			return true;
+		}
+		return false;
 	}
 
 	private boolean enoughMoney() {
 		
 		if(money-cost<0) {
-			System.out.println("manque d'argent pour effectuer cette tâche");
+			
 			return false;
 		}
 		
@@ -221,7 +231,7 @@ public class SimulationImplement implements Simulation{
 	@Override
 	public void startReceivingImmigrant(boolean isInfected) {
 		gameEngine.update();
-		Event event = new EventImmigration(clock.instant(), Duration.ofSeconds(3), gameEngine,
+		Event event = new EventImmigration(Duration.ofSeconds(3), gameEngine,
 				eventTriggered, ville, isInfected,selector,this);
 		gameEngine.register(event);
 		
@@ -245,5 +255,30 @@ public class SimulationImplement implements Simulation{
 	public RateStorage getRateStorage() {
 		return this.rateStorage;
 	}
+	
+	public Ville getVille() {
+		return this.ville;
+	}
+
+
+
+	public int getNbIncreaseOfCurfew() {
+		return nbIncreaseOfCurfew;
+	}
+
+
+
+	public int getNbDecreaseOfCurfew() {
+		return nbDecreaseOfCurfew;
+	}
+
+	public void increaseNbIncreaseOfCurfew() {
+		this.nbIncreaseOfCurfew++;
+	}
+
+	public void increaseNbDecreaseOfCurfew() {
+		this.nbDecreaseOfCurfew++;
+	}
+	
 	
 }

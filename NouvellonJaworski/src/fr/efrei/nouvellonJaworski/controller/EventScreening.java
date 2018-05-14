@@ -1,7 +1,6 @@
 package fr.efrei.nouvellonJaworski.controller;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,11 +19,10 @@ public class EventScreening implements Event{
 	private final List<Event> triggeredEventsList;
 	private final SimulationImplement simulation;
 	private  Selector selector;
-	private Instant triggeredInstant;
 	
 	
-	public EventScreening(Instant currentInstant, Duration duration, GameEngine gameEngine, 
-			List<Event> triggeredEventsList, Ville ville, Selector selector,SimulationImplement simulation) {
+	public EventScreening( Duration duration, GameEngine gameEngine, List<Event> triggeredEventsList,
+			Ville ville, Selector selector,SimulationImplement simulation) {
 		this.duration = duration;
 		this.triggeredEventsList = triggeredEventsList;
 		this.ville=ville;
@@ -38,13 +36,9 @@ public class EventScreening implements Event{
 		
 		triggeredEventsList.add(this);
 		
-		if (gameEngine != null) { 
-			this.triggeredInstant = gameEngine.getCurrentInstant(); 
-		} 
-		//System.out.println("screeningEvent à "+this.triggeredInstant);
 		this.launchCure();
 		
-		EventScreening event=new EventScreening(triggeredInstant, Duration.ofMillis(200), gameEngine, triggeredEventsList, ville, selector,simulation);
+		EventScreening event=new EventScreening( Duration.ofMillis(200), gameEngine, triggeredEventsList, ville, selector,simulation);
 		gameEngine.register(event);
 		
 	}
@@ -63,11 +57,10 @@ public class EventScreening implements Event{
 			
 			
 			if(target.isolateHabitant()) {
-				System.out.println("on lance un screening event sur "+ target.getId());
 				ville.getHabitantsIsolated().add(target);
 				ville.getHabitantsInfected().remove(target);
-				EventCure eventCure=new EventCure(triggeredInstant, Duration.ofSeconds(5),
-						gameEngine, triggeredEventsList, ville, target,simulation);
+				EventCure eventCure=new EventCure(Duration.ofSeconds(5),
+						triggeredEventsList, ville, target,simulation);
 				gameEngine.register(eventCure);
 			}
 		
