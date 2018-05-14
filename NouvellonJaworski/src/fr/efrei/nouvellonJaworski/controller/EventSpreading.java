@@ -40,10 +40,11 @@ public class EventSpreading implements Event{
 			this.triggeredInstant = gameEngine.getCurrentInstant();
 		} 
 		
-		//System.out.println("on lance un spreading event a "+this.triggeredInstant.toString());
+		System.out.println("on lance un spreading event a "+this.triggeredInstant.toString() +"sur "+source.getId());
+		
 		
 		if(!source.isDead() && !source.isIsolated() && ville.getHabitantsHealthy().size()!=0) {
-			//System.out.println("mort: "+source.isDead()+ " isolated :"+source.isIsolated() );
+			
 			this.launchDeathAndSpreading();
 			
 		}

@@ -43,6 +43,7 @@ public class EventInfect implements Event{
 		} 
 		
 		Habitant target = selector.selectAmong(ville.getHabitantsHealthy());
+		System.out.println("event infect "+this.triggeredInstant+ " sur "+target.getId());
 		target.contaminerOuSoigner(true);
 		
 		ville.getHabitantsHealthy().remove(target);

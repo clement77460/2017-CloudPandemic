@@ -36,7 +36,7 @@ public class EventCure implements Event{
 		if (gameEngine != null) { 
 			this.triggeredInstant = gameEngine.getCurrentInstant(); 
 		}
-		//System.out.println("on lance un cure event à "+this.triggeredInstant.toString());
+		System.out.println("on lance un cure event à "+this.triggeredInstant.toString());
 		
 		if(target.healHabitant()) { //cure has succeed
 			//System.out.println("cure has succeed");

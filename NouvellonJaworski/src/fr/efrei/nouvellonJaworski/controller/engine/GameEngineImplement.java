@@ -4,7 +4,8 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-
+import java.util.Collections;
+import java.util.Comparator;
 
 import fr.efrei.nouvellonJaworski.controller.EventStorage;
 import fr.efrei.paumier.shared.engine.GameEngine;
@@ -25,33 +26,63 @@ public class GameEngineImplement implements GameEngine{
 	@Override
 	public void update() {// declenche les evenements expirés dans l'ordre croissant en fonction du temps
 							//stock la date du dernier update
-		boolean hasOneEventAsTriggeredStatus=false;
-		ArrayList<EventStorage> queueTemp;
-		queueTemp=this.extractRegisteredList();
-		EventStorage eventToTrigger = null;
 		
-		for(EventStorage event :queueTemp) {	
-			if(this.isClockTimeAfterTriggerTime(event)) {
-				
-				if(!hasOneEventAsTriggeredStatus) {
+		EventStorage eventTemp;
+		
+		
+		this.updateRateEvents();
+		//this.triii();
+		if(queue.size()>0) {
+			eventTemp=queue.remove(0);
+			
+			if(this.isClockTimeAfterTriggerTime(eventTemp)) {	
 					
-					this.lastUpdate=event.getCreationDate().plusMillis((event.getDuration().toMillis()));
-					hasOneEventAsTriggeredStatus=true;  
-					eventToTrigger=event;
-				}
-				else {
-					this.registerExistingEvent(event);
-				}	
+					
+					this.lastUpdate=eventTemp.getCreationDate().plusMillis((eventTemp.getDuration().toMillis()));
+					this.updateRateEvents();
+					eventTemp.trigger(); 
+					
+					this.update();
 			}
 			else {
 				
-				this.registerExistingEvent(event);
+				
+				lastUpdate=clock.instant();
+				
+				this.registerExistingEvent(eventTemp);
+				
+				
 			}
+		}else {
+			lastUpdate=clock.instant();
 		}
-		this.updateLastUpdateTimeOrTriggerTheEvent(hasOneEventAsTriggeredStatus, eventToTrigger);
+		this.updateRateEvents();
+	}
+	private void triii() {
+		//re-trier la liste a cause des rate temporaire pour les tests 
+		//utilisation de compareTo après
+		ArrayList<EventStorage> queueTemp;
+		queueTemp=this.extractRegisteredList();
+		
+		
+		for(EventStorage ev:queueTemp) {
+			this.registerExistingEvent(ev);
+		}
 	}
 	
+	private void updateRateEvents() {
+		for(EventStorage event:queue) {
+			event.increaseEffort(this.lastUpdate);
+		}
+		
+		queue.sort(Comparator.naturalOrder());
+	}
+	
+	
 	private boolean isClockTimeAfterTriggerTime(EventStorage event) {
+		
+		event.increaseEffort(lastUpdate);
+		
 		if(Duration.between(event.getCreationDate(),this.clock.instant()).toMillis()
 				>= event.getDuration().toMillis()) {
 			return true;
@@ -59,14 +90,6 @@ public class GameEngineImplement implements GameEngine{
 		return false;
 	}
 	
-	private void updateLastUpdateTimeOrTriggerTheEvent(boolean hasOneEventToTrigger,EventStorage evToTrigger) {
-		if(!hasOneEventToTrigger)
-			lastUpdate=clock.instant();
-		else {
-			evToTrigger.trigger(); 
-			this.update();
-		}
-	}
 	
 	@Override
 	public Instant getCurrentInstant() {
@@ -81,8 +104,11 @@ public class GameEngineImplement implements GameEngine{
 		EventStorage[] storage=new EventStorage[events.length];
 		for(int i=0;i<events.length;i++) {
 			storage[i]=new EventStorage(events[i],this.lastUpdate);
+			storage[i].increaseEffort(lastUpdate);
 		}
+		
 		this.triEvenements(storage);
+		
 	}
 	
 	/**
@@ -90,8 +116,14 @@ public class GameEngineImplement implements GameEngine{
 	 * 
 	 */
 	private void registerExistingEvent(EventStorage... eventStorage) {
+		
 		this.triEvenements(eventStorage);
+		
+		
 	}
+	
+	
+
 	
 	
 	
@@ -160,7 +192,6 @@ public class GameEngineImplement implements GameEngine{
 			return ev.getCreationDate().plusMillis(
 					ev.getDuration().toMillis());
 	}
-	
 	
 	private ArrayList<EventStorage> extractRegisteredList() {
 		ArrayList<EventStorage> list = this.queue;

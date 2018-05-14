@@ -79,11 +79,23 @@ public class Ville {
 		
 		this.panicLVL=this.panicLVL+5.0;
 		
-		if(this.panicLVL>=livingPopulation && border!=null) {
+		if(this.panicLVL>livingPopulation && border!=null) {
 			
 			this.emigration();
 			if(panicLVL>=5) 
 				this.panicLVL=this.panicLVL-5.0;
+		}
+	}
+	
+	private void checkPanic() {
+		int livingPopulation=this.getHabitantsHealthy().size()+this.getHabitantsInfected().size()
+				+this.getHabitantsIsolated().size();
+		
+		if(this.panicLVL>livingPopulation && border!=null) {
+			//this.emigration();
+			if(panicLVL>=5) 
+				this.panicLVL=this.panicLVL-5.0;
+			this.emigration();
 		}
 	}
 	
@@ -102,6 +114,7 @@ public class Ville {
 		
 		target.setEmigrated(true);
 		border.sendEmigrant(target.isInfected());
+		this.checkPanic();
 	}
 	
 	

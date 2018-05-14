@@ -11,6 +11,7 @@ import java.net.Socket;
 import fr.efrei.paumier.shared.domain.CityBorder;
 import fr.efrei.paumier.shared.domain.MigrationMessage;
 import fr.efrei.paumier.shared.simulation.Simulation;
+import fr.efrei.paumier.shared.simulation.Statistics;
 
 public class Client implements CityBorder,Runnable{
 	
@@ -86,6 +87,12 @@ public class Client implements CityBorder,Runnable{
 		while(true) {
 			this.getMigrant();
 		}
+		
+	}
+
+	@Override
+	public void sendStatistics(Statistics statistics) {
+		// TODO Auto-generated method stub
 		
 	}
 

@@ -41,7 +41,7 @@ public class EventScreening implements Event{
 		if (gameEngine != null) { 
 			this.triggeredInstant = gameEngine.getCurrentInstant(); 
 		} 
-		
+		System.out.println("screeningEvent à "+this.triggeredInstant);
 		this.launchCure();
 		
 		EventScreening event=new EventScreening(triggeredInstant, Duration.ofMillis(200), gameEngine, triggeredEventsList, ville, selector,simulation);
@@ -50,19 +50,20 @@ public class EventScreening implements Event{
 	}
 	
 	private void launchCure() {
+		
 		List<Habitant> habitantsHealthyAndNot=new ArrayList<Habitant>();
 		habitantsHealthyAndNot.addAll(ville.getHabitantsHealthy());
 		habitantsHealthyAndNot.addAll(ville.getHabitantsInfected());
 		// trier la liste par ordre croissant d'id
 		habitantsHealthyAndNot.sort((o1, o2) -> o1.getId().compareTo(o2.getId()));
-
+		
 		for(int i=0;i<simulation.getNbUpgradeOfScreeningCenter()+1;i++) {
 			Habitant target = selector.selectAmong(habitantsHealthyAndNot);
 			habitantsHealthyAndNot.remove(target);
 			
 			
 			if(target.isolateHabitant()) {
-				
+				System.out.println("on lance un screening event sur "+ target.getId());
 				ville.getHabitantsIsolated().add(target);
 				ville.getHabitantsInfected().remove(target);
 				EventCure eventCure=new EventCure(triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target);

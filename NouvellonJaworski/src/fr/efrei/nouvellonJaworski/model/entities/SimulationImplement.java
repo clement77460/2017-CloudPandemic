@@ -199,6 +199,14 @@ public class SimulationImplement implements Simulation{
 		gameEngine.register(event);
 		
 	}
+
+
+
+	@Override
+	public void sendStatistics() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	
 }
