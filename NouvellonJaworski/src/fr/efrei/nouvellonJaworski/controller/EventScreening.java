@@ -41,7 +41,7 @@ public class EventScreening implements Event{
 		if (gameEngine != null) { 
 			this.triggeredInstant = gameEngine.getCurrentInstant(); 
 		} 
-		System.out.println("screeningEvent à "+this.triggeredInstant);
+		//System.out.println("screeningEvent à "+this.triggeredInstant);
 		this.launchCure();
 		
 		EventScreening event=new EventScreening(triggeredInstant, Duration.ofMillis(200), gameEngine, triggeredEventsList, ville, selector,simulation);
@@ -66,7 +66,8 @@ public class EventScreening implements Event{
 				System.out.println("on lance un screening event sur "+ target.getId());
 				ville.getHabitantsIsolated().add(target);
 				ville.getHabitantsInfected().remove(target);
-				EventCure eventCure=new EventCure(triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target);
+				EventCure eventCure=new EventCure(triggeredInstant, Duration.ofSeconds(5),
+						gameEngine, triggeredEventsList, ville, target,simulation);
 				gameEngine.register(eventCure);
 			}
 		

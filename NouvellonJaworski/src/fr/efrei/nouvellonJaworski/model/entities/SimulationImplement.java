@@ -8,17 +8,21 @@ import java.util.List;
 
 import fr.efrei.nouvellonJaworski.controller.EventScreeningCenter;
 import fr.efrei.nouvellonJaworski.controller.EventImmigration;
+import fr.efrei.nouvellonJaworski.controller.EventImproveMedicine;
+import fr.efrei.nouvellonJaworski.controller.EventImproveVaccine;
 import fr.efrei.nouvellonJaworski.controller.EventIncreaseTaxes;
 import fr.efrei.nouvellonJaworski.controller.EventInfect;
 import fr.efrei.nouvellonJaworski.controller.EventScreening;
 import fr.efrei.nouvellonJaworski.controller.EventTaxes;
 import fr.efrei.nouvellonJaworski.controller.engine.GameEngineImplement;
+import fr.efrei.nouvellonJaworski.model.eventRate.RateStorage;
 import fr.efrei.paumier.shared.domain.CityBorder;
 import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
 import fr.efrei.paumier.shared.orders.OrderType;
 import fr.efrei.paumier.shared.selection.Selector;
 import fr.efrei.paumier.shared.simulation.Simulation;
+import fr.efrei.paumier.shared.simulation.Statistics;
 
 public class SimulationImplement implements Simulation{
 	
@@ -26,10 +30,14 @@ public class SimulationImplement implements Simulation{
 	
 	private final Selector selector;
 	private final Clock clock;
+	private final Instant beginTime;
 	private final GameEngine gameEngine;
 	private final CityBorder border;
 	protected final List<Event> eventTriggered ;
 	private final Ville ville;
+	private final RateStorage rateStorage;
+	
+	
 	
 	private int money;
 	private int nbHabitantsAlive;
@@ -44,6 +52,7 @@ public class SimulationImplement implements Simulation{
 	public SimulationImplement(Clock clock, CityBorder border,Selector selector, int population) {
 		this.firstHabitantIsInfected=false;
 		this.clock=clock;
+		this.beginTime=clock.instant();
 		this.border=border;
 		this.selector=selector;
 		this.nbOriginalHabitants=population;
@@ -55,6 +64,7 @@ public class SimulationImplement implements Simulation{
 		this.nbUpgradeOfTaxes=0;
 		this.nbUpgradeOfScreeningCenter=0;
 		this.ville=new Ville(population,border,selector);
+		this.rateStorage=new RateStorage();
 		this.launchInitialContamination();
 		
 
@@ -150,18 +160,35 @@ public class SimulationImplement implements Simulation{
 	@Override
 	public void executeOrder(OrderType order) {
 		if(enoughMoney()) {
-			if(order.equals(OrderType.INCREASE_TAXES)) {
-				EventIncreaseTaxes center=new EventIncreaseTaxes(this.lastUpdate, Duration.ofSeconds(5),
-						gameEngine, eventTriggered,this);
-				gameEngine.register(center);
-	
-			}else {
-				EventScreeningCenter center=new EventScreeningCenter(this.lastUpdate, Duration.ofSeconds(5),
-						gameEngine, eventTriggered,this);
-				gameEngine.register(center);
+			switch(order) {
+				case INCREASE_TAXES:
+					EventIncreaseTaxes increaseTaxes=new EventIncreaseTaxes(this.lastUpdate, Duration.ofSeconds(5),
+							gameEngine, eventTriggered,this);
+					gameEngine.register(increaseTaxes);
+					break;
+				
+				case BUILD_SCREENING_CENTER:
+					EventScreeningCenter screeningCenter=new EventScreeningCenter(this.lastUpdate, Duration.ofSeconds(5),
+							gameEngine, eventTriggered,this);
+					gameEngine.register(screeningCenter);
+					break;	
+				case RESEARCH_IMPROVED_MEDICINE:
+					EventImproveMedicine improveMedicine=new EventImproveMedicine(this.lastUpdate, Duration.ofSeconds(5),
+							gameEngine, eventTriggered,this);
+					gameEngine.register(improveMedicine);
+				case INCREASE_CURFEW:
+					break;
+				case REDUCE_CURFEW:
+					break;
+				case RESEARCH_IMPROVED_VACCINE:
+					EventImproveVaccine improveVaccine=new EventImproveVaccine(this.lastUpdate, Duration.ofSeconds(5),
+							gameEngine, eventTriggered,this);
+					gameEngine.register(improveVaccine);
+					break;
+				default:
+					break;
 			}
-		
-		
+				
 			this.money=this.money-cost;
 		}
 	}
@@ -195,7 +222,7 @@ public class SimulationImplement implements Simulation{
 	public void startReceivingImmigrant(boolean isInfected) {
 		gameEngine.update();
 		Event event = new EventImmigration(clock.instant(), Duration.ofSeconds(3), gameEngine,
-				eventTriggered, ville, isInfected,selector);
+				eventTriggered, ville, isInfected,selector,this);
 		gameEngine.register(event);
 		
 	}
@@ -204,9 +231,19 @@ public class SimulationImplement implements Simulation{
 
 	@Override
 	public void sendStatistics() {
-		// TODO Auto-generated method stub
-		
+		Statistics stats=new Statistics(this.getOriginalPopulation(),
+				this.getLivingPopulation(),
+				this.getInfectedPopulation(),
+				this.getQuarantinedPopulation(),
+				this.getDeadPopulation(), 
+				this.getMoney(), 
+				this.getPanicLevel(), 
+				Duration.between(beginTime, clock.instant()));
+		border.sendStatistics(stats);
 	}
 	
+	public RateStorage getRateStorage() {
+		return this.rateStorage;
+	}
 	
 }

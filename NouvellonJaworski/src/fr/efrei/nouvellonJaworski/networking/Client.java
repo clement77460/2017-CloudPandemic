@@ -92,7 +92,7 @@ public class Client implements CityBorder,Runnable{
 
 	@Override
 	public void sendStatistics(Statistics statistics) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 

@@ -73,8 +73,6 @@ public class EventStorage implements Event,Comparable<EventStorage>{
 		long tmpsRestantSansRate=(long) (event.getDuration().toMillis()-effort);
 		long tmpsRestantAvecRate=(long) (tmpsRestantSansRate/event.getRate());
 		
-		Long calcul=clockLU.millis()+tmpsRestantAvecRate-clockCreation.millis();
-		
 		return clockLU.millis()+tmpsRestantAvecRate-clockCreation.millis();
 		
 

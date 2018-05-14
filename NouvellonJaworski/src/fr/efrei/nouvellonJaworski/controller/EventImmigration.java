@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.model.entities.Habitant;
+import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
 import fr.efrei.nouvellonJaworski.model.entities.Ville;
 import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
@@ -17,6 +18,8 @@ public class EventImmigration implements Event{
 	private final Ville ville;
 	private final GameEngine gameEngine;
 	private final Selector selector;
+	private final SimulationImplement simulation;
+	
 	private final boolean isInfected;
 	
 	
@@ -24,7 +27,8 @@ public class EventImmigration implements Event{
 	
 	
 	public EventImmigration(Instant currentInstant, Duration duration, GameEngine gameEngine, 
-			List<Event> triggeredEventsList, Ville ville,boolean isInfected,Selector selector) {
+			List<Event> triggeredEventsList, Ville ville,
+			boolean isInfected,Selector selector,SimulationImplement simulation) {
 		this.isInfected=isInfected;
 		this.duration = duration;
 		this.triggeredEventsList = triggeredEventsList;
@@ -32,7 +36,7 @@ public class EventImmigration implements Event{
 		this.gameEngine=gameEngine;
 		this.triggeredInstant=currentInstant;
 		this.selector=selector;
-		
+		this.simulation=simulation;
 		
 	}
 	
