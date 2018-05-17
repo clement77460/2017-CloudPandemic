@@ -10,6 +10,9 @@ import java.net.Socket;
 
 import fr.efrei.paumier.shared.domain.CityBorder;
 import fr.efrei.paumier.shared.domain.MigrationMessage;
+import fr.efrei.paumier.shared.orders.OrderMessage;
+import fr.efrei.paumier.shared.orders.OrderType;
+import fr.efrei.paumier.shared.simulation.HelloMessage;
 import fr.efrei.paumier.shared.simulation.Simulation;
 import fr.efrei.paumier.shared.simulation.Statistics;
 
@@ -34,11 +37,10 @@ public class Client implements CityBorder,Runnable{
 	
 	@Override
 	public void sendEmigrant(boolean isInfected) {
-		System.out.println("envoi du client");
-		MigrationMessage mm=new MigrationMessage(isInfected);
+		MigrationMessage migrationMessage=new MigrationMessage(isInfected);
 		try {
 			//envoi d'un message de migration
-			objectOutputStream.writeObject(mm);
+			objectOutputStream.writeObject(migrationMessage);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -46,13 +48,18 @@ public class Client implements CityBorder,Runnable{
 	}
 	
 	
-	private void getMigrant() {
+	private void getMessage() {
 		System.out.println("extraction du client");
 	    try {
 	    	//recupération d'un message de migration
-			MigrationMessage obj=(MigrationMessage) objectIntputStream.readObject();
-			
-			simulation.startReceivingImmigrant(obj.isInfected());	
+	    	Object obj=objectIntputStream.readObject();
+	    	if(obj instanceof MigrationMessage) {
+	    		simulation.startReceivingImmigrant(((MigrationMessage) obj).isInfected());	
+	    	}
+	    	//récupération d'un ordreMessage
+	    	else {
+	    		this.simulation.executeOrder(((OrderMessage)obj).getOrder());
+	    	}
 		} catch (ClassNotFoundException | IOException e) {
 			e.printStackTrace();
 		} 
@@ -68,7 +75,7 @@ public class Client implements CityBorder,Runnable{
 	    
 	  }
 	  
-	  private void deconnecter() {
+	private void deconnecter() {
 	    try {
 	      skt.close();
 	    } catch (IOException e) {
@@ -81,21 +88,34 @@ public class Client implements CityBorder,Runnable{
 		
 		try {
 			this.connecter();
+			this.sendHello();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		while(true) {
-			this.getMigrant();
-		}
 		
+		while(true) {
+			this.getMessage();
+		}
 	}
 
 	@Override
 	public void sendStatistics(Statistics statistics) {
-		
-		
+		System.out.println("--------------------ENVOI STATS-----------------");
+		try {
+			objectOutputStream.writeObject(statistics);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
 	}
-
 	
+	public void sendHello() {
+		System.out.println("--------------------ENVOI HELLO-----------------");
+		try {
+			objectOutputStream.writeObject(new HelloMessage("nouvellonJaworski"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+	}
 	
 }

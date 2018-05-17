@@ -252,6 +252,18 @@ public class SimulationImplement implements Simulation{
 		border.sendStatistics(stats);
 	}
 	
+	public Statistics getStatistics() {
+		return new Statistics(this.getOriginalPopulation(),
+				this.getLivingPopulation(),
+				this.getInfectedPopulation(),
+				this.getQuarantinedPopulation(),
+				this.getDeadPopulation(), 
+				this.getMoney(), 
+				this.getPanicLevel(), 
+				Duration.between(beginTime, clock.instant()));
+	}
+	
+	
 	public RateStorage getRateStorage() {
 		return this.rateStorage;
 	}
