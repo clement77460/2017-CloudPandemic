@@ -1556,10 +1556,8 @@ public abstract class BaseSimulationTests {
 		selector.skipNext(4); // sec 13.0, 13.2, 13.4, 13.6
 		selector.enqueueRanks(0, 0); // sec 13.750: 2 spreadings (#2, #3)
 		selector.skipNext(1); // sec 13.8
-		selector.skipNext(35); // sec 14 -> 20.8
-		selector.skipNext(1); // sec 21.0
-		selector.skipNext(1); // sec 21.2
-		selector.enqueueRanks(1, 1, 1); // sec 21.250: 3 spreadings
+		selector.skipNext(25); // sec 14 -> 18.8
+		selector.enqueueRanks(1, 1, 1); // sec 19: 3 spreadings
 		
 		clock.advanceTo(Duration.ofSeconds(5));
 		simulation.update();
