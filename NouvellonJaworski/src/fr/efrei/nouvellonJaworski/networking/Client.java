@@ -2,14 +2,14 @@ package fr.efrei.nouvellonJaworski.networking;
 
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 import fr.efrei.paumier.shared.domain.CityBorder;
 import fr.efrei.paumier.shared.domain.MigrationMessage;
+import fr.efrei.paumier.shared.networking.messaging.ClientMessage;
+import fr.efrei.paumier.shared.networking.messaging.Message;
 import fr.efrei.paumier.shared.orders.OrderMessage;
 import fr.efrei.paumier.shared.orders.OrderType;
 import fr.efrei.paumier.shared.simulation.HelloMessage;
@@ -17,10 +17,10 @@ import fr.efrei.paumier.shared.simulation.Simulation;
 import fr.efrei.paumier.shared.simulation.Statistics;
 
 public class Client implements CityBorder,Runnable{
-	
+	  private String nomGroupe="nouvellonJaworski";
 	  private String hote;
 	  private int port;
-	  private Socket skt;
+	  private Socket socket;
 	  private ObjectOutputStream objectOutputStream;
 	  private ObjectInputStream objectIntputStream;
 	  
@@ -47,37 +47,42 @@ public class Client implements CityBorder,Runnable{
 		} 
 	}
 	
-	
 	private void getMessage() {
-		System.out.println("extraction du client");
+		
 	    try {
 	    	//recupération d'un message de migration
 	    	Object obj=objectIntputStream.readObject();
 	    	if(obj instanceof MigrationMessage) {
+	    		System.out.println("-------------Recption d'un immigrant -------------------");
 	    		simulation.startReceivingImmigrant(((MigrationMessage) obj).isInfected());	
 	    	}
 	    	//récupération d'un ordreMessage
-	    	else {
+	    	else if(obj instanceof OrderMessage){
+	    		System.out.println("-------------Recption d'un ordre "+ ((OrderMessage)obj).getOrder()
+	    				+"-------------------");
 	    		this.simulation.executeOrder(((OrderMessage)obj).getOrder());
+	    	}else {
+	    		System.out.println("-------------Recption d'un message client de " +
+	    				((ClientMessage)obj).getName()+"-------------------");
+	    		Message clientMessage=((ClientMessage) obj).getMessage();
+	    		this.simulation.executeOrder(((OrderMessage)clientMessage).getOrder());
 	    	}
-		} catch (ClassNotFoundException | IOException e) {
+	    } catch (ClassNotFoundException | IOException e) {
 			e.printStackTrace();
 		} 
-	    System.out.println("find e l'extraction");
+	    
 	}
-        
-        
-	
+ 
 	private void connecter() throws IOException {
-	    skt = new Socket(hote, port);
-	    objectOutputStream=new ObjectOutputStream(skt.getOutputStream());
-	    objectIntputStream=new ObjectInputStream(skt.getInputStream());
+		socket = new Socket(hote, port);
+	    objectOutputStream=new ObjectOutputStream(socket.getOutputStream());
+	    objectIntputStream=new ObjectInputStream(socket.getInputStream());
 	    
 	  }
 	  
 	private void deconnecter() {
 	    try {
-	      skt.close();
+	    	socket.close();
 	    } catch (IOException e) {
 	      System.err.println("Cloture de connexion impossible");
 	    }
@@ -91,6 +96,7 @@ public class Client implements CityBorder,Runnable{
 			this.sendHello();
 		} catch (IOException e) {
 			e.printStackTrace();
+			this.deconnecter();
 		}
 		
 		while(true) {
@@ -100,7 +106,7 @@ public class Client implements CityBorder,Runnable{
 
 	@Override
 	public void sendStatistics(Statistics statistics) {
-		System.out.println("--------------------ENVOI STATS-----------------");
+		
 		try {
 			objectOutputStream.writeObject(statistics);
 			
@@ -110,12 +116,22 @@ public class Client implements CityBorder,Runnable{
 	}
 	
 	public void sendHello() {
-		System.out.println("--------------------ENVOI HELLO-----------------");
+		System.out.println("--------------------ENVOI HELLO -----------------");
+		System.out.println("--------------------ENVOI STATS (rythme 200 ms)-----------------");
 		try {
-			objectOutputStream.writeObject(new HelloMessage("nouvellonJaworski"));
+			objectOutputStream.writeObject(new HelloMessage(nomGroupe));
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
 	}
-	
+
+	public void sendClientMessage(OrderType orderType) {
+		try {
+			objectOutputStream.writeObject(
+					new ClientMessage("groupeDestinataire",new OrderMessage(orderType)));
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+	}
 }

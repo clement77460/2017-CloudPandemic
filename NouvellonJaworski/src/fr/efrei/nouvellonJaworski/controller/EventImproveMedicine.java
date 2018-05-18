@@ -18,7 +18,7 @@ public class EventImproveMedicine implements Event{
 
 	@Override
 	public void trigger() {
-		this.simulation.getRateStorage().incrCureRate();
+		this.simulation.getRateStorage().increaseCureRate();
 		
 		
 	}

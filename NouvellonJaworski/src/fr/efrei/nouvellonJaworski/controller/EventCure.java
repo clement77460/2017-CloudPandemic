@@ -33,7 +33,7 @@ public class EventCure implements Event{
 		triggeredEventsList.add(this);
 		
 		if(target.healHabitant()) { 
-			ville.decrPanic(2.5);
+			ville.decreasePanic(2.5);
 			ville.getHabitantsHealthy().add(target);
 			
 		}

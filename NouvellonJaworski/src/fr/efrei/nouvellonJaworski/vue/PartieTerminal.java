@@ -5,14 +5,15 @@ import java.time.Clock;
 import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
 import fr.efrei.nouvellonJaworski.model.selection.MySelector;
 import fr.efrei.nouvellonJaworski.networking.Client;
+import fr.efrei.paumier.shared.orders.OrderType;
 
-public class PartieNoeud {
+public class PartieTerminal {
 	private Clock clock2;
 	private MySelector selector;
 	private SimulationImplement simulation;
 	private Client cityBorder;
 	
-	public PartieNoeud(int population) {
+	public PartieTerminal(int population) {
 		this.clock2=Clock.systemUTC();
 		this.selector=new MySelector();
 		
@@ -48,8 +49,33 @@ public class PartieNoeud {
 	
 	private void envoiStats() {
 		this.simulation.update();
-		//System.out.println(this.simulation.getStatistics().toString());
 		this.simulation.sendStatistics();
 	}
 
+	private void choix(int valeur) {
+		switch(valeur) {
+		case 1:
+			cityBorder.sendClientMessage(OrderType.BUILD_SCREENING_CENTER);
+			break;
+		case 2:
+			cityBorder.sendClientMessage(OrderType.INCREASE_TAXES);
+			break;
+		case 3:
+			cityBorder.sendClientMessage(OrderType.RESEARCH_IMPROVED_MEDICINE);
+			break;
+		case 4:
+			cityBorder.sendClientMessage(OrderType.RESEARCH_IMPROVED_VACCINE);
+			break;
+		case 5:
+			cityBorder.sendClientMessage(OrderType.INCREASE_CURFEW);
+			break;
+		case 6:
+			cityBorder.sendClientMessage(OrderType.REDUCE_CURFEW);
+			break;
+		case 7:
+			System.exit(0);
+			break;
+			
+		}
+	}
 }

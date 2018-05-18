@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.controller.EventScreeningCenter;
+import fr.efrei.nouvellonJaworski.controller.EventSpreading;
+import fr.efrei.nouvellonJaworski.controller.EventDeath;
 import fr.efrei.nouvellonJaworski.controller.EventDecreaseCurfew;
 import fr.efrei.nouvellonJaworski.controller.EventImmigration;
 import fr.efrei.nouvellonJaworski.controller.EventImproveMedicine;
@@ -74,7 +76,7 @@ public class SimulationImplement implements Simulation{
 	
 	
 	private void launchInitialContamination() {
-		Event event1 = new EventInfect(Duration.ofSeconds(3), gameEngine, this.eventTriggered,ville, selector,this);
+		Event event1 = new EventInfect(Duration.ofSeconds(3), this.eventTriggered,this);
 		Event eventScreening = new EventScreening(Duration.ofMillis(200), gameEngine,this.eventTriggered, ville, selector,this);
 		Event eventTaxes=new EventTaxes(Duration.ofSeconds(5), gameEngine, this.eventTriggered,this);
 		gameEngine.register(event1,eventScreening,eventTaxes);
@@ -82,7 +84,32 @@ public class SimulationImplement implements Simulation{
 		
 	}
 	
-	
+	public void createInfectAndDeathEvent(Habitant source,List<Event> triggeredEventsList) {
+		if(ville.getHabitantsHealthy().size()>0) {
+			
+			Habitant target = selector.selectAmong(ville.getHabitantsHealthy());
+			ville.getHabitantsHealthy().remove(target);
+			ville.getHabitantsInfected().add(target);
+			
+			EventSpreading eventSpreading = new EventSpreading(Duration.ofSeconds(5),
+					triggeredEventsList, ville, target,this);
+			EventDeath eventDeath = new EventDeath(Duration.ofSeconds(15),
+					triggeredEventsList, ville, target,this);
+			
+			if(source==null) {
+				target.contaminerOuSoigner(true);
+				gameEngine.register(eventSpreading,eventDeath);
+				
+			}
+			else {
+				source.infectSomeone(target);
+				EventSpreading eventSpreading2 = new EventSpreading(Duration.ofSeconds(5), triggeredEventsList, ville, source,this);
+				gameEngine.register(eventSpreading,eventSpreading2,eventDeath);
+			}
+			
+			
+		}
+	}
 
 	
 	
@@ -232,7 +259,7 @@ public class SimulationImplement implements Simulation{
 	public void startReceivingImmigrant(boolean isInfected) {
 		gameEngine.update();
 		Event event = new EventImmigration(Duration.ofSeconds(3), gameEngine,
-				eventTriggered, ville, isInfected,selector,this);
+				eventTriggered, ville, isInfected,this);
 		gameEngine.register(event);
 		
 	}

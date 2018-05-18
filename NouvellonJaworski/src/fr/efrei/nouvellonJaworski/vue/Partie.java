@@ -2,10 +2,7 @@ package fr.efrei.nouvellonJaworski.vue;
 import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
 
 import fr.efrei.nouvellonJaworski.model.selection.MySelector;
-import fr.efrei.nouvellonJaworski.networking.Client;
-import fr.efrei.paumier.shared.domain.CityBorder;
 import fr.efrei.paumier.shared.orders.OrderType;
-import fr.efrei.paumier.shared.simulation.Simulation;
 
 
 import java.time.Clock;
@@ -14,17 +11,17 @@ import java.util.Scanner;
 
 
 public class Partie {
-	private Clock clock2;
+	private Clock clock;
 	private MySelector selector;
 	private SimulationImplement simulation;
 	private Scanner sc;
 	
 	public Partie(int population) {
-		this.clock2=Clock.systemUTC();
+		this.clock=Clock.systemUTC();
 		this.selector=new MySelector();
 		this.sc=new Scanner(System.in);
 		
-		this.simulation = new SimulationImplement(clock2, null,selector, population);
+		this.simulation = new SimulationImplement(clock, null,selector, population);
 		
 	}
 	

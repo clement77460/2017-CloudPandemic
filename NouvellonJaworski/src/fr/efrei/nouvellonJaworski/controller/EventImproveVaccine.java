@@ -19,7 +19,7 @@ public class EventImproveVaccine implements Event{
 	@Override
 	public void trigger() {
 		
-		this.simulation.getRateStorage().incrDeathRate();
+		this.simulation.getRateStorage().increaseDeathRate();
 	}
 	
 	@Override

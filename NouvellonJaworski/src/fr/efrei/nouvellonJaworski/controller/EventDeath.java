@@ -33,7 +33,7 @@ public class EventDeath implements Event{
 
 		
 		if(!target.isEmigrated()) {
-			if(target.killHabitant() ) {//he died
+			if(target.killHabitant() ) {
 				
 				ville.getHabitantsInfected().remove(target);
 				ville.incrPanic(5);

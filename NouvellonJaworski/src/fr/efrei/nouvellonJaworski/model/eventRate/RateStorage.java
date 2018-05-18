@@ -20,7 +20,7 @@ public class RateStorage {
 		return this.cureRate;
 	}
 	
-	public void incrCureRate() {
+	public void increaseCureRate() {
 		this.cureRate++;
 	}
 	
@@ -28,7 +28,7 @@ public class RateStorage {
 		return this.deathRate;
 	}
 	
-	public void incrDeathRate() {
+	public void increaseDeathRate() {
 		BigDecimal rate=new BigDecimal(deathRate);
 		BigDecimal multiplicateur=new BigDecimal("0.80");
 		this.deathRate=rate.multiply(multiplicateur).doubleValue();

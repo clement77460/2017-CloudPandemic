@@ -8,7 +8,6 @@ import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
 import fr.efrei.nouvellonJaworski.model.entities.Ville;
 import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
-import fr.efrei.paumier.shared.selection.Selector;
 
 public class EventImmigration implements Event{
 	
@@ -16,7 +15,6 @@ public class EventImmigration implements Event{
 	private final List<Event> triggeredEventsList;
 	private final Ville ville;
 	private final GameEngine gameEngine;
-	private final Selector selector;
 	private final SimulationImplement simulation;
 	private final boolean isInfected;
 	
@@ -24,13 +22,12 @@ public class EventImmigration implements Event{
 	
 	public EventImmigration(Duration duration, GameEngine gameEngine, 
 			List<Event> triggeredEventsList, Ville ville,
-			boolean isInfected,Selector selector,SimulationImplement simulation) {
+			boolean isInfected,SimulationImplement simulation) {
 		this.isInfected=isInfected;
 		this.duration = duration;
 		this.triggeredEventsList = triggeredEventsList;
 		this.ville=ville;
 		this.gameEngine=gameEngine;
-		this.selector=selector;
 		this.simulation=simulation;
 		
 	}
@@ -47,7 +44,7 @@ public class EventImmigration implements Event{
 			temp.infectSomeone();
 			ville.getHabitantsInfected().add(temp);
 			EventSpreading eventSpreading = new EventSpreading(Duration.ofSeconds(5),
-					gameEngine, triggeredEventsList, ville, temp,selector,simulation);
+					triggeredEventsList, ville, temp,simulation);
 			
 			EventDeath eventDeath = new EventDeath(Duration.ofSeconds(15),
 					triggeredEventsList, ville, temp,simulation);

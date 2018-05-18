@@ -66,7 +66,7 @@ public class Ville {
 		return habitantsDead;
 	}
 	
-	public void decrPanic(double decreaseValue) {
+	public void decreasePanic(double decreaseValue) {
 		
 		if(panicLVL>=decreaseValue)
 			this.panicLVL=this.panicLVL-decreaseValue;

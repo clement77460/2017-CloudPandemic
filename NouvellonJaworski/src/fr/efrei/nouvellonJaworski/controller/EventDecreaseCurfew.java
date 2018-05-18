@@ -17,7 +17,7 @@ public class EventDecreaseCurfew implements Event{
 
 	@Override
 	public void trigger() {
-		this.simulation.getVille().decrPanic(10.0);
+		this.simulation.getVille().decreasePanic(10.0);
 		this.simulation.getRateStorage().decreaseSpreadingRate();
 		
 		
