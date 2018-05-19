@@ -1,17 +1,21 @@
 package fr.efrei.nouvellonJaworski.launcher;
 
-import fr.efrei.nouvellonJaworski.vue.Partie;
+import fr.efrei.nouvellonJaworski.vue.PartieLocale;
 import fr.efrei.nouvellonJaworski.vue.PartieNoeud;
+import fr.efrei.nouvellonJaworski.vue.PartieTerminal;
 
 public class Lanceur {
 
 	public static void main(String[] args){
-		int i=1;
+		int i=0;
 		if(i==0) {
-			Partie game=new Partie(100);
+			PartieLocale game=new PartieLocale(100);
 			game.boucleJeu(); 
-		}else {
+		}else if(i==1){
 			PartieNoeud game=new PartieNoeud(100);
+			game.boucleJeu();
+		}else {
+			PartieTerminal game=new PartieTerminal(100);
 			game.boucleJeu();
 		}
 	}

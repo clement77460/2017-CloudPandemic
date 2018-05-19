@@ -44,7 +44,7 @@ public class SimulationImplement implements Simulation{
 	
 	
 	private int money=0;
-	private int nbOriginalHabitants;
+	private int nbOriginalHabitants=0;
 	
 	private int nbUpgradeOfTaxes=0;
 	private int nbUpgradeOfScreeningCenter=0;
@@ -159,8 +159,8 @@ public class SimulationImplement implements Simulation{
 
 	public void updateMoney() {
 		
-		this.money=this.money+
-				(this.ville.getHabitantsHealthy().size()+ville.getHabitantsInfected().size()+ville.getHabitantsIsolated().size())
+		this.money+=(this.ville.getHabitantsHealthy().size()+
+				ville.getHabitantsInfected().size()+ville.getHabitantsIsolated().size())
 				*(this.nbUpgradeOfTaxes+1);
 	
 	}
@@ -268,15 +268,7 @@ public class SimulationImplement implements Simulation{
 
 	@Override
 	public void sendStatistics() {
-		Statistics stats=new Statistics(this.getOriginalPopulation(),
-				this.getLivingPopulation(),
-				this.getInfectedPopulation(),
-				this.getQuarantinedPopulation(),
-				this.getDeadPopulation(), 
-				this.getMoney(), 
-				this.getPanicLevel(), 
-				Duration.between(beginTime, clock.instant()));
-		border.sendStatistics(stats);
+		border.sendStatistics(this.getStatistics());
 	}
 	
 	public Statistics getStatistics() {

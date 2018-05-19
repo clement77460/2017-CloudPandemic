@@ -73,10 +73,15 @@ public class Client implements CityBorder,Runnable{
 	    
 	}
  
-	private void connecter() throws IOException {
-		socket = new Socket(hote, port);
-	    objectOutputStream=new ObjectOutputStream(socket.getOutputStream());
-	    objectIntputStream=new ObjectInputStream(socket.getInputStream());
+	private void connecter() {
+		try {
+			socket = new Socket(hote, port);
+			objectOutputStream=new ObjectOutputStream(socket.getOutputStream());
+			objectIntputStream=new ObjectInputStream(socket.getInputStream());
+		} catch (IOException e) {
+			this.deconnecter();
+			e.printStackTrace();
+		}
 	    
 	  }
 	  
@@ -90,15 +95,8 @@ public class Client implements CityBorder,Runnable{
 
 	@Override
 	public void run() {
-		
-		try {
-			this.connecter();
-			this.sendHello();
-		} catch (IOException e) {
-			e.printStackTrace();
-			this.deconnecter();
-		}
-		
+		this.connecter();
+		this.sendHello();
 		while(true) {
 			this.getMessage();
 		}
@@ -111,6 +109,7 @@ public class Client implements CityBorder,Runnable{
 			objectOutputStream.writeObject(statistics);
 			
 		} catch (IOException e) {
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} 
 	}
@@ -125,10 +124,11 @@ public class Client implements CityBorder,Runnable{
 		} 
 	}
 
-	public void sendClientMessage(OrderType orderType) {
+	public void sendClientMessage(String target,OrderType orderType) {
+		System.out.println("--------------------ENVOI ORDRE VERS "+target+"-----------------");
 		try {
 			objectOutputStream.writeObject(
-					new ClientMessage("groupeDestinataire",new OrderMessage(orderType)));
+					new ClientMessage(target,new OrderMessage(orderType)));
 			
 		} catch (IOException e) {
 			e.printStackTrace();

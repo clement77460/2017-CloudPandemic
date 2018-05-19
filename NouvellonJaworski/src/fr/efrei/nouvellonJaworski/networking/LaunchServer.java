@@ -12,7 +12,7 @@ package fr.efrei.nouvellonJaworski.networking;
 import java.io.IOException;
 
 
-public class launchServer {
+public class LaunchServer {
 
     public static void main(String[] args) {
         try {
@@ -26,12 +26,14 @@ public class launchServer {
             srv.ecoute();
             srv.sendMSG();
             Thread.sleep(10000);
-            srv.sendMSG();
+            srv.sendOrder();
+            Thread.sleep(10000);
+            srv.sendClientMessage();
+            while(true){
+                srv.readOutputAndSendMSGAfterHelloOrStats();
+            }
         } catch (InterruptedException ex) {
             
         }
-        System.out.println("back");
-        while(true);
     }
-    
 }

@@ -52,18 +52,19 @@ public class EventScreening implements Event{
 		habitantsHealthyAndNot.sort((o1, o2) -> o1.getId().compareTo(o2.getId()));
 		
 		for(int i=0;i<simulation.getNbUpgradeOfScreeningCenter()+1;i++) {
-			Habitant target = selector.selectAmong(habitantsHealthyAndNot);
-			habitantsHealthyAndNot.remove(target);
-			
-			
-			if(target.isolateHabitant()) {
-				ville.getHabitantsIsolated().add(target);
-				ville.getHabitantsInfected().remove(target);
-				EventCure eventCure=new EventCure(Duration.ofSeconds(5),
-						triggeredEventsList, ville, target,simulation);
-				gameEngine.register(eventCure);
+			if(habitantsHealthyAndNot.size()>0) {
+				Habitant target = selector.selectAmong(habitantsHealthyAndNot);
+				habitantsHealthyAndNot.remove(target);
+				
+				
+				if(target.isolateHabitant()) {
+					ville.getHabitantsIsolated().add(target);
+					ville.getHabitantsInfected().remove(target);
+					EventCure eventCure=new EventCure(Duration.ofSeconds(5),
+							triggeredEventsList, ville, target,simulation);
+					gameEngine.register(eventCure);
+				}
 			}
-		
 		}
 	}
 	

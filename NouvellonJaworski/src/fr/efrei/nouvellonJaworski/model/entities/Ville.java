@@ -107,15 +107,16 @@ public class Ville {
 		habitantsHealthyAndInfected.addAll(habitantsInfected);
 		habitantsHealthyAndInfected.addAll(habitantsHealthy);
 		habitantsHealthyAndInfected.sort((o1, o2) -> o1.getId().compareTo(o2.getId()));
-		
-		Habitant target=selector.selectAmong(habitantsHealthyAndInfected);
-		
-		
-		habitantsHealthy.remove(target);
-		habitantsInfected.remove(target);
-		
-		target.setEmigrated(true);
-		border.sendEmigrant(target.isInfected());
+		if(habitantsHealthyAndInfected.size()>0) {
+			Habitant target=selector.selectAmong(habitantsHealthyAndInfected);
+			
+			
+			habitantsHealthy.remove(target);
+			habitantsInfected.remove(target);
+			
+			target.setEmigrated(true);
+			border.sendEmigrant(target.isInfected());
+		}
 		this.checkPanic();
 	}
 	

@@ -10,13 +10,13 @@ import java.util.Scanner;
 
 
 
-public class Partie {
+public class PartieLocale {
 	private Clock clock;
 	private MySelector selector;
 	private SimulationImplement simulation;
 	private Scanner sc;
 	
-	public Partie(int population) {
+	public PartieLocale(int population) {
 		this.clock=Clock.systemUTC();
 		this.selector=new MySelector();
 		this.sc=new Scanner(System.in);
