@@ -40,6 +40,7 @@ public class Client implements CityBorder,Runnable{
 		MigrationMessage migrationMessage=new MigrationMessage(isInfected);
 		try {
 			//envoi d'un message de migration
+			System.out.println("-------------Envoi d'un émmigrant -------------------");
 			objectOutputStream.writeObject(migrationMessage);
 			
 		} catch (IOException e) {
@@ -68,7 +69,6 @@ public class Client implements CityBorder,Runnable{
 	    		this.simulation.executeOrder(((OrderMessage)clientMessage).getOrder());
 	    	}
 	    } catch (ClassNotFoundException | IOException e) {
-			e.printStackTrace();
 		} 
 	    
 	}
@@ -85,7 +85,7 @@ public class Client implements CityBorder,Runnable{
 	    
 	  }
 	  
-	private void deconnecter() {
+	public void deconnecter() {
 	    try {
 	    	socket.close();
 	    } catch (IOException e) {
@@ -134,4 +134,5 @@ public class Client implements CityBorder,Runnable{
 			e.printStackTrace();
 		} 
 	}
+	
 }

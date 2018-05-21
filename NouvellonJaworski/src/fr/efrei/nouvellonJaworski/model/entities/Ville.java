@@ -94,10 +94,11 @@ public class Ville {
 				+this.getHabitantsIsolated().size();
 		
 		if(this.panicLVL>livingPopulation && border!=null) {
-			if(panicLVL>=5) 
+			if(panicLVL>=5) {
 				this.panicLVL=this.panicLVL-5.0;
-			this.emigration();
-			this.checkPanic();
+				this.emigration();
+				this.checkPanic();
+			}
 		}
 	}
 	
@@ -116,8 +117,9 @@ public class Ville {
 			
 			target.setEmigrated(true);
 			border.sendEmigrant(target.isInfected());
+			this.checkPanic();
 		}
-		this.checkPanic();
+		
 	}
 	
 	

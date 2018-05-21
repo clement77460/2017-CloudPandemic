@@ -2,9 +2,12 @@ package fr.efrei.nouvellonJaworski.vue.frame;
 
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -33,6 +36,7 @@ public class PandemicFrame extends JFrame{
 	
 	private void initFrame() {
 		this.setSize(1200,700);
+		this.setTitle("Pandemic Game");
 		this.setLocation(20,20);
 		this.getContentPane().add(this.createTablePane(),BorderLayout.CENTER);
 		this.getContentPane().add(createComboBoxPane(),BorderLayout.SOUTH);
@@ -40,6 +44,16 @@ public class PandemicFrame extends JFrame{
 	}
 	
 	private Component createTablePane() {
+		table.getTableHeader().setBackground(new Color(0,0,0));
+		table.getTableHeader().setForeground(new Color(255,0,0));
+		table.getTableHeader().setFont(new Font("Arial",Font.BOLD,20));
+		
+		table.setBackground(new Color(0,0,0));
+		table.setFont(new Font("Arial",Font.BOLD,20));
+		table.setForeground(new Color(255,0,0));
+		table.setRowHeight(this.getHeight()/7);
+		table.setGridColor(new Color(255,0,0));
+		
 		return new JScrollPane(table);
 	}
 	
@@ -60,5 +74,19 @@ public class PandemicFrame extends JFrame{
 		panel.add(submitButton);
 		
 		return panel;
+	}
+	
+	public void displayEndGameScreen(String message) {
+		this.getContentPane().removeAll();
+		JPanel panel = new JPanel(new FlowLayout());
+		JLabel labelMessage=new JLabel(message);
+		
+		labelMessage.setFont(new Font("Arial",Font.BOLD,17));
+		labelMessage.setForeground(new Color(255,0,0));
+		panel.add(labelMessage);
+		this.getContentPane().add(panel,BorderLayout.CENTER);
+		
+		this.revalidate();
+		this.repaint();
 	}
 }

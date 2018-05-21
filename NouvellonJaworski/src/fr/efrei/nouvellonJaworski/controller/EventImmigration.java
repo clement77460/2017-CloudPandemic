@@ -36,6 +36,7 @@ public class EventImmigration implements Event{
 	public void trigger() {
 		
 		Habitant temp=new Habitant();
+		temp.setEmigrated(false);
 		
 		triggeredEventsList.add(this);
 		

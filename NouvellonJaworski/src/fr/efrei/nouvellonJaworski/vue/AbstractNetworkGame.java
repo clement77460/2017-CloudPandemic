@@ -2,6 +2,7 @@ package fr.efrei.nouvellonJaworski.vue;
 
 import java.time.Clock;
 
+import fr.efrei.nouvellonJaworski.controller.frame.FrameController;
 import fr.efrei.nouvellonJaworski.model.abstractmodel.TableModelPandemic;
 import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
 import fr.efrei.nouvellonJaworski.model.selection.MySelector;
@@ -17,7 +18,7 @@ public abstract class AbstractNetworkGame {
 	protected Client cityBorder;
 	private PandemicFrame vue;
 	private TableModelPandemic tableModel;
-	
+	private Thread thread;
 	
 	public AbstractNetworkGame(int population,String ip,int port) {
 		clock2=Clock.systemUTC();
@@ -28,17 +29,21 @@ public abstract class AbstractNetworkGame {
 		 
 		this.simulation = new SimulationImplement(clock2, cityBorder,selector, population);
 		((Client) cityBorder).setSimulation(simulation);
-		new Thread( (Runnable) this.cityBorder).start();
+		thread=new Thread( (Runnable) this.cityBorder);
+		thread.start();
+		
 		
 		this.tableModel=new TableModelPandemic();
 		this.tableModel.fillTableWithStats(this.simulation.getStatistics());
 		
 		vue=new PandemicFrame(this.tableModel,this);
+		vue.addWindowListener(new FrameController(this.thread,this.cityBorder));
         vue.setVisible(true);
 	}
 	
 	
 	public void boucleJeu() {
+		String msgToDisplay;
 		while(this.simulation.getFirstHabitantIsInfected()==false  ||
 				!(this.simulation.getInfectedPopulation()==0)) {
 			
@@ -54,16 +59,21 @@ public abstract class AbstractNetworkGame {
 			
 		}
 		if(this.simulation.getLivingPopulation()!=0) {
-			System.out.println("victoire");
+			msgToDisplay="Victoire";
+			
 		}else {
-			System.out.println("fin de la partie, toute la population est infectée");
+			msgToDisplay="fin de la partie, toute la population est infectée";
 		}
+		vue.displayEndGameScreen(msgToDisplay);
+		thread.interrupt();
+		this.cityBorder.deconnecter();
 	}
 	
 	private void envoiStats() {
 		this.simulation.update();
 		this.simulation.sendStatistics();
 	}
+	
 	
 	abstract public void launchOrder(String destinataire,OrderType orderType);
 }
