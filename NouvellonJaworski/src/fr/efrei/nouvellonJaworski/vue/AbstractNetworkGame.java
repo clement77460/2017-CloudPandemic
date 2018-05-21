@@ -19,12 +19,12 @@ public abstract class AbstractNetworkGame {
 	private TableModelPandemic tableModel;
 	
 	
-	public AbstractNetworkGame(int population) {
+	public AbstractNetworkGame(int population,String ip,int port) {
 		clock2=Clock.systemUTC();
 		this.selector=new MySelector();
 		
-		this.cityBorder=new Client("localhost",11111);
-		//this.cityBorder=new Client("178.62.119.191",4242);
+		//this.cityBorder=new Client("localhost",11111);
+		this.cityBorder=new Client("178.62.119.191",4242);
 		 
 		this.simulation = new SimulationImplement(clock2, cityBorder,selector, population);
 		((Client) cityBorder).setSimulation(simulation);

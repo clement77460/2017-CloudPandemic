@@ -6,7 +6,7 @@ public class PartieNoeud extends AbstractNetworkGame{
 	
 	
 	public PartieNoeud(int population) {
-        super(population);
+        super(population,"178.62.119.191",4242);
 	}
 	
 	public void launchOrder(String destinataire,OrderType orderType) {

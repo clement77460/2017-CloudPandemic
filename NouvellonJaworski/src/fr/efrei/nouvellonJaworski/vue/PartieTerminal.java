@@ -6,7 +6,7 @@ public class PartieTerminal extends AbstractNetworkGame{
 
 	
 	public PartieTerminal(int population) {
-		super(population);
+		super(population,"178.62.119.191",8081);
 	}
 	
 	

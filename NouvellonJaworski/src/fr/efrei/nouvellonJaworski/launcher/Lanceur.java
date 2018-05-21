@@ -7,7 +7,7 @@ import fr.efrei.nouvellonJaworski.vue.PartieTerminal;
 public class Lanceur {
 
 	public static void main(String[] args){
-		int i=0;
+		int i=3;
 		if(i==0) {
 			PartieLocale game=new PartieLocale(100);
 			game.boucleJeu(); 
