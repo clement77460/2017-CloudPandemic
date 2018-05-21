@@ -25,7 +25,7 @@ public abstract class AbstractNetworkGame {
 		this.selector=new MySelector();
 		
 		//this.cityBorder=new Client("localhost",11111);
-		this.cityBorder=new Client("178.62.119.191",4242);
+		this.cityBorder=new Client(ip,port);
 		 
 		this.simulation = new SimulationImplement(clock2, cityBorder,selector, population);
 		((Client) cityBorder).setSimulation(simulation);
