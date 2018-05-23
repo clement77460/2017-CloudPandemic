@@ -18,14 +18,14 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import fr.efrei.nouvellonJaworski.controller.frame.SubmitController;
 import fr.efrei.nouvellonJaworski.model.abstractmodel.TableModelPandemic;
-import fr.efrei.nouvellonJaworski.vue.AbstractNetworkGame;
+import fr.efrei.nouvellonJaworski.partie.PartieTerminal;
 import fr.efrei.paumier.shared.orders.OrderType;
 
 public class PandemicFrame extends JFrame{
 	private static final long serialVersionUID = 7030202242408996410L;
 	private JTable table;
-	private AbstractNetworkGame partie;
-	public PandemicFrame(TableModelPandemic tableModel,AbstractNetworkGame partie) {
+	private PartieTerminal partie;
+	public PandemicFrame(TableModelPandemic tableModel,PartieTerminal partie) {
 		super();
 		this.table=new JTable(tableModel);
 		this.partie=partie;

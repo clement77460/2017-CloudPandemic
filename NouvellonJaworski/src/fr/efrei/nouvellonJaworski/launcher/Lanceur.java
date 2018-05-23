@@ -2,31 +2,31 @@ package fr.efrei.nouvellonJaworski.launcher;
 
 import java.util.Scanner;
 
-import fr.efrei.nouvellonJaworski.vue.PartieLocale;
-import fr.efrei.nouvellonJaworski.vue.PartieNoeud;
-import fr.efrei.nouvellonJaworski.vue.PartieTerminal;
+import fr.efrei.nouvellonJaworski.partie.PartieLocale;
+import fr.efrei.nouvellonJaworski.partie.PartieNoeud;
+import fr.efrei.nouvellonJaworski.partie.PartieTerminal;
 
 public class Lanceur {
 
 	public static void main(String[] args){
-		Scanner sc=new Scanner(System.in);
+		Scanner scanner=new Scanner(System.in);
 		System.out.println("choix du type d'application :");
 		System.out.println(" 0 : Partie Locale \n 1: Partie Noeud \n 2: Partie Terminale");
-		switch(sc.nextInt()) {
+		switch(scanner.nextInt()) {
 			case 0:
 				PartieLocale game=new PartieLocale(100);
 				game.boucleJeu(); 
-				sc.close();
+				scanner.close();
 				break;
 			case 1:
-				PartieNoeud game2=new PartieNoeud(100);
-				game2.boucleJeu();
-				sc.close();
+				PartieNoeud gameNode=new PartieNoeud(100,"178.62.119.191",4242);
+				gameNode.startSimulation();
+				scanner.close();
+				System.exit(0);
 				break;
 			default:
-				PartieTerminal game3=new PartieTerminal(100);
-				game3.boucleJeu();
-				sc.close();
+				new PartieTerminal(100,"178.62.119.191",8081);
+				scanner.close();
 				break;
 		}
 	}

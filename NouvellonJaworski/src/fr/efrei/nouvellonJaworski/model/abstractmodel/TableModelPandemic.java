@@ -10,7 +10,18 @@ public class TableModelPandemic extends AbstractTableModel {
 	private String[] columnNames= {"Temps","Original","Alive","Quarantined","Infected","Dead","Money","Panic LVL"};
     private Object[][] data;
     
-
+    public TableModelPandemic() {
+    	data=new Object[1][this.getColumnCount()];
+    	data[0][0]=0;
+    	data[0][1]=0;
+    	data[0][2]=0;
+    	data[0][3]=0;
+    	data[0][4]=0;
+    	data[0][5]=0;
+    	data[0][6]=0;
+    	data[0][7]=0;
+    }
+    
     @Override
     public int getColumnCount() {
         return columnNames.length;
@@ -60,17 +71,15 @@ public class TableModelPandemic extends AbstractTableModel {
     }
     
     public void fillTableWithStats(Statistics stats) {
-    	Object temp[][]=new Object[1][this.getColumnCount()];
-    	temp[0][0]=stats.getEllapsedDuration();
-    	temp[0][1]=stats.getOriginalPopulation();
-    	temp[0][2]=stats.getLivingPopulation();
-    	temp[0][3]=stats.getQuarantinedPopulation();
-    	temp[0][4]=stats.getInfectedPopulation();
-    	temp[0][5]=stats.getDeadPopulation();
-    	temp[0][6]=stats.getMoney();
-    	temp[0][7]=stats.getPanicLevel();
+    	data[0][0]=stats.getEllapsedDuration();
+    	data[0][1]=stats.getOriginalPopulation();
+    	data[0][2]=stats.getLivingPopulation();
+    	data[0][3]=stats.getQuarantinedPopulation();
+    	data[0][4]=stats.getInfectedPopulation();
+    	data[0][5]=stats.getDeadPopulation();
+    	data[0][6]=stats.getMoney();
+    	data[0][7]=stats.getPanicLevel();
     	
-    	this.setDataVector(temp,this.columnNames);
     }
     
 }

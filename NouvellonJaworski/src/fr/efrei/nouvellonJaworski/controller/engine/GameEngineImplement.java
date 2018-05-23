@@ -27,18 +27,18 @@ public class GameEngineImplement implements GameEngine{
 	public void update() {// declenche les evenements expirés dans l'ordre croissant en fonction du temps
 							//stock la date du dernier update
 		
-		EventStorage eventTemp;
+		EventStorage eventToUpdate;
 	
 		this.updateRateEvents();
 		if(queue.size()>0) {
-			eventTemp=queue.remove(0);
+			eventToUpdate=queue.remove(0);
 			
-			if(this.isClockTimeAfterTriggerTime(eventTemp)) {	
+			if(this.isClockTimeAfterTriggerTime(eventToUpdate)) {	
 					
 					
-					this.lastUpdate=eventTemp.getCreationDate().plusMillis((eventTemp.getDuration().toMillis()));
+					this.lastUpdate=eventToUpdate.getCreationDate().plusMillis((eventToUpdate.getDuration().toMillis()));
 					this.updateRateEvents();
-					eventTemp.trigger(); 
+					eventToUpdate.trigger(); 
 					
 					this.update();
 			}
@@ -47,7 +47,7 @@ public class GameEngineImplement implements GameEngine{
 				
 				lastUpdate=clock.instant();
 				
-				this.registerExistingEvent(eventTemp);
+				this.registerExistingEvent(eventToUpdate);
 				
 				
 			}

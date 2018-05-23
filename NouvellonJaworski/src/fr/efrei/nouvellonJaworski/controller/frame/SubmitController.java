@@ -4,25 +4,26 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
-import fr.efrei.nouvellonJaworski.vue.AbstractNetworkGame;
+
+import fr.efrei.nouvellonJaworski.partie.PartieTerminal;
 import fr.efrei.paumier.shared.orders.OrderType;
 
 public class SubmitController implements ActionListener{
 	
 	private JTextField inputOrderType;
 	private JComboBox<OrderType> orderTypeComboBox;
-	private AbstractNetworkGame partie;
+	private PartieTerminal game;
 	
 	public SubmitController(JTextField inputOrderType,JComboBox<OrderType> orderTypeComboBox,
-			AbstractNetworkGame partie) {
+			PartieTerminal game) {
 		this.inputOrderType=inputOrderType;
 		this.orderTypeComboBox=orderTypeComboBox;
-		this.partie=partie;
+		this.game=game;
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		partie.launchOrder(inputOrderType.getText(), (OrderType)orderTypeComboBox.getSelectedItem());
+		game.launchOrder(inputOrderType.getText(), (OrderType)orderTypeComboBox.getSelectedItem());
 	}
 
 }

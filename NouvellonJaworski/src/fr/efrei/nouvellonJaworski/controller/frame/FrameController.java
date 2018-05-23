@@ -3,15 +3,16 @@ package fr.efrei.nouvellonJaworski.controller.frame;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
-import fr.efrei.nouvellonJaworski.networking.Client;
+
+import fr.efrei.nouvellonJaworski.networking.ClientTerminal;
 
 public class FrameController implements WindowListener{
 	private Thread thread;
-	private Client client;
+	private ClientTerminal clientTerminal;
 	
-	public FrameController(Thread thread,Client client) {
+	public FrameController(Thread thread,ClientTerminal clientTerminal) {
 		this.thread=thread;
-		this.client=client;
+		this.clientTerminal=clientTerminal;
 	}
 	
 	@Override
@@ -29,7 +30,7 @@ public class FrameController implements WindowListener{
 	@Override
 	public void windowClosing(WindowEvent arg0) {
 		this.thread.interrupt();
-		this.client.deconnecter();
+		this.clientTerminal.deconnecter();
 	}
 
 	@Override

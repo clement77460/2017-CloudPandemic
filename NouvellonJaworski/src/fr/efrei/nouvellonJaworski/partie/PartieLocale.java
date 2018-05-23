@@ -1,4 +1,4 @@
-package fr.efrei.nouvellonJaworski.vue;
+package fr.efrei.nouvellonJaworski.partie;
 import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
 
 import fr.efrei.nouvellonJaworski.model.selection.MySelector;
@@ -14,12 +14,12 @@ public class PartieLocale {
 	private Clock clock;
 	private MySelector selector;
 	private SimulationImplement simulation;
-	private Scanner sc;
+	private Scanner scanner;
 	
 	public PartieLocale(int population) {
 		this.clock=Clock.systemUTC();
 		this.selector=new MySelector();
-		this.sc=new Scanner(System.in);
+		this.scanner=new Scanner(System.in);
 		
 		this.simulation = new SimulationImplement(clock, null,selector, population);
 		
@@ -31,7 +31,7 @@ public class PartieLocale {
 		while(this.simulation.getFirstHabitantIsInfected()==false  ||
 				!(this.simulation.getInfectedPopulation()==0)) {
 			this.affichageOptions();
-			this.choix(sc.nextInt());
+			this.choix(scanner.nextInt());
 			this.simulation.update();
 			
 		}

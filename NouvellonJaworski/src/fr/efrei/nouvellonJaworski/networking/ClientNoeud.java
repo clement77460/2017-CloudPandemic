@@ -1,6 +1,5 @@
 package fr.efrei.nouvellonJaworski.networking;
 
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -8,16 +7,13 @@ import java.net.Socket;
 
 import fr.efrei.paumier.shared.domain.CityBorder;
 import fr.efrei.paumier.shared.domain.MigrationMessage;
-import fr.efrei.paumier.shared.networking.messaging.ClientMessage;
-import fr.efrei.paumier.shared.networking.messaging.Message;
 import fr.efrei.paumier.shared.orders.OrderMessage;
-import fr.efrei.paumier.shared.orders.OrderType;
 import fr.efrei.paumier.shared.simulation.HelloMessage;
 import fr.efrei.paumier.shared.simulation.Simulation;
 import fr.efrei.paumier.shared.simulation.Statistics;
 
-public class Client implements CityBorder,Runnable{
-	  private String nomGroupe="nouvellonJaworski";
+public class ClientNoeud implements CityBorder,Runnable{
+	private String nomGroupe="nouvellonJaworski";
 	  private String hote;
 	  private int port;
 	  private Socket socket;
@@ -26,7 +22,7 @@ public class Client implements CityBorder,Runnable{
 	  
 	  private Simulation simulation;
 	
-	public Client(String hote, int port) {
+	public ClientNoeud(String hote, int port) {
 	    this.hote = hote;
 	    this.port = port;
 	  }
@@ -51,33 +47,30 @@ public class Client implements CityBorder,Runnable{
 	private void getMessage() {
 		
 	    try {
-	    	//recupération d'un message de migration
+	    	
 	    	Object obj=objectIntputStream.readObject();
+	    	//recupération d'un message de migration
 	    	if(obj instanceof MigrationMessage) {
 	    		System.out.println("-------------Recption d'un immigrant -------------------");
 	    		simulation.startReceivingImmigrant(((MigrationMessage) obj).isInfected());	
 	    	}
 	    	//récupération d'un ordreMessage
-	    	else if(obj instanceof OrderMessage){
+	    	else {
 	    		System.out.println("-------------Recption d'un ordre "+ ((OrderMessage)obj).getOrder()
 	    				+"-------------------");
 	    		this.simulation.executeOrder(((OrderMessage)obj).getOrder());
-	    	}else {
-	    		System.out.println("-------------Recption d'un message client de " +
-	    				((ClientMessage)obj).getName()+"-------------------");
-	    		Message clientMessage=((ClientMessage) obj).getMessage();
-	    		this.simulation.executeOrder(((OrderMessage)clientMessage).getOrder());
 	    	}
 	    } catch (ClassNotFoundException | IOException e) {
 		} 
 	    
 	}
- 
+
 	private void connecter() {
 		try {
 			socket = new Socket(hote, port);
 			objectOutputStream=new ObjectOutputStream(socket.getOutputStream());
 			objectIntputStream=new ObjectInputStream(socket.getInputStream());
+			System.out.println("connexion succeed");
 		} catch (IOException e) {
 			this.deconnecter();
 			e.printStackTrace();
@@ -107,7 +100,6 @@ public class Client implements CityBorder,Runnable{
 		
 		try {
 			objectOutputStream.writeObject(statistics);
-			
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
@@ -123,16 +115,4 @@ public class Client implements CityBorder,Runnable{
 			e.printStackTrace();
 		} 
 	}
-
-	public void sendClientMessage(String target,OrderType orderType) {
-		System.out.println("--------------------ENVOI ORDRE VERS "+target+"-----------------");
-		try {
-			objectOutputStream.writeObject(
-					new ClientMessage(target,new OrderMessage(orderType)));
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
-	}
-	
 }
