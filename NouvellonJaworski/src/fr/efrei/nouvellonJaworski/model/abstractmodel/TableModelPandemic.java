@@ -7,19 +7,10 @@ import fr.efrei.paumier.shared.simulation.Statistics;
 public class TableModelPandemic extends AbstractTableModel {
 
 	private static final long serialVersionUID = 1000045L;
-	private String[] columnNames= {"Temps","Original","Alive","Quarantined","Infected","Dead","Money","Panic LVL"};
+	private String[] columnNames= {"Groupe","Temps","Original","Alive","Quarantined","Infected","Dead","Money","Panic LVL"};
     private Object[][] data;
     
     public TableModelPandemic() {
-    	data=new Object[1][this.getColumnCount()];
-    	data[0][0]=0;
-    	data[0][1]=0;
-    	data[0][2]=0;
-    	data[0][3]=0;
-    	data[0][4]=0;
-    	data[0][5]=0;
-    	data[0][6]=0;
-    	data[0][7]=0;
     }
     
     @Override
@@ -28,6 +19,9 @@ public class TableModelPandemic extends AbstractTableModel {
     }
     @Override
     public int getRowCount() {
+    	if(data==null) {
+    		return 0;
+    	}
         return data.length;
     }
     @Override
@@ -55,9 +49,9 @@ public class TableModelPandemic extends AbstractTableModel {
      * @param data
      * @param title 
      */
-    public void setDataVector(Object[][] data,String[] title){
+    public void setDataVector(Object[][] data){
        this.data=data;
-       this.columnNames=title;
+       this.fireTableDataChanged();
     }
     
     
@@ -70,16 +64,66 @@ public class TableModelPandemic extends AbstractTableModel {
         fireTableCellUpdated(row, col);
     }
     
-    public void fillTableWithStats(Statistics stats) {
-    	data[0][0]=stats.getEllapsedDuration();
-    	data[0][1]=stats.getOriginalPopulation();
-    	data[0][2]=stats.getLivingPopulation();
-    	data[0][3]=stats.getQuarantinedPopulation();
-    	data[0][4]=stats.getInfectedPopulation();
-    	data[0][5]=stats.getDeadPopulation();
-    	data[0][6]=stats.getMoney();
-    	data[0][7]=stats.getPanicLevel();
+    
+    public void refreshStats(Statistics stats,String groupName) {
+    	int row=this.isPresent(groupName);
+    	if(row >=0) {
+    		this.fillTableWithStats(stats, row);
+    	}
+    	else {
+    		this.fillTableWithNewStats(stats, groupName);
+    	}
+    }
+    
+    private void fillTableWithStats(Statistics stats,int row) {
+
     	
+    	data[row][1]=stats.getEllapsedDuration();
+    	data[row][2]=stats.getOriginalPopulation();
+   		data[row][3]=stats.getLivingPopulation();
+   		data[row][4]=stats.getQuarantinedPopulation();
+   		data[row][5]=stats.getInfectedPopulation();
+   		data[row][6]=stats.getDeadPopulation();
+   		data[row][7]=stats.getMoney();
+   		data[row][8]=stats.getPanicLevel();
+    	
+    	this.fireTableRowsUpdated(row, row);
+    }
+    /**
+     * 
+     * @param groupName
+     * @return un indice >=0 si le groupe existe déja
+     * 		   un indice < 0 si le groupe n'existe pas
+     */
+    private int isPresent(String groupName) {
+    	for(int i=0;i<this.getRowCount();i++) {
+    		if(this.data[i][0].equals(groupName)){
+    			return i;
+    		}
+    	}
+    	return -1;
+    }
+    
+    private void fillTableWithNewStats(Statistics stats,String groupName){
+    	int row=this.getRowCount();
+    	
+    	Object[][] temp=new Object[row+1][this.getColumnCount()];
+    	
+    	for(int i=0;i<row;i++) {
+    		for(int j=0;j<this.getColumnCount();j++)
+    			temp[i][j]=data[i][j];
+    	}
+    	temp[row][0]=groupName;
+    	temp[row][1]=stats.getEllapsedDuration();
+    	temp[row][2]=stats.getOriginalPopulation();
+    	temp[row][3]=stats.getLivingPopulation();
+    	temp[row][4]=stats.getQuarantinedPopulation();
+    	temp[row][5]=stats.getInfectedPopulation();
+    	temp[row][6]=stats.getDeadPopulation();
+    	temp[row][7]=stats.getMoney();
+    	temp[row][8]=stats.getPanicLevel();
+    	
+    	this.setDataVector(temp);
     }
     
 }

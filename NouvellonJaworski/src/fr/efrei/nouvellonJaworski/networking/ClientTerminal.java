@@ -37,8 +37,8 @@ public class ClientTerminal implements Runnable{
 	    	//recupération d'un clientMessage
 	    	Message clientMessage=((ClientMessage) obj).getMessage();
 	    	
-	    	this.tableModelPandemic.fillTableWithStats((Statistics) clientMessage);
-	    	this.tableModelPandemic.fireTableRowsUpdated(0, 1);
+	    	this.tableModelPandemic.refreshStats(((Statistics) clientMessage),
+	    			((ClientMessage) obj).getName());
 	    	
 	    } catch (ClassNotFoundException | IOException e) {
 		} 
