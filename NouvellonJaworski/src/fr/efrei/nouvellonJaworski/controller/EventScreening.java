@@ -48,6 +48,7 @@ public class EventScreening implements Event{
 		List<Habitant> habitantsHealthyAndNot=new ArrayList<Habitant>();
 		habitantsHealthyAndNot.addAll(ville.getHabitantsHealthy());
 		habitantsHealthyAndNot.addAll(ville.getHabitantsInfected());
+		
 		// trier la liste par ordre croissant d'id
 		habitantsHealthyAndNot.sort((o1, o2) -> o1.getId().compareTo(o2.getId()));
 		
@@ -58,14 +59,20 @@ public class EventScreening implements Event{
 				
 				
 				if(target.isolateHabitant()) {
-					ville.getHabitantsIsolated().add(target);
-					ville.getHabitantsInfected().remove(target);
-					EventCure eventCure=new EventCure(Duration.ofSeconds(5),
-							triggeredEventsList, ville, target,simulation);
-					gameEngine.register(eventCure);
+					this.launchCureEvent(target);
 				}
 			}
 		}
+	}
+	
+	
+	private void launchCureEvent(Habitant target) {
+		
+		ville.getHabitantsIsolated().add(target);
+		ville.getHabitantsInfected().remove(target);
+		EventCure eventCure=new EventCure(Duration.ofSeconds(5),
+				triggeredEventsList, ville, target,simulation);
+		gameEngine.register(eventCure);
 	}
 	
 	@Override

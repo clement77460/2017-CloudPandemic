@@ -35,29 +35,37 @@ public class EventImmigration implements Event{
 	@Override
 	public void trigger() {
 		
-		Habitant temp=new Habitant();
-		temp.setEmigrated(false);
+		Habitant immigrant=new Habitant();
+		immigrant.setEmigrated(false);
 		
 		triggeredEventsList.add(this);
 		
 		
 		if(isInfected) {
-			temp.infectSomeone();
-			ville.getHabitantsInfected().add(temp);
-			EventSpreading eventSpreading = new EventSpreading(Duration.ofSeconds(5),
-					triggeredEventsList, ville, temp,simulation);
+			immigrant.infectSomeone();
+			ville.getHabitantsInfected().add(immigrant);
 			
-			EventDeath eventDeath = new EventDeath(Duration.ofSeconds(15),
-					triggeredEventsList, ville, temp,simulation);
-			
-			this.gameEngine.register(eventSpreading,eventDeath);
+			this.launchEventsOnImmigrant(immigrant);
 			
 		}else {
-			ville.getHabitantsHealthy().add(temp);
+			ville.getHabitantsHealthy().add(immigrant);
 		}
 		
 	}
-
+	
+	
+	private void launchEventsOnImmigrant(Habitant immigrant) {
+		
+		
+		EventSpreading eventSpreading = new EventSpreading(Duration.ofSeconds(5),
+				triggeredEventsList, ville, immigrant,simulation);
+		
+		EventDeath eventDeath = new EventDeath(Duration.ofSeconds(15),
+				triggeredEventsList, ville, immigrant,simulation);
+		
+		this.gameEngine.register(eventSpreading,eventDeath);
+	}
+	
 	@Override
 	public Duration getDuration() {
 		

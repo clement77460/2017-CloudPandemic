@@ -35,15 +35,19 @@ public class EventDeath implements Event{
 		if(!target.isEmigrated()) {
 			if(target.killHabitant() ) {
 				
-				ville.getHabitantsInfected().remove(target);
-				ville.incrPanic(5);
-				
-				ville.getHabitantsIsolated().remove(target);			
-				ville.getHabitantsDead().add(target);
+				this.killHabitantAndIncreasePanic();
 			}
 		}
 	}
 
+	private void killHabitantAndIncreasePanic() {
+		ville.getHabitantsInfected().remove(target);
+		ville.incrPanic(5);
+		
+		ville.getHabitantsIsolated().remove(target);			
+		ville.getHabitantsDead().add(target);
+	}
+	
 	@Override
 	public Duration getDuration() {
 		return duration;

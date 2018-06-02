@@ -44,17 +44,25 @@ public class PandemicFrame extends JFrame{
 	}
 	
 	private Component createTablePane() {
+		
+		this.designTableHeader();
+		this.designTableContent();
+		
+		return new JScrollPane(table);
+	}
+	
+	private void designTableHeader() {
 		table.getTableHeader().setBackground(new Color(0,0,0));
 		table.getTableHeader().setForeground(new Color(255,0,0));
 		table.getTableHeader().setFont(new Font("Arial",Font.BOLD,20));
-		
+	}
+	
+	private void designTableContent(){
 		table.setBackground(new Color(0,0,0));
 		table.setFont(new Font("Arial",Font.BOLD,20));
 		table.setForeground(new Color(255,0,0));
 		table.setRowHeight(this.getHeight()/7);
 		table.setGridColor(new Color(255,0,0));
-		
-		return new JScrollPane(table);
 	}
 	
 	private Component createComboBoxPane() {

@@ -86,7 +86,10 @@ public class TableModelPandemic extends AbstractTableModel {
    		data[row][6]=stats.getDeadPopulation();
    		data[row][7]=stats.getMoney();
    		data[row][8]=stats.getPanicLevel();
-    	
+   		
+    	// a tester quand le serveur sera up (fonction qui évite redondance)
+   		//this.insertStats(stats,data,row);
+   		
     	this.fireTableRowsUpdated(row, row);
     }
     /**
@@ -107,23 +110,38 @@ public class TableModelPandemic extends AbstractTableModel {
     private void fillTableWithNewStats(Statistics stats,String groupName){
     	int row=this.getRowCount();
     	
-    	Object[][] temp=new Object[row+1][this.getColumnCount()];
+    	Object[][] newData=new Object[row+1][this.getColumnCount()];
     	
     	for(int i=0;i<row;i++) {
     		for(int j=0;j<this.getColumnCount();j++)
-    			temp[i][j]=data[i][j];
+    			newData[i][j]=data[i][j];
     	}
-    	temp[row][0]=groupName;
-    	temp[row][1]=stats.getEllapsedDuration();
-    	temp[row][2]=stats.getOriginalPopulation();
-    	temp[row][3]=stats.getLivingPopulation();
-    	temp[row][4]=stats.getQuarantinedPopulation();
-    	temp[row][5]=stats.getInfectedPopulation();
-    	temp[row][6]=stats.getDeadPopulation();
-    	temp[row][7]=stats.getMoney();
-    	temp[row][8]=stats.getPanicLevel();
+    	newData[row][0]=groupName;
+    	newData[row][1]=stats.getEllapsedDuration();
+    	newData[row][2]=stats.getOriginalPopulation();
+    	newData[row][3]=stats.getLivingPopulation();
+    	newData[row][4]=stats.getQuarantinedPopulation();
+    	newData[row][5]=stats.getInfectedPopulation();
+    	newData[row][6]=stats.getDeadPopulation();
+    	newData[row][7]=stats.getMoney();
+    	newData[row][8]=stats.getPanicLevel();
     	
-    	this.setDataVector(temp);
+    	// a tester quand le serveur sera up (fonction qui évite redondance)
+    	//this.insertStats(stats, newData, row);
+    	
+    	this.setDataVector(newData);
+    }
+    
+    private void insertStats(Statistics stats,Object[][] newData,int row) {
+    	
+    	newData[row][1]=stats.getEllapsedDuration();
+    	newData[row][2]=stats.getOriginalPopulation();
+    	newData[row][3]=stats.getLivingPopulation();
+    	newData[row][4]=stats.getQuarantinedPopulation();
+    	newData[row][5]=stats.getInfectedPopulation();
+    	newData[row][6]=stats.getDeadPopulation();
+    	newData[row][7]=stats.getMoney();
+    	newData[row][8]=stats.getPanicLevel();
     }
     
 }
