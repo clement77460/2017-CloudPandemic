@@ -77,7 +77,7 @@ public class TableModelPandemic extends AbstractTableModel {
     
     private void fillTableWithStats(Statistics stats,int row) {
 
-    	
+    	//à Supprimer si on met la fonction insertStats
     	data[row][1]=stats.getEllapsedDuration();
     	data[row][2]=stats.getOriginalPopulation();
    		data[row][3]=stats.getLivingPopulation();
@@ -117,6 +117,8 @@ public class TableModelPandemic extends AbstractTableModel {
     			newData[i][j]=data[i][j];
     	}
     	newData[row][0]=groupName;
+    	
+    	//à Supprimer si on met la fonction insertStats
     	newData[row][1]=stats.getEllapsedDuration();
     	newData[row][2]=stats.getOriginalPopulation();
     	newData[row][3]=stats.getLivingPopulation();
@@ -126,7 +128,7 @@ public class TableModelPandemic extends AbstractTableModel {
     	newData[row][7]=stats.getMoney();
     	newData[row][8]=stats.getPanicLevel();
     	
-    	// a tester quand le serveur sera up (fonction qui évite redondance)
+    	// à tester quand le serveur sera up (fonction qui évite redondance)
     	//this.insertStats(stats, newData, row);
     	
     	this.setDataVector(newData);
