@@ -3,7 +3,6 @@ package fr.efrei.nouvellonJaworski.model.entities;
 import java.util.*;
 
 import fr.efrei.paumier.shared.domain.CityBorder;
-import fr.efrei.paumier.shared.domain.MigrationMessage;
 import fr.efrei.paumier.shared.selection.Selector;
 
 
@@ -16,7 +15,7 @@ public class Ville {
 	private List<Habitant> habitantsInfected;
 	private List<Habitant> habitantsIsolated;
 	private List<Habitant> habitantsDead;
-	protected static SimulationImplement stats;
+	
 	private Double panicLVL;
 	 
 	
@@ -67,23 +66,39 @@ public class Ville {
 		return habitantsDead;
 	}
 	
-	public void decrPanic() {
+	public void decreasePanic(double decreaseValue) {
 		
-		if(panicLVL>=2.5)
-			this.panicLVL=this.panicLVL-2.5;
+		if(panicLVL>=decreaseValue)
+			this.panicLVL=this.panicLVL-decreaseValue;
 	}
 	
-	public void incrPanic() {
+	public void incrPanic(double increaseValue) {
 		int livingPopulation=this.getHabitantsHealthy().size()+this.getHabitantsInfected().size()
 				+this.getHabitantsIsolated().size();
 		
-		this.panicLVL=this.panicLVL+5.0;
+		this.panicLVL=this.panicLVL+increaseValue;
 		
-		if(this.panicLVL>=livingPopulation && border!=null) {
+		
+		if(this.panicLVL>livingPopulation && border!=null) {
 			
-			this.emigration();
-			if(panicLVL>=5) 
+			
+			if(panicLVL>=5) {
 				this.panicLVL=this.panicLVL-5.0;
+			}
+			this.emigration();
+		}
+	}
+	
+	private void checkPanic() {
+		int livingPopulation=this.getHabitantsHealthy().size()+this.getHabitantsInfected().size()
+				+this.getHabitantsIsolated().size();
+		
+		if(this.panicLVL>livingPopulation && border!=null) {
+			if(panicLVL>=5) {
+				this.panicLVL=this.panicLVL-5.0;
+				this.emigration();
+				this.checkPanic();
+			}
 		}
 	}
 	
@@ -93,15 +108,18 @@ public class Ville {
 		habitantsHealthyAndInfected.addAll(habitantsInfected);
 		habitantsHealthyAndInfected.addAll(habitantsHealthy);
 		habitantsHealthyAndInfected.sort((o1, o2) -> o1.getId().compareTo(o2.getId()));
+		if(habitantsHealthyAndInfected.size()>0) {
+			Habitant target=selector.selectAmong(habitantsHealthyAndInfected);
+			
+			
+			habitantsHealthy.remove(target);
+			habitantsInfected.remove(target);
+			
+			target.setEmigrated(true);
+			border.sendEmigrant(target.isInfected());
+			this.checkPanic();
+		}
 		
-		Habitant target=selector.selectAmong(habitantsHealthyAndInfected);
-		
-		
-		habitantsHealthy.remove(target);
-		habitantsInfected.remove(target);
-		
-		target.setEmigrated(true);
-		border.sendEmigrant(target.isInfected());
 	}
 	
 	

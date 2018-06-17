@@ -688,8 +688,8 @@ public abstract class BaseSimulationTests {
 	@Test
 	public void death_increasesPanicLevel_upToTotalPopulation() {
 		setupScenarioForPanic();
-		
-		selector.enqueueRankMultipleTimes(-1, 4); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations
+
+		selector.enqueueRankMultipleTimes(-1, 5); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 5 emmigrations (including 1 double emigration) 
 		selector.enqueueRankMultipleTimes(0, 34); // sec 43 - (8 deaths), 34 spreadings - panic 100 (max) - 0 emmigrations
 
 		// Details of sec 43:
@@ -704,8 +704,9 @@ public abstract class BaseSimulationTests {
 		//	-> Emigration - Population = 80, panic 80 - choosing last person in the list
 		// Seventh death - Population = 79, panic 85
 		//	-> Emigration - Population = 78, panic 80 - choosing last person in the list
-		// Eigth death - Population = 77, panic 85
-		//	-> Emigration - Population = 76, panic 80 - choosing last person in the list
+		//  -> Emigration - Population = 77, panic 80 - choosing last person in the list (also due to the fact that emigration lower the population)
+		// Eigth death - Population = 76, panic 85
+		//	-> Emigration - Population = 75, panic 80 - choosing last person in the list
 		// Because we chose the last person each time, he's not infected (and not dying)
 		
 		clock.advanceTo(Duration.ofSeconds(18));
@@ -744,8 +745,8 @@ public abstract class BaseSimulationTests {
 	public void emigration_capPanicToLivingPopulation() {
 		setUpWithBorder();
 		setupScenarioForPanic();
-		
-		selector.enqueueRankMultipleTimes(-1, 4); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations
+
+		selector.enqueueRankMultipleTimes(-1, 5); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 5 emmigrations (including 1 double emigration) 
 		selector.enqueueRankMultipleTimes(0, 34); // sec 43 - (8 deaths), 34 spreadings - panic 100 (max) - 0 emmigrations
 
 		// same details as previous test
@@ -753,7 +754,7 @@ public abstract class BaseSimulationTests {
 		clock.advanceTo(Duration.ofSeconds(43));
 		simulation.update();
 
-		assertEquals(80, simulation.getPanicLevel(), 0.01);
+		assertEquals(75, simulation.getPanicLevel(), 0.01);
 		assertEquals(20, simulation.getDeadPopulation());
 	}
 
@@ -762,7 +763,7 @@ public abstract class BaseSimulationTests {
 		setUpWithBorder();
 		setupScenarioForPanic();
 		
-		selector.enqueueRankMultipleTimes(-1, 4); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations
+		selector.enqueueRankMultipleTimes(-1, 5); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 5 emmigrations (including 1 double emigration) 
 		selector.enqueueRankMultipleTimes(0, 34); // sec 43 - (8 deaths), 34 spreadings - panic 100 (max) - 0 emmigrations
 
 		// same details as previous test
@@ -770,11 +771,8 @@ public abstract class BaseSimulationTests {
 		clock.advanceTo(Duration.ofSeconds(43));
 		simulation.update();
 
-		assertEquals(80, simulation.getPanicLevel(), 0.01);
-		assertEquals(20, simulation.getDeadPopulation());
-		
 		assertEquals(100, simulation.getOriginalPopulation());
-		assertEquals(76, simulation.getLivingPopulation());		
+		assertEquals(75, simulation.getLivingPopulation());		
 	}
 
 	@Test
@@ -782,7 +780,7 @@ public abstract class BaseSimulationTests {
 		setUpWithBorder();
 		setupScenarioForPanic();
 		
-		selector.enqueueRankMultipleTimes(-1, 4); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations
+		selector.enqueueRankMultipleTimes(-1, 5); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations (including 1 double emigration - see above)
 		selector.enqueueRankMultipleTimes(0, 34); // sec 43 - (8 deaths), 34 spreadings - panic 100 (max) - 0 emmigrations
 
 		// same details as previous test
@@ -790,7 +788,7 @@ public abstract class BaseSimulationTests {
 		clock.advanceTo(Duration.ofSeconds(43));
 		simulation.update();
 
-		assertEquals(4, border.getEmigrants().size());
+		assertEquals(5, border.getEmigrants().size());
 		assertFalse(border.getEmigrants().get(0));
 		assertFalse(border.getEmigrants().get(1));
 		assertFalse(border.getEmigrants().get(2));
@@ -802,7 +800,7 @@ public abstract class BaseSimulationTests {
 		setUpWithBorder();
 		setupScenarioForPanic();
 		
-		selector.enqueueRankMultipleTimes(0, 4); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 4 emmigrations
+		selector.enqueueRankMultipleTimes(0, 5); // sec 43 - (8 deaths), 34 spreadings - panic 80 (max) - 5 emmigrations
 		selector.enqueueRankMultipleTimes(0, 34); // sec 43 - (8 deaths), 34 spreadings - panic 100 (max) - 0 emmigrations
 
 		// Important change : we instead emmigrate the first inhabitant in the list - a dying one
@@ -970,6 +968,691 @@ public abstract class BaseSimulationTests {
 		assertEquals(4, simulation.getInfectedPopulation());
 		assertEquals(0, simulation.getQuarantinedPopulation());
 		assertEquals(0, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void v6_improvingMedicine_firstTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+
+	@Test
+	public void v6_improvingMedicine_secondTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+
+	@Test
+	public void v6_improvingMedicine_doubleRateOfCure() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.enqueueRanks(0, 0); // sec 13: 2 spreadings (#2, #3)
+		selector.enqueueRanks(3); // sec 13: 1 screening - #3 quarantined
+		
+		clock.advanceTo(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE); // Will be available at sec 10
+		
+		clock.advanceTo(Duration.ofMillis(15500));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(3, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void v6_improvingMedicine_twice_trippleRateOfCure() {
+		selector.setDefaultValue(50);		
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(0); // sec 03 - infection (#0}
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0); // sec 08 - spreading (#1)
+		selector.skipNext(25); //  screenings...
+		selector.enqueueRanks(0, 0); // sec 13 - spreading x 2 (#2 & #3)
+		selector.skipNext(5); // sec 13
+		selector.skipNext(5); // sec 14
+		selector.skipNext(5); // sec 15
+		selector.skipNext(1); // sec 16.0
+		selector.enqueueRanks(0); // sec 16.2: 1 screening - #0 quarantined
+		selector.skipNext(3); // sec 16.4, 16.6 & 16.8
+		selector.skipNext(5); // sec 17
+		
+		clock.advanceTo(Duration.ofSeconds(10));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE); // Will be available at sec 15
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE); // Will be available at sec 15
+		
+		clock.advanceTo(Duration.ofMillis(17867));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(3, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void v6_improvingMedicine_canSaveSomebodyMuchCloserToHisEnd() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.enqueueRanks(0, 0); // sec 13: 2 spreadings (#2, #3)
+		selector.skipNext(5); // sec 13
+		selector.skipNext(5); // sec 14
+		selector.enqueueRanks(0); // sec 15: 1 screening - #0 quarantined
+		selector.skipNext(4); // sec 15
+		selector.skipNext(5); // sec 16
+		selector.skipNext(5); // sec 17
+		selector.skipNext(24);
+		selector.enqueueRanks(1, 1, 1); // sec 18: 3 spreadings
+		
+		clock.advanceTo(Duration.ofMillis(5000));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE); // Will be available at sec 10
+		
+		clock.advanceTo(Duration.ofMillis(18000)); // Curing event of # will trigger at 17.5, before the dying event of sec 18
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(6, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void v6_improvingMedicine_cannotSaveSomebodyAtTheVeryEnd() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.enqueueRanks(0, 0); // sec 13: 2 spreadings (#2, #3)
+		selector.skipNext(5); // sec 13
+		selector.skipNext(5); // sec 14
+		selector.skipNext(5); // sec 15
+		selector.enqueueRanks(0); // sec 16: 1 screening - #0 quarantined
+		selector.skipNext(4); // sec 16
+		selector.skipNext(5); // sec 17
+		selector.skipNext(24);
+		selector.enqueueRanks(1, 1, 1); // sec 18: 3 spreadings
+		
+		clock.advanceTo(Duration.ofMillis(5000));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE); // Will be available at sec 10
+		
+		clock.advanceTo(Duration.ofMillis(18000)); // Curing event of # will trigger at 18.5, after the dying event of sec 18
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(6, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void v6_improvingMedicine_rightNearEnd_mightBeEnoughToSaveHim() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.enqueueRanks(0, 0); // sec 13: 2 spreadings (#2, #3)
+		selector.enqueueRanks(0); // sec 13: 1 screening - #0 quarantined
+		selector.skipNext(24);
+		selector.enqueueRanks(1, 1, 1); // sec 18: 3 spreadings
+		
+		clock.advanceTo(Duration.ofMillis(12900));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_MEDICINE); // Will be available at sec 17.9
+		
+		clock.advanceTo(Duration.ofMillis(18000)); // #0 will be cured at sec 17.950, before the dying event of sec 18
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(6, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
+	
+	@Test
+	public void v6_improvingVaccine_firstTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_VACCINE);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+
+	@Test
+	public void v6_improvingVaccine_secondTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_VACCINE);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_VACCINE);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+	
+	@Test
+	public void v6_improvingMedicine_reduceRateOfDyingBy20Percent() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.enqueueRanks(0, 0); // sec 13: 2 spreadings (#2, #3)
+		selector.skipNext(25);
+		selector.enqueueRanks(1, 1, 1, 1); // sec 18: 4 spreadings (+1 because #0 is still alive)
+		selector.skipNext(24);
+		
+		clock.advanceTo(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_VACCINE); // Will be available at sec 10
+		
+		// #0 will be infected at 3
+		// at 10, 8 seconds of life remains. Vaccine is then discovered. 
+		// 8 / 0.8 = 10 seconds of life now remains.
+		// He will die at sec 20 precisely
+		
+		clock.advanceTo(Duration.ofMillis(18000));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(8, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(19999));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(8, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(20000));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(7, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+	}
+	
+	@Test
+	public void v6_improvingMedicine_twice_reduceRateOfDyingBy36Percents() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.enqueueRanks(0, 0); // sec 13: 2 spreadings (#2, #3)
+		selector.skipNext(25);
+		selector.enqueueRanks(1, 1, 1, 1); // sec 18: 4 spreadings (+1 because #0 is still alive)
+		selector.skipNext(24);
+		
+		clock.advanceTo(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_VACCINE); // Will be available at sec 10
+		
+		clock.advanceTo(Duration.ofSeconds(10));
+		simulation.update();
+		simulation.executeOrder(OrderType.RESEARCH_IMPROVED_VACCINE); // Will be available at sec 15
+		
+		// #0 will be infected at 3
+		// at 10, 8 seconds of life remains. Vaccine is then improved. 
+		// 8 / 0.8 = 10 seconds of life now remains.
+		// at 15, 5 seconds of life remains. Vaccine is then improved again. 
+		// 5 / 0.8 = 6.25 seconds of life now remains.
+		// He will die at sec 21.25 precisely
+		
+		clock.advanceTo(Duration.ofMillis(18000));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(8, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(21249));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(8, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(21250));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(7, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+	}	 
+	
+	@Test
+	public void v6_increaseCurfew_firstTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+
+	@Test
+	public void v6_increaseCurfew_secondTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+	
+	@Test
+	public void v6_increaseCurfew_reduceRateOfSpreadingBy20Percent() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.skipNext(4); // sec 13.0, 13.2, 13.4, 13.6
+		selector.enqueueRanks(0, 0); // sec 13.750: 2 spreadings (#2, #3)
+		
+		clock.advanceTo(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 10
+				
+		// #0 and #1 are supposed to spread at sec 13
+		// Those 3 remaining seconds will become 3.75
+		
+		clock.advanceTo(Duration.ofMillis(13749));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(2, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(13750));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(100, simulation.getLivingPopulation());
+		assertEquals(4, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(0, simulation.getDeadPopulation());
+	}
+	
+	@Test
+	public void v6_increaseCurfew__forFullSpreads_reduceRateOfSpreadingBy20Percent() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.skipNext(4); // sec 13.0, 13.2, 13.4, 13.6
+		selector.enqueueRanks(0, 0); // sec 13.750: 2 spreadings (#2, #3)
+		selector.skipNext(1); // sec 13.8
+		selector.skipNext(30); // sec 14 -> 19.8
+		selector.enqueueRanks(1, 1, 1); // sec 20: 3 spreadings
+		
+		clock.advanceTo(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 10
+				
+		// #0 and #1 are supposed to spread at sec 13
+		// Those 3 remaining seconds will become 3.75
+		// Then the next wave of spreading will happen 6.25 second later, so at 20
+		
+		clock.advanceTo(Duration.ofMillis(19999));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(3, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(20000));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(6, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+	}
+	
+	@Test
+	public void v6_increaseCurfew_twice_reduceRateOfSpreadingBy36Percents() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.skipNext(4); // sec 13.0, 13.2, 13.4, 13.6
+		selector.enqueueRanks(0, 0); // sec 13.750: 2 spreadings (#2, #3)
+		selector.skipNext(1); // sec 13.8
+		selector.skipNext(35); // sec 14 -> 20.8
+		selector.skipNext(1); // sec 21.0
+		selector.skipNext(1); // sec 21.2
+		selector.enqueueRanks(1, 1, 1); // sec 21.250: 3 spreadings
+		
+		clock.advanceTo(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 10
+		
+		clock.advanceTo(Duration.ofSeconds(10));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 15
+				
+		// #0 and #1 are supposed to spread at sec 13
+		// At sec 10, the 3 remaining seconds will become 3.75
+		// At 13.75, a new wave of spreading will be scheduled to 20
+		// At 15, the 5 remaing seconds will become 6.25		
+		
+		clock.advanceTo(Duration.ofMillis(21249));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(3, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(21250));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(6, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void v6_increaseCurfew_canTriggerEmigration() {
+		setUpWithBorder();
+		setupScenarioForPanic(); // at 38, panic will be at 60... or more if we increase the curfew
+		
+		clock.advanceTo(Duration.ofMillis(33100));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 38.1
+
+		// same details as previous test
+		
+		clock.advanceTo(Duration.ofMillis(38000));
+		simulation.update();
+
+		assertEquals(0, border.getEmigrants().size());
+		
+		clock.advanceTo(Duration.ofMillis(38100));
+		simulation.update();
+
+		assertEquals(3, border.getEmigrants().size());
+	}
+	
+	@Test
+	public void v6_reduceCurfew_firstTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW);
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.REDUCE_CURFEW);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+
+	@Test
+	public void v6_reduceCurfew_secondTime_costs100() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW);
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.REDUCE_CURFEW);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.REDUCE_CURFEW);
+		
+		assertEquals(0, simulation.getMoney());
+	}
+	
+	@Test
+	public void v6_reduceCurfew_cannotDecreaseMoreThanIncrease() {
+		selector.setDefaultValue(-1);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW);
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.REDUCE_CURFEW);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.REDUCE_CURFEW);
+
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.REDUCE_CURFEW);
+		
+		assertEquals(100, simulation.getMoney());
+	}
+	
+	@Test
+	public void v6_reduceCurfew_cancelRateOfSpreadingIncrease() {
+		selector.setDefaultValue(50); // screening inhabitants in the middle of the list
+		selector.skipNext(14);
+		selector.enqueueRanks(0); // sec 03: 1 initial infection (#0)
+		selector.skipNext(25);
+		selector.enqueueRanks(0); // sec 08: 1 spreading (#1)
+		selector.skipNext(25);
+		selector.skipNext(4); // sec 13.0, 13.2, 13.4, 13.6
+		selector.enqueueRanks(0, 0); // sec 13.750: 2 spreadings (#2, #3)
+		selector.skipNext(1); // sec 13.8
+		selector.skipNext(25); // sec 14 -> 18.8
+		selector.enqueueRanks(1, 1, 1); // sec 19: 3 spreadings
+		
+		clock.advanceTo(Duration.ofSeconds(5));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 10
+		
+		clock.advanceTo(Duration.ofSeconds(10));
+		simulation.update();
+		simulation.executeOrder(OrderType.REDUCE_CURFEW); // Will be available at sec 15
+				
+		// #0 and #1 are supposed to spread at sec 13
+		// At sec 10, the 3 remaining seconds will become 3.75
+		// At 13.75, a new wave of spreading will be scheduled to 20
+		// At 15, the 5 remaing seconds will become 4		
+		
+		clock.advanceTo(Duration.ofMillis(18999));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(3, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+		
+		clock.advanceTo(Duration.ofMillis(19000));
+		simulation.update();		
+		
+		assertEquals(100, simulation.getOriginalPopulation());
+		assertEquals(99, simulation.getLivingPopulation());
+		assertEquals(6, simulation.getInfectedPopulation());
+		assertEquals(0, simulation.getQuarantinedPopulation());
+		assertEquals(1, simulation.getDeadPopulation());
+	}
+
+	@Test
+	public void v6_reduceCurfew_cancelPanicIncrease() {
+		setUpWithBorder();
+		setupScenarioForPanic(); // at 38, panic will be at 60... or more if we increase the curfew
+		
+		clock.advanceTo(Duration.ofMillis(33100));
+		simulation.update();
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.REDUCE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.REDUCE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.REDUCE_CURFEW); // Will be available at sec 38.1
+		simulation.executeOrder(OrderType.INCREASE_CURFEW); // Will be available at sec 38.1
+
+		clock.advanceTo(Duration.ofMillis(38100));
+		simulation.update();
+
+		assertEquals(0, border.getEmigrants().size());
+	}
+
+	@Test
+	public void v6_sendStatistics_forwardAllData() {
+		setUpWithBorder();
+		
+		selector.setDefaultValue(50);
+		selector.skipNext(14); //  screenings...
+		selector.enqueueRanks(10); // sec 03 - infection		
+		selector.enqueueRanks(10); // sec 03 - screening
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();		
+		simulation.sendStatistics();
+
+		assertEquals(1, border.getStatisticsList().size());
+		Statistics firstCapture = border.getStatisticsList().get(0);
+		
+		assertEquals(100, firstCapture.getOriginalPopulation());
+		assertEquals(100, firstCapture.getLivingPopulation());
+		assertEquals(1, firstCapture.getInfectedPopulation());
+		assertEquals(1, firstCapture.getQuarantinedPopulation());
+		assertEquals(0, firstCapture.getDeadPopulation());
+		assertEquals(100, firstCapture.getMoney());
+		assertEquals(0, firstCapture.getPanicLevel(), 0.01);
+		assertEquals(Duration.ofSeconds(5), firstCapture.getEllapsedDuration());
+		
+		clock.advance(Duration.ofSeconds(5));
+		simulation.update();		
+		simulation.sendStatistics();
+
+		assertEquals(2, border.getStatisticsList().size());
+		assertEquals(firstCapture, border.getStatisticsList().get(0));
+		Statistics secondCapture = border.getStatisticsList().get(1);
+		
+		assertEquals(100, secondCapture.getOriginalPopulation());
+		assertEquals(100, secondCapture.getLivingPopulation());
+		assertEquals(0, secondCapture.getInfectedPopulation());
+		assertEquals(0, secondCapture.getQuarantinedPopulation());
+		assertEquals(0, secondCapture.getDeadPopulation());
+		assertEquals(200, secondCapture.getMoney());
+		assertEquals(0, secondCapture.getPanicLevel(), 0.01);
+		assertEquals(Duration.ofSeconds(10), secondCapture.getEllapsedDuration());
 	}
 }
 

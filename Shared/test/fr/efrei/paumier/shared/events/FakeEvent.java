@@ -12,6 +12,8 @@ public class FakeEvent implements Event {
 	private TimeManager manager;
 	private Instant triggeredInstant;
 	
+	private double rate = 1;
+	
 	public FakeEvent(Instant currentInstant, Duration duration, TimeManager manager, List<Event> triggeredEventsList) {
 		this.duration = duration;
 		this.manager = manager;
@@ -30,6 +32,15 @@ public class FakeEvent implements Event {
 	@Override
 	public Duration getDuration() {
 		return duration;
+	}
+
+	@Override
+	public double getRate() {
+		return rate;
+	}
+
+	public void setRate(double rate) {
+		this.rate = rate;
 	}
 	
 	public Instant getTriggeredInstant() {

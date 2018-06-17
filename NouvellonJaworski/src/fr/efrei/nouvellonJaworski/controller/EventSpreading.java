@@ -1,33 +1,30 @@
 package fr.efrei.nouvellonJaworski.controller;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.model.entities.Habitant;
+import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
 import fr.efrei.nouvellonJaworski.model.entities.Ville;
-import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
-import fr.efrei.paumier.shared.selection.Selector;
 
 public class EventSpreading implements Event{
 	private final Duration duration;
 	private final List<Event> triggeredEventsList;
 	private final Ville ville;
 	private final Habitant source;
-	private final GameEngine gameEngine;
-	private Selector selector;
+	private final SimulationImplement simulation;
+
 	
-	private Instant triggeredInstant;
-	
-	public EventSpreading(Instant currentInstant, Duration duration, GameEngine gameEngine, List<Event> triggeredEventsList,Ville ville,Habitant source,Selector selector) {
+	public EventSpreading(Duration duration, 
+			List<Event> triggeredEventsList,
+			Ville ville,Habitant source,SimulationImplement simulation) {
 		
 		this.duration = duration; 
 		this.triggeredEventsList = triggeredEventsList;
 		this.ville=ville;
 		this.source=source;
-		this.gameEngine=gameEngine;
-		this.selector=selector; 
+		this.simulation=simulation;
 		
 	}
 	
@@ -36,35 +33,11 @@ public class EventSpreading implements Event{
 		
 		triggeredEventsList.add(this);
 		
-		if (gameEngine != null) {
-			this.triggeredInstant = gameEngine.getCurrentInstant();
-		} 
 		
-		//System.out.println("on lance un spreading event a "+this.triggeredInstant.toString());
-		
-		if(!source.isDead() && !source.isIsolated() && ville.getHabitantsHealthy().size()!=0) {
-			//System.out.println("mort: "+source.isDead()+ " isolated :"+source.isIsolated() );
-			this.launchDeathAndSpreading();
+		if(!source.isDead() && !source.isIsolated() && source.isInfected() && ville.getHabitantsHealthy().size()!=0) {
 			
-		}
-	}
-
-	private void launchDeathAndSpreading() {
-		//s'il y a la présence de non infectés
-		if(ville.getHabitantsHealthy().size()>0) {
-			Habitant target = selector.selectAmong(ville.getHabitantsHealthy());
+			simulation.createInfectAndDeathEvent(source, triggeredEventsList);
 			
-			source.infectSomeone(target);
-			ville.getHabitantsHealthy().remove(target);
-			ville.getHabitantsInfected().add(target);
-		
-		
-			
-			EventSpreading eventSpreading1 = new EventSpreading(this.triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, source,selector);
-			EventSpreading eventSpreading2 = new EventSpreading(this.triggeredInstant, Duration.ofSeconds(5), gameEngine, triggeredEventsList, ville, target,selector);
-			EventDeath eventDeath = new EventDeath(this.triggeredInstant, Duration.ofSeconds(15), gameEngine, triggeredEventsList, ville,target);
-			
-			gameEngine.register(eventSpreading1,eventSpreading2,eventDeath);
 		}
 	}
 	
@@ -73,4 +46,8 @@ public class EventSpreading implements Event{
 		return duration;
 	}
 
+	public double getRate() {
+		
+		return simulation.getRateStorage().getSpreadingRate();
+	}
 }

@@ -1,30 +1,27 @@
 package fr.efrei.nouvellonJaworski.controller;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.model.entities.Habitant;
+import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
 import fr.efrei.nouvellonJaworski.model.entities.Ville;
-import fr.efrei.paumier.shared.engine.GameEngine;
 import fr.efrei.paumier.shared.events.Event;
 
 public class EventDeath implements Event{
 	private final Ville ville;
 	private final Duration duration;
-	private final GameEngine gameEngine;
 	private final List<Event> triggeredEventsList;
+	private final SimulationImplement simulation;
 	private Habitant target;
-	private Instant triggeredInstant;
 	
 	
-	public EventDeath(Instant currentInstant, Duration duration, GameEngine gameEngine, 
-			List<Event> triggeredEventsList, Ville ville, Habitant target) { 
-		
+	public EventDeath(Duration duration,List<Event> triggeredEventsList, 
+			Ville ville, Habitant target,SimulationImplement simulation) { 
+		this.simulation=simulation;
 		this.duration = duration;
 		this.triggeredEventsList = triggeredEventsList;
 		this.ville=ville;
-		this.gameEngine=gameEngine;
 		this.target=target;
 	}
 	
@@ -33,30 +30,33 @@ public class EventDeath implements Event{
 	public void trigger() {
 		
 		triggeredEventsList.add(this);
-		
-		if (gameEngine != null) {
-			this.triggeredInstant = gameEngine.getCurrentInstant();
-		} 
-		
-		//System.out.println("on lance un death event à "+this.triggeredInstant.toString());
-		
+
 		
 		if(!target.isEmigrated()) {
-			if(target.killHabitant() ) {//he died
-				if(!target.isIsolated()) {//is not isolate
-					ville.getHabitantsInfected().remove(target);
-					ville.incrPanic();
-				}
+			if(target.killHabitant() ) {
 				
-				
-				ville.getHabitantsDead().add(target);
+				this.killHabitantAndIncreasePanic();
 			}
 		}
 	}
 
+	private void killHabitantAndIncreasePanic() {
+		ville.getHabitantsInfected().remove(target);
+		ville.incrPanic(5);
+		
+		ville.getHabitantsIsolated().remove(target);			
+		ville.getHabitantsDead().add(target);
+	}
+	
 	@Override
 	public Duration getDuration() {
 		return duration;
+	}
+	
+	public double getRate() {
+		
+		return simulation.getRateStorage().getDeathRate();
+		
 	}
 
 }

@@ -1,7 +1,6 @@
 package fr.efrei.nouvellonJaworski.controller;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 
 import fr.efrei.nouvellonJaworski.model.entities.SimulationImplement;
@@ -16,9 +15,9 @@ public class EventTaxes implements Event{
 	private final List<Event> triggeredEventsList;
 	private final SimulationImplement simulation;
 	
-	private Instant triggeredInstant;
+
 	
-	public EventTaxes(Instant currentInstant, Duration duration, GameEngine gameEngine,
+	public EventTaxes(Duration duration, GameEngine gameEngine,
 			List<Event> triggeredEventsList,SimulationImplement simulation) { 
 		
 		this.duration = duration;
@@ -33,12 +32,8 @@ public class EventTaxes implements Event{
 		
 		triggeredEventsList.add(this);
 		
-		if (gameEngine != null) { 
-			this.triggeredInstant = gameEngine.getCurrentInstant();
-		} 
-		
 		simulation.updateMoney();
-		Event eventTaxes=new EventTaxes(Instant.EPOCH,  Duration.ofSeconds(5), gameEngine, this.triggeredEventsList,simulation);
+		Event eventTaxes=new EventTaxes(Duration.ofSeconds(5), gameEngine, this.triggeredEventsList,simulation);
 		
 		gameEngine.register(eventTaxes);
 		

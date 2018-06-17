@@ -4,7 +4,8 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-
+import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 
 import fr.efrei.nouvellonJaworski.controller.EventStorage;
 import fr.efrei.paumier.shared.engine.GameEngine;
@@ -25,33 +26,49 @@ public class GameEngineImplement implements GameEngine{
 	@Override
 	public void update() {// declenche les evenements expirés dans l'ordre croissant en fonction du temps
 							//stock la date du dernier update
-		boolean hasOneEventAsTriggeredStatus=false;
-		ArrayList<EventStorage> queueTemp;
-		queueTemp=this.extractRegisteredList();
-		EventStorage eventToTrigger = null;
 		
-		for(EventStorage event :queueTemp) {	
-			if(this.isClockTimeAfterTriggerTime(event)) {
-				
-				if(!hasOneEventAsTriggeredStatus) {
+		EventStorage eventToUpdate;
+	
+		this.updateRateEvents();
+		if(queue.size()>0) {
+			eventToUpdate=queue.remove(0);
+			
+			if(this.isClockTimeAfterTriggerTime(eventToUpdate)) {	
 					
-					this.lastUpdate=event.getCreationDate().plusMillis((event.getDuration().toMillis()));
-					hasOneEventAsTriggeredStatus=true;  
-					eventToTrigger=event;
-				}
-				else {
-					this.registerExistingEvent(event);
-				}	
+					
+					this.lastUpdate=eventToUpdate.getCreationDate().plusMillis((eventToUpdate.getDuration().toMillis()));
+					this.updateRateEvents();
+					eventToUpdate.trigger(); 
+					
+					this.update();
 			}
 			else {
 				
-				this.registerExistingEvent(event);
+				
+				lastUpdate=clock.instant();
+				
+				this.registerExistingEvent(eventToUpdate);
+				
+				
 			}
+		}else {
+			lastUpdate=clock.instant();
 		}
-		this.updateLastUpdateTimeOrTriggerTheEvent(hasOneEventAsTriggeredStatus, eventToTrigger);
+		this.updateRateEvents();
 	}
 	
+	private void updateRateEvents() {
+		for(EventStorage event:queue) {
+			event.increaseEffort(this.lastUpdate);
+		}
+		this.sortQueue();
+	}
+	
+	
 	private boolean isClockTimeAfterTriggerTime(EventStorage event) {
+		
+		event.increaseEffort(lastUpdate);
+		
 		if(Duration.between(event.getCreationDate(),this.clock.instant()).toMillis()
 				>= event.getDuration().toMillis()) {
 			return true;
@@ -59,14 +76,6 @@ public class GameEngineImplement implements GameEngine{
 		return false;
 	}
 	
-	private void updateLastUpdateTimeOrTriggerTheEvent(boolean hasOneEventToTrigger,EventStorage evToTrigger) {
-		if(!hasOneEventToTrigger)
-			lastUpdate=clock.instant();
-		else {
-			evToTrigger.trigger(); 
-			this.update();
-		}
-	}
 	
 	@Override
 	public Instant getCurrentInstant() {
@@ -81,8 +90,11 @@ public class GameEngineImplement implements GameEngine{
 		EventStorage[] storage=new EventStorage[events.length];
 		for(int i=0;i<events.length;i++) {
 			storage[i]=new EventStorage(events[i],this.lastUpdate);
+			storage[i].increaseEffort(lastUpdate);
+			this.queue.add(storage[i]);
 		}
-		this.triEvenements(storage);
+		queue.sort(Comparator.naturalOrder());
+		
 	}
 	
 	/**
@@ -90,83 +102,18 @@ public class GameEngineImplement implements GameEngine{
 	 * 
 	 */
 	private void registerExistingEvent(EventStorage... eventStorage) {
-		this.triEvenements(eventStorage);
+		this.queue.add(eventStorage[0]);
+		this.sortQueue();
+		
+		
 	}
 	
-	
-	
-	private void triEvenements(EventStorage... events) {
-		boolean isPlaced;
-		
-		for(int n=0;n<events.length;n++) {
-			isPlaced=false;
+	private void sortQueue() {
+		try {
+			queue.sort(Comparator.naturalOrder());
+		}catch(ConcurrentModificationException e) {
 			
-			if(this.queue.size()==0) {
-				this.queue.add(events[n]);
-			}
-			
-			else {
-				for(int i=0;i<this.queue.size() && !isPlaced;i++) {
-					
-					isPlaced=this.addEventOnAnNonEmptyQueue(this.queue.get(i), events[n],i);
-					
-				}
-				if(!isPlaced) {
-					this.queue.add(events[n]);
-				}
-			}
 		}
 	}
 	
-	
-	private boolean addEventOnAnNonEmptyQueue(EventStorage eventInQueue,
-			EventStorage eventToAdd,int indiceQueue) {
-		
-		if(this.creationDatePlusDuration(eventInQueue).isAfter(
-				this.creationDatePlusDuration(eventToAdd))) {
-			
-			this.queue.add(indiceQueue, eventToAdd);
-			return true;
-		}
-		else {
-			if(this.compareCreationDateIfTriggerTimeAreSimilar(eventInQueue, eventToAdd)){
-					
-				this.queue.add(indiceQueue, eventToAdd);
-				return true;
-				
-			}
-		}
-		return false;
-	}
-	
-	
-	private boolean compareCreationDateIfTriggerTimeAreSimilar(EventStorage eventInQueue,
-			EventStorage eventToAdd) {
-		
-		if(this.creationDatePlusDuration(eventInQueue).equals(
-				this.creationDatePlusDuration(eventToAdd))) {
-			//on choisis celui qui a la plus ancienne date de creation
-			
-			if(eventInQueue.getCreationDate().isAfter(
-					eventToAdd.getCreationDate())) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	
-	private Instant creationDatePlusDuration(EventStorage ev) {
-			return ev.getCreationDate().plusMillis(
-					ev.getDuration().toMillis());
-	}
-	
-	
-	private ArrayList<EventStorage> extractRegisteredList() {
-		ArrayList<EventStorage> list = this.queue;
-		
-		this.queue = new ArrayList<EventStorage>();
-		
-		return list;
-	}
 }
